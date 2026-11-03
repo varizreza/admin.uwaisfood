@@ -130,6 +130,7 @@ button.tag{cursor:pointer;border:1px solid var(--ln);font-weight:500}
 
 <script>
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
+const APP_VER = 'v3 · struk';
 const IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 const LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -400,8 +401,8 @@ function vMenu() {
   const sheetLink = D.sheetUrl ? `<h3>Data</h3><div class="card"><a class="btn o" href="${esc(D.sheetUrl)}" target="_blank" rel="noopener">📄 Buka Spreadsheet</a></div>` : '';
   const app = sheetLink + (IN_GAS ? '' : `<h3>Aplikasi</h3><div class="card col">
       <div class="mut">Terhubung ke: <code>${esc(getApi().slice(0, 48))}…</code></div>
-      <div class="acts">${installEv ? '<button onclick="pasang()">⬇️ Pasang aplikasi</button>' : ''}<button class="o" onclick="gantiApi()">Ganti URL Spreadsheet</button></div></div>`);
-  return `<h2>Menu &amp; Printer</h2>
+      <div class="acts">${installEv ? '<button onclick="pasang()">⬇️ Pasang aplikasi</button>' : ''}<button class="o" onclick="segarkan()">🔄 Perbarui aplikasi</button><button class="o" onclick="gantiApi()">Ganti URL Spreadsheet</button></div></div>`);
+  return `<h2>Menu &amp; Printer <span class="mut" style="font-weight:400">· ${APP_VER}</span></h2>
     <div class="card mut" style="margin-bottom:12px">Untuk <b>paket/varian</b>, isi kolom <b>Isi</b> dengan format
       <code>6 Bolen Manis + 4 Banana Milk Cheese</code>. Kosongkan untuk menu satuan. Nama isi yang sama otomatis dijumlahkan di Rekap.</div>
     <div class="grid w">${D.menu.map((m, i) => `
@@ -627,12 +628,23 @@ async function kirim(data) {
 }
 
 /* ================= PWA (hanya versi hosting) ================= */
+async function segarkan() {  // hapus cache & service worker lama, lalu muat ulang versi terbaru
+  try {
+    if ('serviceWorker' in navigator) (await navigator.serviceWorker.getRegistrations()).forEach(r => r.unregister());
+    if (window.caches) (await caches.keys()).forEach(k => caches.delete(k));
+  } catch (e) {}
+  toast('Memuat versi terbaru…'); setTimeout(() => location.reload(), 600);
+}
 function pasang() { if (installEv) { installEv.prompt(); installEv = null; render(); } }
 if (!IN_GAS) {
   [['manifest', 'manifest.webmanifest'], ['icon', 'icon-192.png'], ['apple-touch-icon', 'icon-192.png']].forEach(([rel, href]) => {
     const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l);
   });
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator) {
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && !window._rl) { window._rl = 1; location.reload(); } });
+    navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).then(r => r.update()).catch(() => {});
+  }
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEv = e; if (tab === 'menu') render(); });
 }
 
