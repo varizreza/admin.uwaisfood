@@ -140,7 +140,7 @@ const LS = {
   del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
 // Opsional: isi URL /exec di sini agar tidak perlu mengisi lewat layar setup
-const DEFAULT_API = '';
+const DEFAULT_API = 'https://script.google.com/macros/s/AKfycbwWcnvTcBJzY4SXIxKY30sPXj31oNapu-nIYPnQWDplQOOb5Xvb8WvT3vcZwGDhVOBpFw/exec';
 const getApi = () => LS.get('uf_api') || DEFAULT_API;
 const getTok = () => window._tok || LS.get('uf_tok');
 const setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
