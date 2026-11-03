@@ -381,9 +381,10 @@ function vMenu() {
     : `<div class="mut">Sambungkan printer thermal Bluetooth 58mm. Jika printer Anda tidak muncul di daftar, kemungkinan memakai Bluetooth klasik — gunakan RawBT (cetak otomatis beralih ke RawBT bila printer belum terhubung).</div>
        <div class="acts"><button onclick="sambung()">🔗 Hubungkan Printer</button><button class="o" onclick="cetakTes()">Tes Cetak</button>
        <a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">RawBT</a></div>`;
-  const app = IN_GAS ? '' : `<h3>Aplikasi</h3><div class="card col">
+  const sheetLink = D.sheetUrl ? `<h3>Data</h3><div class="card"><a class="btn o" href="${esc(D.sheetUrl)}" target="_blank" rel="noopener">📄 Buka Spreadsheet</a></div>` : '';
+  const app = sheetLink + (IN_GAS ? '' : `<h3>Aplikasi</h3><div class="card col">
       <div class="mut">Terhubung ke: <code>${esc(getApi().slice(0, 48))}…</code></div>
-      <div class="acts">${installEv ? '<button onclick="pasang()">⬇️ Pasang aplikasi</button>' : ''}<button class="o" onclick="gantiApi()">Ganti URL Spreadsheet</button></div></div>`;
+      <div class="acts">${installEv ? '<button onclick="pasang()">⬇️ Pasang aplikasi</button>' : ''}<button class="o" onclick="gantiApi()">Ganti URL Spreadsheet</button></div></div>`);
   return `<h2>Menu &amp; Printer</h2>
     <div class="card mut" style="margin-bottom:12px">Untuk <b>paket/varian</b>, isi kolom <b>Isi</b> dengan format
       <code>6 Bolen Manis + 4 Banana Milk Cheese</code>. Kosongkan untuk menu satuan. Nama isi yang sama otomatis dijumlahkan di Rekap.</div>
