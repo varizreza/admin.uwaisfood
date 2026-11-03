@@ -1,5 +1,5 @@
-const C = 'uwais-food-v5';
-const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
+const C = 'uwais-food-v11';
+const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 const INDEX = () => new URL('index.html', self.registration.scope).href;
 
 self.addEventListener('install', e => {

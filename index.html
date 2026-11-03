@@ -100,6 +100,8 @@ button.tag{cursor:pointer;border:1px solid var(--ln);font-weight:500}
 }
 @media (min-width:1000px){.split.p{grid-template-columns:1fr 370px;align-items:start}.panel{position:sticky;top:18px}}
 
+select.sel{width:100%;padding:11px 12px;border:1.5px solid var(--ln);border-radius:12px;background:var(--surface);color:var(--tx);font:inherit;outline:none}
+select.sel:focus{border-color:var(--pr);box-shadow:0 0 0 3px var(--pr-l)}
 /* Struk */
 .ov{position:fixed;inset:0;background:#000a;z-index:60;display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto}
 .dlg{width:100%;max-width:440px;max-height:94vh;overflow:auto}
@@ -121,7 +123,7 @@ button.tag{cursor:pointer;border:1px solid var(--ln);font-weight:500}
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="go('menu')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat…</div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v8)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -131,29 +133,67 @@ button.tag{cursor:pointer;border:1px solid var(--ln);font-weight:500}
 <div id="msg"></div>
 
 <script>
+/* Penjaga: jika program utama gagal jalan, tampilkan penyebabnya di layar (bukan "Memuat…" selamanya) */
+window.__boot = false;
+window.__errs = [];
+window.__len = 53852;
+(function () {
+  var box = null;
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function paint() {
+    if (window.__boot) return;
+    var a = document.getElementById('app'); if (!a) return;
+    var msg;
+    if (window.__errs.length) {
+      msg = '<b>Aplikasi gagal dijalankan (v8)</b><br>' + window.__errs.map(esc).join('<br>') +
+        '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
+    } else {
+      msg = '<b>Aplikasi belum berjalan (v8)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+        '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
+    }
+      var m = document.getElementById('main'), t = m ? (m.text || '') : '';
+      var ticks = (t.match(/`/g) || []).length, ln = t.split(/\r?\n/).length;
+      msg += '<br><small style="opacity:.8">Diagnosa: script utama ' + (m ? 'ada' : 'TIDAK ADA') + ', ' + t.replace(/\r/g, '').length + ' dari ' + window.__len + ' karakter' +
+        (t.replace(/\r/g, '').length < window.__len - 5 ? ' &rarr; <b>FILE TERPOTONG/BERBEDA</b>' : ' (lengkap)') +
+        ', baris ' + ln + ', tanda backtick ' + ticks + (ticks % 2 ? ' &rarr; <b>GANJIL (rusak)</b>' : ' (genap)') +
+        ', google.script: ' + (typeof google !== 'undefined' && google.script ? 'ada' : 'tidak ada') + '</small>';
+    a.innerHTML = '<div style="max-width:640px;margin:30px auto;padding:18px;border:1px solid #e03131;border-radius:14px;font:14px/1.5 sans-serif;color:#e03131;background:#fdecec;word-break:break-word">' + msg + '</div>';
+  }
+  window.addEventListener('error', function (e) {
+    window.__errs.push((e.message || 'error') + (e.lineno ? ' (baris ' + e.lineno + (e.colno ? ':' + e.colno : '') + ')' : ''));
+    paint();
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    window.__errs.push('Promise: ' + ((e.reason && e.reason.message) || e.reason));
+    paint();
+  });
+  setTimeout(paint, 4000);
+})();
+</script>
+<script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-const APP_VER = 'v5 · offline';
-const IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
-const LS = {
+var APP_VER = 'v8 · edit';
+var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
+var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
 // Opsional: isi URL /exec di sini agar tidak perlu mengisi lewat layar setup
-const DEFAULT_API = 'https://script.google.com/macros/s/AKfycbwWcnvTcBJzY4SXIxKY30sPXj31oNapu-nIYPnQWDplQOOb5Xvb8WvT3vcZwGDhVOBpFw/exec';
-const getApi = () => LS.get('uf_api') || DEFAULT_API;
-const getTok = () => window._tok || LS.get('uf_tok');
-const setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
+var DEFAULT_API = '';
+var getApi = () => LS.get('uf_api') || DEFAULT_API;
+var getTok = () => window._tok || LS.get('uf_tok');
+var setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
 
-let D = {menu: [], orders: [], pelanggan: []}, cart = {}, tab = 'pesan', filt = 'Baru', dev = null, chr = null, installEv = null;
-const $ = s => document.querySelector(s);
-const rp = n => 'Rp' + Number(n || 0).toLocaleString('id-ID');
-const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let _t; function toast(t) { const m = $('#msg'); m.textContent = t; m.style.display = 'block'; clearTimeout(_t); _t = setTimeout(() => m.style.display = 'none', 3200); }
+var D = {menu: [], orders: [], pelanggan: [], pos: []}, cart = {}, tab = 'pesan', filt = 'Semua', rfilt = 'Semua', curPO = LS.get('uf_po'), editing = null, dev = null, chr = null, installEv = null;
+var $ = s => document.querySelector(s);
+var rp = n => 'Rp' + Number(n || 0).toLocaleString('id-ID');
+var esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+var _t; function toast(t) { const m = $('#msg'); m.textContent = t; m.style.display = 'block'; clearTimeout(_t); _t = setTimeout(() => m.style.display = 'none', 3200); }
 $('#pr').textContent = IN_GAS ? '🖨️ Cetak via RawBT' : '🖨️ Printer: belum terhubung';
 
 /* Satu pintu ke backend: google.script.run (Apps Script) atau fetch (hosting) */
-const retryErr = m => { const er = new Error(m); er.retry = true; return er; };
+var retryErr = m => { const er = new Error(m); er.retry = true; return er; };
 async function run(fn, ...args0) {
   const args = fn === 'login' ? args0 : [getTok(), ...args0];
   const fail = m => {
@@ -173,17 +213,17 @@ async function run(fn, ...args0) {
   if (!j.ok) return fail(j.error || 'Terjadi kesalahan');
   return j.data;
 }
-const msgOf = e => (e && e.message) || String(e);
+var msgOf = e => (e && e.message) || String(e);
 
 async function load() {
   if (needSetup() || !getTok()) return render();
   const c = J.get('uf_data', null);
-  if (c) D = Object.assign({menu: [], orders: [], pelanggan: []}, c);
+  if (c) D = Object.assign({menu: [], orders: [], pelanggan: [], pos: []}, c);
   window._loading = !c;
   render(); updSync();
   await syncNow();
 }
-const needSetup = () => !IN_GAS && !getApi();
+var needSetup = () => !IN_GAS && !getApi();
 
 /* ================= LOGIKA DATA ================= */
 // "6 Bolen Manis + 4 Banana Milk Cheese" -> [{n:6, nama:'Bolen Manis'}, ...]
@@ -193,7 +233,7 @@ function parseIsi(isi) {
     return m ? {n: +m[1], nama: m[2].trim()} : {n: 1, nama: p};
   });
 }
-const key = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+var key = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
 
 function komponen(items) {
   const r = {};
@@ -212,13 +252,49 @@ function perPaket(items) {
 function groups() {
   const g = {};
   D.orders.forEach(o => {
-    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, items: [], total: 0};
+    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, po: o.po || '', items: [], total: 0};
     g[o.id].items.push(o); g[o.id].total += o.qty * o.harga;
   });
   return Object.values(g).reverse();
 }
-const filtered = () => D.orders.filter(o => filt === 'Semua' || o.status === filt);
-const findPel = n => D.pelanggan.find(p => key(p.nama) === key(n));
+/* ---- PO (periode pre-order) ---- */
+var BLN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+function fmtTgl(s) { const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? (+m[3]) + ' ' + BLN[+m[2] - 1] + ' ' + m[1] : ''; }
+var findPO = id => (D.pos || []).find(p => p.id === id);
+var poNama = id => id ? (findPO(id) ? findPO(id).nama : 'PO dihapus') : 'Tanpa PO';
+function poTarget() {                        // PO tujuan pesanan baru: PO terpilih jika masih buka, kalau tidak PO buka terbaru
+  const cur = findPO(curPO);
+  if (cur && cur.status !== 'Selesai') return cur;
+  const o = (D.pos || []).filter(p => p.status !== 'Selesai');
+  return o.length ? o[o.length - 1] : null;
+}
+function viewPO() {                          // PO yang sedang dilihat: id PO, '*' (semua) atau '-' (tanpa PO)
+  if (curPO === '*' || curPO === '-' || findPO(curPO)) return curPO;
+  const t = poTarget(); if (t) return t.id;
+  const ps = D.pos || []; return ps.length ? ps[ps.length - 1].id : '*';
+}
+var inPO = (o, sel) => sel === '*' || (sel === '-' ? !o.po : o.po === sel);
+var filtered = () => { const sel = viewPO(); return D.orders.filter(o => inPO(o, sel) && (rfilt === 'Semua' || o.status === rfilt)); };
+function poStats(id) {
+  const o = D.orders.filter(x => x.po === id), comp = komponen(o);
+  return {n: new Set(o.map(x => x.id)).size, pcs: comp.reduce((s, x) => s + x.qty, 0), nilai: o.reduce((s, x) => s + x.qty * x.harga, 0)};
+}
+function perPemesan(o) {
+  const g = {};
+  o.forEach(x => { const k = key(x.nama); g[k] = g[k] || {nama: x.nama, items: [], total: 0}; g[k].items.push(x); g[k].total += x.qty * x.harga; });
+  return Object.values(g).sort((a, b) => a.nama.localeCompare(b.nama));
+}
+function pilihPO(v) { curPO = v; LS.set('uf_po', v); render(); }
+function poBar(mode) {
+  const all = (D.pos || []).slice().reverse();
+  const list = mode === 'pesan' ? all.filter(p => p.status !== 'Selesai') : all;
+  const cur = mode === 'pesan' ? (poTarget() || {}).id : viewPO();
+  const legacy = D.orders.some(o => !o.po);
+  const opts = list.map(p => `<option value="${p.id}" ${cur === p.id ? 'selected' : ''}>${esc(p.nama)}${p.kirim ? ' · ' + fmtTgl(p.kirim) : ''}${p.status === 'Selesai' ? ' (selesai)' : ''}</option>`).join('') +
+    (mode === 'pesan' ? '' : `<option value="*" ${cur === '*' ? 'selected' : ''}>Semua PO</option>` + (legacy ? `<option value="-" ${cur === '-' ? 'selected' : ''}>Tanpa PO (pesanan lama)</option>` : ''));
+  return `<div class="row" style="margin-bottom:12px"><select class="sel" onchange="pilihPO(this.value)">${opts}</select><button class="o" onclick="go('po')" style="white-space:nowrap">📅 Kelola PO</button></div>`;
+}
+var findPel = n => D.pelanggan.find(p => key(p.nama) === key(n));
 function waLink(hp) {
   let d = String(hp || '').replace(/\D/g, '');
   if (d.startsWith('0')) d = '62' + d.slice(1); else if (d.startsWith('8')) d = '62' + d;
@@ -226,7 +302,7 @@ function waLink(hp) {
 }
 
 /* ================= TAMPILAN ================= */
-const TABS = [['pesan', '➕', 'Pesan'], ['order', '📋', 'Orderan'], ['pelanggan', '👥', 'Pelanggan'], ['rekap', '🧮', 'Rekap'], ['menu', '🍽️', 'Menu']];
+var TABS = [['pesan', '➕', 'Pesan'], ['order', '📋', 'Orderan'], ['rekap', '🧮', 'Rekap'], ['po', '📅', 'PO'], ['pelanggan', '👥', 'Pelanggan'], ['menu', '🍽️', 'Menu']];
 function render() {
   if (needSetup()) { $('#side').innerHTML = ''; $('#bottom').innerHTML = ''; $('#app').innerHTML = vSetup(); return; }
   if (!getTok()) { $('#side').innerHTML = ''; $('#bottom').innerHTML = ''; $('#app').innerHTML = vLogin(); setTimeout(() => { const p = $('#pin'); if (p) p.focus(); }, 60); return; }
@@ -234,21 +310,21 @@ function render() {
     TABS.map(t => `<button class="nv ${tab === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('') +
     '<div class="sp"></div><div class="mut" style="padding:0 12px">Pengelola orderan</div>';
   $('#bottom').innerHTML = TABS.map(t => `<button class="${tab === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('');
-  $('#app').innerHTML = {pesan: vPesan, order: vOrder, pelanggan: vPelanggan, rekap: vRekap, menu: vMenu}[tab]();
+  $('#app').innerHTML = {pesan: vPesan, order: vOrder, rekap: vRekap, po: vPO, pelanggan: vPelanggan, menu: vMenu}[tab]();
 }
 function go(t) { tab = t; render(); window.scrollTo(0, 0); }
-const chips = isi => parseIsi(isi).map(p => `<span class="tag pr">${p.n} ${esc(p.nama)}</span>`).join('');
+var chips = isi => parseIsi(isi).map(p => `<span class="tag pr">${p.n} ${esc(p.nama)}</span>`).join('');
 
 /* ================= OFFLINE: cache lokal + antrean sinkron ================= */
-const MEM = {};
-const J = {
+var MEM = {};
+var J = {
   get(k, d) { if (k in MEM) return MEM[k]; try { const v = LS.get(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { MEM[k] = v; try { LS.set(k, JSON.stringify(v)); } catch (e) {} },
   del(k) { delete MEM[k]; LS.del(k); }
 };
-let Q = J.get('uf_q', []), ONLINE = navigator.onLine !== false, flushing = false, refreshing = false;
-const saveQ = () => J.set('uf_q', Q);
-const saveCache = () => J.set('uf_data', {menu: D.menu, orders: D.orders.slice(-4000), pelanggan: D.pelanggan, sheetUrl: D.sheetUrl});
+var Q = J.get('uf_q', []), ONLINE = navigator.onLine !== false, flushing = false, refreshing = false;
+var saveQ = () => J.set('uf_q', Q);
+var saveCache = () => J.set('uf_data', {menu: D.menu, orders: D.orders.slice(-4000), pelanggan: D.pelanggan, pos: D.pos, sheetUrl: D.sheetUrl});
 function setOnline(v) { ONLINE = v; updSync(); }
 function updSync() {
   const el = $('#sync'); if (!el) return;
@@ -299,12 +375,12 @@ async function refresh() {
   const wasLoading = window._loading;
   try {
     const d = await run('getData');
-    d.pelanggan = d.pelanggan || [];
+    d.pelanggan = d.pelanggan || []; d.pos = d.pos || [];
     if (Q.length) return;                         // ada perubahan baru selagi menunggu: jangan timpa
     if (tab === 'menu') d.menu = D.menu;          // jangan hilangkan editan menu yang belum disimpan
-    const before = JSON.stringify([D.menu, D.orders, D.pelanggan]);
+    const before = JSON.stringify([D.menu, D.orders, D.pelanggan, D.pos]);
     D = d; window._lastRef = Date.now(); window._err = ''; saveCache(); setOnline(true);
-    if (JSON.stringify([D.menu, D.orders, D.pelanggan]) !== before) softRender();
+    if (JSON.stringify([D.menu, D.orders, D.pelanggan, D.pos]) !== before) softRender();
   } catch (e) {
     if (e.retry) { window._err = msgOf(e); setOnline(false); }
     else if (!/Sesi berakhir/.test(msgOf(e))) toast('Gagal memuat: ' + msgOf(e));
@@ -337,8 +413,8 @@ async function masuk() {
 }
 function keluar() {
   if (Q.length && !confirm(Q.length + ' perubahan belum terkirim ke server dan akan hilang jika keluar. Tetap keluar?')) return;
-  Q = []; J.del('uf_q'); J.del('uf_data'); setTok(''); closeStruk();
-  D = {menu: [], orders: [], pelanggan: []}; cart = {}; render(); updSync();
+  Q = []; editing = null; J.del('uf_q'); J.del('uf_data'); setTok(''); closeStruk();
+  D = {menu: [], orders: [], pelanggan: [], pos: []}; cart = {}; render(); updSync();
 }
 
 /* ---- Setup (hanya versi hosting) ---- */
@@ -361,6 +437,7 @@ function topPel() {
   return D.pelanggan.map((p, i) => ({p, i})).sort((a, b) => b.p.jumlah - a.p.jumlah).slice(0, 6).filter(x => x.p.jumlah > 0);
 }
 function pinfo() {
+  if (editing) return '';
   const n = (window._n || '').trim();
   if (!n) return '';
   const p = findPel(n);
@@ -373,33 +450,81 @@ function pinfo() {
 }
 function pilihPel(i) { window._n = D.pelanggan[i].nama; window._hp = ''; window._al = ''; const y = window.scrollY; render(); window.scrollTo(0, y); }
 
+var priceOf = m => { const o = editing && editing.orig[m.nama]; return o ? o.harga : m.harga; };   // saat edit: harga lama tetap
+var isiOf = m => { const o = editing && editing.orig[m.nama]; return o ? o.isi : m.isi; };
+function editBanner() {
+  return `<div class="note warn" style="margin-bottom:12px">✏️ Mengedit pesanan <b>${esc(editing.nama0)}</b> · ${esc(poNama(editing.po))}.
+    Item yang sudah dipesan tetap memakai harga saat dipesan.</div>`;
+}
 function vPesan() {
+  if (!editing && !poTarget()) return `<h2>Buat Pesanan</h2><div class="card col" style="text-align:center;padding:26px;max-width:460px;margin:20px auto"><div style="font-size:38px">📅</div><b style="font-size:17px">Belum ada PO yang dibuka</b><div class="mut">Buat PO (periode pre-order) dulu. Semua pesanan, rekap, dan struk akan dikelompokkan per PO.</div><button onclick="bukaFormPO()">+ Buat PO baru</button></div>`;
+  const ex = editing ? editing.extra : [];
   const lines = D.menu.map((m, i) => ({m, i, q: cart[i] || 0})).filter(x => x.q > 0);
-  const total = lines.reduce((s, x) => s + x.q * x.m.harga, 0);
-  const comp = komponen(lines.map(x => ({item: x.m.nama, qty: x.q, isi: x.m.isi})));
-  const top = topPel();
-  const cards = D.menu.map((m, i) => `
+  const total = lines.reduce((s, x) => s + x.q * priceOf(x.m), 0) + ex.reduce((s, x) => s + x.qty * x.harga, 0);
+  const comp = komponen([...lines.map(x => ({item: x.m.nama, qty: x.q, isi: isiOf(x.m)})), ...ex.filter(x => x.qty > 0).map(x => ({item: x.nama, qty: x.qty, isi: x.isi}))]);
+  const top = editing ? [] : topPel();
+  const exCards = ex.map((x, i) => `
+    <div class="card menu-card ${x.qty ? 'on' : ''}">
+      <div><b style="font-size:16px">${esc(x.nama)}</b> <span class="tag">tidak ada di menu</span>
+        ${x.isi ? `<div class="tags" style="margin-top:6px">${chips(x.isi)}</div>` : ''}</div>
+      <div class="row"><span class="price">${rp(x.harga)}</span>
+        <div class="step"><button class="o" onclick="chgExtra(${i},-1)">−</button><b>${x.qty}</b><button onclick="chgExtra(${i},1)">+</button></div></div>
+    </div>`).join('');
+  const cards = exCards + D.menu.map((m, i) => `
     <div class="card menu-card ${cart[i] ? 'on' : ''}">
       <div><b style="font-size:16px">${esc(m.nama)}</b>
-        ${m.isi ? `<div class="tags" style="margin-top:6px">${chips(m.isi)}</div>` : '<div class="mut">Satuan</div>'}</div>
-      <div class="row"><span class="price">${rp(m.harga)}</span>
+        ${isiOf(m) ? `<div class="tags" style="margin-top:6px">${chips(isiOf(m))}</div>` : '<div class="mut">Satuan</div>'}</div>
+      <div class="row"><span class="price">${rp(priceOf(m))}</span>
         <div class="step"><button class="o" onclick="chg(${i},-1)">−</button><b>${cart[i] || 0}</b><button onclick="chg(${i},1)">+</button></div></div>
     </div>`).join('');
+  const nLines = lines.length + ex.filter(x => x.qty > 0).length;
   const panel = `
     <div class="card panel col">
-      <b style="font-size:16px">Pesanan baru</b>
+      <b style="font-size:16px">${editing ? '✏️ Edit pesanan' : 'Pesanan baru'}</b>
       ${top.length ? `<div><div class="mut" style="margin-bottom:6px">Pelanggan langganan</div><div class="tags">${top.map(x => `<button class="tag" onclick="pilihPel(${x.i})">${esc(x.p.nama)}</button>`).join('')}</div></div>` : ''}
       <input id="nama" list="pelList" placeholder="Nama pemesan" value="${esc(window._n || '')}" oninput="window._n=this.value;$('#pinfo').innerHTML=pinfo()" autocomplete="off">
       <datalist id="pelList">${D.pelanggan.map(p => `<option value="${esc(p.nama)}">`).join('')}</datalist>
       <div id="pinfo">${pinfo()}</div>
-      ${lines.length ? lines.map(x => `<div class="line"><span>${x.q}× ${esc(x.m.nama)}</span><b>${rp(x.q * x.m.harga)}</b></div>`).join('') : '<div class="mut">Belum ada menu dipilih.</div>'}
+      ${nLines ? lines.map(x => `<div class="line"><span>${x.q}× ${esc(x.m.nama)}</span><b>${rp(x.q * priceOf(x.m))}</b></div>`).join('') + ex.filter(x => x.qty > 0).map(x => `<div class="line"><span>${x.qty}× ${esc(x.nama)}</span><b>${rp(x.qty * x.harga)}</b></div>`).join('') : '<div class="mut">Belum ada menu dipilih.</div>'}
       ${comp.length ? `<div><div class="mut" style="margin-bottom:6px">Rincian isi</div><div class="tags">${comp.map(c => `<span class="tag ok">${c.qty} ${esc(c.nama)}</span>`).join('')}</div></div>` : ''}
       <div class="row"><span class="mut">Total</span><span class="big">${rp(total)}</span></div>
-      <button class="full" onclick="simpan()">Simpan Pesanan</button>
-      ${lines.length ? '<button class="o" onclick="cart={};render()">Kosongkan</button>' : ''}
+      <button class="full" onclick="${editing ? 'simpanEdit()' : 'simpan()'}">${editing ? 'Simpan Perubahan' : 'Simpan Pesanan'}</button>
+      ${editing ? '<button class="o" onclick="batalEdit()">Batal edit</button>' : (nLines ? '<button class="o" onclick="cart={};render()">Kosongkan</button>' : '')}
     </div>`;
-  return `<h2>Buat Pesanan</h2><div class="split p"><div class="grid">${cards || (window._loading ? '<div class="empty">Memuat…</div>' : '<div class="empty">Menu kosong. Tambah di tab Menu.</div>')}</div><div id="panel">${panel}</div></div>` +
-    (lines.length ? `<button class="fab" onclick="document.getElementById('panel').scrollIntoView({behavior:'smooth'})">🛒 ${rp(total)}</button>` : '');
+  return `<h2>${editing ? 'Edit Pesanan' : 'Buat Pesanan'}</h2>${editing ? editBanner() : poBar('pesan')}<div class="split p"><div class="grid">${cards || (window._loading ? '<div class="empty">Memuat…</div>' : '<div class="empty">Menu kosong. Tambah di tab Menu.</div>')}</div><div id="panel">${panel}</div></div>` +
+    (nLines ? `<button class="fab" onclick="document.getElementById('panel').scrollIntoView({behavior:'smooth'})">🛒 ${rp(total)}</button>` : '');
+}
+function chgExtra(i, d) { const x = editing.extra[i]; x.qty = Math.max(0, x.qty + d); const y = window.scrollY; render(); window.scrollTo(0, y); }
+
+/* ---- Edit pesanan yang sudah disimpan ---- */
+function editOrder(id) {
+  const g = groups().find(x => x.id === id); if (!g) return;
+  cart = {};
+  const extra = [], orig = {};
+  g.items.forEach(it => {
+    orig[it.item] = {harga: it.harga, isi: it.isi || ''};
+    const i = D.menu.findIndex(m => m.nama === it.item);
+    if (i >= 0) cart[i] = (cart[i] || 0) + it.qty;
+    else extra.push({nama: it.item, harga: it.harga, isi: it.isi || '', qty: it.qty});   // menu sudah dihapus/diganti nama
+  });
+  editing = {id, nama0: g.nama, po: g.po, waktu: g.waktu, status: g.status, orig, extra};
+  window._n = g.nama; window._hp = ''; window._al = '';
+  go('pesan');
+}
+function batalEdit() { editing = null; cart = {}; window._n = ''; go('order'); }
+function simpanEdit() {
+  const e = editing, nama = (window._n || '').trim();
+  if (!nama) { toast('Isi nama pemesan dulu'); const el = $('#nama'); if (el) el.focus(); return; }
+  const items = D.menu.map((m, i) => ({nama: m.nama, harga: priceOf(m), isi: isiOf(m), qty: cart[i] || 0})).filter(x => x.qty > 0)
+    .concat(e.extra.filter(x => x.qty > 0).map(x => ({nama: x.nama, harga: x.harga, isi: x.isi, qty: x.qty})));
+  if (!items.length) return toast('Pilih minimal satu menu (atau hapus pesanan dengan tombol 🗑)');
+  const at = Math.max(0, D.orders.findIndex(o => o.id === e.id));          // posisi asli dipertahankan
+  D.orders = D.orders.filter(o => o.id !== e.id);
+  D.orders.splice(at, 0, ...items.map(i => ({id: e.id, waktu: e.waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: e.status, isi: i.isi || '', po: e.po})));
+  if (!findPel(nama)) D.pelanggan.push({nama, hp: '', alamat: '', catatan: '', terakhir: '', jumlah: 0});
+  enqueue('editOrder', e.id, nama, items);
+  editing = null; cart = {}; window._n = '';
+  go('order'); toast(ONLINE ? 'Pesanan diperbarui ✔' : 'Perubahan tersimpan di perangkat — akan dikirim saat online');
 }
 function chg(i, d) { cart[i] = Math.max(0, (cart[i] || 0) + d); const y = window.scrollY; render(); window.scrollTo(0, y); }
 async function simpan() {
@@ -407,11 +532,12 @@ async function simpan() {
   const items = D.menu.map((m, i) => ({nama: m.nama, harga: m.harga, isi: m.isi, qty: cart[i] || 0})).filter(x => x.qty > 0);
   if (!nama) { toast('Isi nama pemesan dulu'); const e = $('#nama'); if (e) e.focus(); return; }
   if (!items.length) return toast('Pilih menu dulu');
+  const tgt = poTarget(); if (!tgt) return toast('Buat PO dulu di tab PO');
   const pel = findPel(nama) ? {} : {hp: (window._hp || '').trim(), alamat: (window._al || '').trim()};
   const id = newId(), waktu = nowStr();
-  items.forEach(i => D.orders.push({id, waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: 'Baru', isi: i.isi || ''}));
+  items.forEach(i => D.orders.push({id, waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: 'Baru', isi: i.isi || '', po: tgt.id}));
   upsertPelLocal(nama, pel);
-  enqueue('addOrder', nama, items, pel, id, Date.now());
+  enqueue('addOrder', nama, items, pel, id, Date.now(), tgt.id);
   cart = {}; window._n = ''; window._hp = ''; window._al = '';
   go('order'); toast(ONLINE ? 'Tersimpan ✔' : 'Tersimpan di perangkat — akan dikirim saat online'); cetakOrder(id);
 }
@@ -421,26 +547,39 @@ function orderCard(g) {
   const p = findPel(g.nama);
   return `<div class="card col">
     <div class="row"><b style="font-size:16px">${esc(g.nama)}</b><span class="tag ${g.status === 'Selesai' ? 'ok' : 'pr'}">${g.status}</span></div>
-    <div class="mut">${g.waktu}${p && p.hp ? ' · ' + esc(p.hp) : ''}</div>
+    <div class="mut">${g.waktu}${viewPO() === '*' ? ' · ' + esc(poNama(g.po)) : ''}${p && p.hp ? ' · ' + esc(p.hp) : ''}</div>
     <div>${g.items.map(o => `<div class="line"><span>${o.qty}× ${esc(o.item)}${o.isi ? `<div class="mut">${parseIsi(o.isi).map(x => (x.n * o.qty) + ' ' + esc(x.nama)).join(' · ')}</div>` : ''}</span><span>${rp(o.qty * o.harga)}</span></div>`).join('')}</div>
     <div class="row"><span class="big" style="font-size:22px">${rp(g.total)}</span>
-      <span class="acts"><button class="o" onclick="cetakOrder('${g.id}')" title="Cetak">🖨️</button>
+      <span class="acts"><button class="o" onclick="cetakOrder('${g.id}')" title="Cetak">🖨️</button><button class="o" onclick="editOrder('${g.id}')" title="Edit pesanan">✏️</button><button class="o" onclick="pindahDlg('${g.id}')" title="Pindah PO">📅</button>
       <button class="g" onclick="status('${g.id}','${g.status === 'Baru' ? 'Selesai' : 'Baru'}')">${g.status === 'Baru' ? '✓ Selesai' : 'Buka lagi'}</button>
       <button class="r" onclick="hapus('${g.id}')" title="Hapus">🗑</button></span></div>
   </div>`;
 }
 function olist() {
-  const q = (window._q || '').toLowerCase();
-  const l = groups().filter(g => (filt === 'Semua' || g.status === filt) && g.nama.toLowerCase().includes(q));
+  const q = (window._q || '').toLowerCase(), sel = viewPO();
+  const l = groups().filter(g => inPO(g, sel) && (filt === 'Semua' || g.status === filt) && g.nama.toLowerCase().includes(q));
   return l.length ? `<div class="grid w">${l.map(orderCard).join('')}</div>` : '<div class="empty">Tidak ada orderan.</div>';
 }
-function segFilter() {
-  return `<div class="seg">${['Baru', 'Selesai', 'Semua'].map(f => `<button class="${filt === f ? 'on' : ''}" onclick="filt='${f}';render()">${f}</button>`).join('')}</div>`;
+function segFilter(v) {
+  const cur = v === 'rfilt' ? rfilt : filt;
+  return `<div class="seg">${['Semua', 'Baru', 'Selesai'].map(f => `<button class="${cur === f ? 'on' : ''}" onclick="${v}='${f}';render()">${f}</button>`).join('')}</div>`;
 }
 function vOrder() {
-  return `<h2>Orderan</h2><div class="col" style="margin-bottom:14px">${segFilter()}
+  return `<h2>Orderan</h2>${poBar('lihat')}<div class="col" style="margin-bottom:14px">${segFilter('filt')}
     <input placeholder="🔍 Cari nama pemesan…" value="${esc(window._q || '')}" oninput="window._q=this.value;$('#olist').innerHTML=olist()"></div>
     <div id="olist">${olist()}</div>`;
+}
+function pindahDlg(id) {
+  const g = groups().find(x => x.id === id); if (!g) return;
+  $('#modal').innerHTML = `<div class="ov" onclick="if(event.target===this)closeStruk()"><div class="dlg card col">
+    <b style="font-size:17px">Pindahkan pesanan ${esc(g.nama)}</b>
+    <select class="sel" id="poPindah">${(D.pos || []).slice().reverse().map(p => `<option value="${p.id}" ${p.id === g.po ? 'selected' : ''}>${esc(p.nama)}</option>`).join('')}</select>
+    <div class="row"><button class="o" onclick="closeStruk()">Batal</button><button onclick="pindahOK('${id}')">Pindahkan</button></div></div></div>`;
+}
+function pindahOK(id) {
+  const v = $('#poPindah').value; if (!v) return;
+  D.orders.forEach(o => { if (o.id === id) o.po = v; });
+  enqueue('pindahPO', [id], v); closeStruk(); render(); toast('Pesanan dipindahkan ke ' + poNama(v));
 }
 function status(id, s) { D.orders.forEach(o => { if (o.id === id) o.status = s; }); enqueue('setStatus', id, s); render(); }
 function hapus(id) { if (!confirm('Hapus pesanan ini?')) return; D.orders = D.orders.filter(o => o.id !== id); enqueue('deleteOrder', id); render(); }
@@ -492,12 +631,14 @@ function hapusPel(i) {
 
 /* ---- Rekap ---- */
 function vRekap() {
-  const o = filtered(), comp = komponen(o), pk = perPaket(o);
+  const o = filtered(), comp = komponen(o), pk = perPaket(o), ppm = perPemesan(o), po = findPO(viewPO());
   const pcs = comp.reduce((s, x) => s + x.qty, 0), omzet = o.reduce((s, x) => s + x.qty * x.harga, 0);
   const nOrder = new Set(o.map(x => x.id)).size;
   return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Rekap Produksi</h2>
-      <button onclick="cetakRekap()" ${o.length ? '' : 'disabled'}>🖨️ Cetak Rekap</button></div>
-    <div style="margin:10px 0 4px">${segFilter()}</div>
+      <span class="acts"><button onclick="cetakRekap()" ${o.length ? '' : 'disabled'}>🖨️ Cetak Rekap</button><button class="o" onclick="cetakPemesan()" ${o.length ? '' : 'disabled'}>🖨️ Daftar Pemesan</button></span></div>
+    ${poBar('lihat')}
+    ${po && po.kirim ? `<div class="mut" style="margin:-4px 2px 8px">📅 Ambil/kirim: ${fmtTgl(po.kirim)}${po.status === 'Selesai' ? ' · PO selesai' : ''}</div>` : ''}
+    <div style="margin:4px 0">${segFilter('rfilt')}</div>
     <div class="grid" style="margin-top:12px">
       <div class="card stat"><span class="mut">Jumlah pesanan</span><span class="big">${nOrder}</span></div>
       <div class="card stat"><span class="mut">Total pcs</span><span class="big">${pcs}</span></div>
@@ -506,7 +647,65 @@ function vRekap() {
     <h3>Yang harus dibuat (pcs per jenis)</h3>
     ${comp.length ? `<div class="grid">${comp.map(c => `<div class="card stat"><span>${esc(c.nama)}</span><span class="big">${c.qty}<span class="mut" style="font-size:14px;font-weight:500"> pcs</span></span></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}
     <h3>Jumlah per menu / paket</h3>
-    ${pk.length ? `<div class="card">${pk.map(p => `<div class="line"><span>${esc(p.nama)}</span><b>${p.qty}</b></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}`;
+    ${pk.length ? `<div class="card">${pk.map(p => `<div class="line"><span>${esc(p.nama)}</span><b>${p.qty}</b></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}
+    <h3>Daftar pemesan (${ppm.length})</h3>
+    ${ppm.length ? `<div class="grid w">${ppm.map(p => `<div class="card col"><div class="row"><b>${esc(p.nama)}</b><span class="price">${rp(p.total)}</span></div><div class="mut">${perPaket(p.items).map(x => x.qty + ' ' + esc(x.nama)).join(' · ')}</div></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}`;
+}
+
+/* ---- PO: kelola periode pre-order ---- */
+var newPOId = () => 'P' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4);
+function bukaFormPO() { window._poe = {id: '', nama: '', kirim: '', status: 'Buka'}; go('po'); }
+function editPO(id) { window._poe = Object.assign({}, findPO(id)); render(); window.scrollTo(0, 0); }
+function simpanPOForm() {
+  const e = window._poe;
+  if (!e.kirim && !e.nama.trim()) return toast('Isi tanggal ambil/kirim atau nama PO');
+  const po = {id: e.id || newPOId(), nama: e.nama.trim() || ('PO ' + fmtTgl(e.kirim)), kirim: e.kirim || '', status: e.status || 'Buka'};
+  D.pos = D.pos || [];
+  const i = D.pos.findIndex(x => x.id === po.id);
+  if (i >= 0) D.pos[i] = po; else { D.pos.push(po); curPO = po.id; LS.set('uf_po', po.id); }
+  enqueue('savePO', po); window._poe = null; render(); toast('PO tersimpan ✔');
+}
+function togglePO(id) {
+  const p = findPO(id); if (!p) return;
+  p.status = p.status === 'Selesai' ? 'Buka' : 'Selesai';
+  enqueue('savePO', Object.assign({}, p)); render(); toast(p.status === 'Selesai' ? 'PO diselesaikan' : 'PO dibuka kembali');
+}
+function hapusPO(id) {
+  if (D.orders.some(o => o.po === id)) return toast('PO masih punya pesanan, tidak bisa dihapus');
+  if (!confirm('Hapus PO ini?')) return;
+  D.pos = D.pos.filter(p => p.id !== id); enqueue('deletePO', id); render();
+}
+function pindahLama() {
+  const t = findPO(viewPO());
+  if (!t) return toast('Pilih PO tujuan dulu (ketuk “Pilih” pada salah satu PO)');
+  const ids = [...new Set(D.orders.filter(o => !o.po).map(o => o.id))];
+  if (!confirm('Masukkan ' + ids.length + ' pesanan lama ke "' + t.nama + '"?')) return;
+  D.orders.forEach(o => { if (!o.po) o.po = t.id; });
+  enqueue('pindahPO', ids, t.id); render(); toast('Pesanan lama dimasukkan ke ' + t.nama);
+}
+function poCard(p) {
+  const s = poStats(p.id), aktif = viewPO() === p.id, selesai = p.status === 'Selesai';
+  return `<div class="card col" style="${aktif ? 'border-color:var(--pr);box-shadow:0 0 0 2px var(--pr-l)' : ''}">
+    <div class="row"><b style="font-size:16px">${esc(p.nama)}</b><span class="tag ${selesai ? '' : 'ok'}">${selesai ? 'Selesai' : 'Buka'}</span></div>
+    <div class="mut">${p.kirim ? '📅 ' + fmtTgl(p.kirim) : 'Tanggal belum diisi'}</div>
+    <div class="tags"><span class="tag pr">${s.n} pesanan</span><span class="tag pr">${s.pcs} pcs</span><span class="tag pr">${rp(s.nilai)}</span></div>
+    <div class="acts"><button onclick="pilihPO('${p.id}');go('order')">📋 Orderan</button><button class="o" onclick="pilihPO('${p.id}');go('rekap')">🧮 Rekap</button>
+      <button class="${selesai ? 'o' : 'g'}" onclick="togglePO('${p.id}')">${selesai ? 'Buka lagi' : '✓ Selesaikan'}</button>
+      <button class="o" onclick="editPO('${p.id}')">✏️</button><button class="r" onclick="hapusPO('${p.id}')">🗑</button></div>
+  </div>`;
+}
+function vPO() {
+  const e = window._poe, ps = (D.pos || []).slice().reverse();
+  const legacyN = new Set(D.orders.filter(o => !o.po).map(o => o.id)).size;
+  const form = e ? `<div class="card col" style="margin-bottom:14px"><b>${e.id ? 'Edit PO' : 'PO baru'}</b>
+      <label class="mut">Tanggal ambil / kirim</label><input type="date" value="${esc(e.kirim)}" oninput="window._poe.kirim=this.value">
+      <label class="mut">Nama PO (opsional — otomatis dari tanggal)</label><input placeholder="mis. PO Sabtu" value="${esc(e.nama)}" oninput="window._poe.nama=this.value">
+      <div class="row"><button class="o" onclick="window._poe=null;render()">Batal</button><button onclick="simpanPOForm()">Simpan</button></div></div>` : '';
+  return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Periode Pre-Order (PO)</h2><button onclick="bukaFormPO()">+ PO baru</button></div>
+    <div class="card mut" style="margin-bottom:12px">Satu PO = satu periode pre-order. Pesanan, rekap, dan struk dikelompokkan per PO. Setelah semua pesanan diantar, ketuk <b>Selesaikan</b>; untuk periode berikutnya buat PO baru.</div>
+    ${form}
+    ${legacyN ? `<div class="note warn" style="margin-bottom:12px">Ada ${legacyN} pesanan lama yang belum punya PO. Pilih PO tujuan (tombol Orderan/Rekap pada PO), lalu: <div style="margin-top:8px"><button class="o" onclick="pindahLama()">Masukkan ke PO terpilih</button></div></div>` : ''}
+    ${ps.length ? `<div class="grid w">${ps.map(poCard).join('')}</div>` : '<div class="empty">Belum ada PO. Ketuk “+ PO baru”.</div>'}`;
 }
 
 /* ---- Menu & Printer ---- */
@@ -547,16 +746,16 @@ function simpanMenu() {
 }
 
 /* ================= STRUK & PRINTER THERMAL (ESC/POS) ================= */
-const ENC = new TextEncoder();
-const num = n => Number(n || 0).toLocaleString('id-ID');
-const CFG_DEF = {toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58};
+var ENC = new TextEncoder();
+var num = n => Number(n || 0).toLocaleString('id-ID');
+var CFG_DEF = {toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58};
 function cfg() { try { return Object.assign({}, CFG_DEF, JSON.parse(LS.get('uf_cfg') || '{}')); } catch (e) { return Object.assign({}, CFG_DEF); } }
 function simpanCfg(silent) {
   const c = Object.assign({}, window._cfg || cfg()); c.lebar = +c.lebar === 80 ? 80 : 58;
   LS.set('uf_cfg', JSON.stringify(c)); if (!silent) toast('Pengaturan struk tersimpan ✔');
 }
-const cols = () => (+cfg().lebar === 80 ? 48 : 32);   // 58mm = 32 kolom, 80mm = 48 kolom
-const asc = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\x20-\x7E]/g, '');
+var cols = () => (+cfg().lebar === 80 ? 48 : 32);   // 58mm = 32 kolom, 80mm = 48 kolom
+var asc = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\x20-\x7E]/g, '');
 function wrap(s, w) {                                  // bungkus teks per kata, indentasi awal dipertahankan
   const t = asc(s), ind = (t.match(/^ */) || [''])[0], width = Math.max(4, w - ind.length), out = [];
   let cur = '';
@@ -609,7 +808,7 @@ function toBytes(r) {
 function toHtml(r) {
   return r.o.map(op => { const L = lineOf(op, r.w); return `<div class="pl${L.big ? ' bg' : ''}${L.bold ? ' b' : ''}">${esc(L.t) || '&nbsp;'}</div>`; }).join('');
 }
-const two = n => String(n).padStart(2, '0');
+var two = n => String(n).padStart(2, '0');
 function nowStr() { const d = new Date(); return `${two(d.getDate())}/${two(d.getMonth() + 1)}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`; }
 
 function buildStruk(g, st) {
@@ -619,6 +818,8 @@ function buildStruk(g, st) {
   if (c.telp) r.c('Telp/WA: ' + c.telp);
   r.hr('=');
   r.lr('No.', g.id).lr('Tanggal', g.waktu);
+  const po = findPO(g.po);
+  if (po) { r.l('PO: ' + po.nama); if (po.kirim) r.lr('Ambil/Kirim', fmtTgl(po.kirim)); }
   r.l('Pelanggan: ' + g.nama);
   if (c.kasir) r.l('Kasir: ' + c.kasir);
   r.hr('-');
@@ -648,9 +849,15 @@ function buildStruk(g, st) {
   r.feed(1);
   return r;
 }
+function poHeader(r) {
+  const sel = viewPO(), po = findPO(sel);
+  if (po) { r.c(po.nama, {bold: true}); if (po.kirim) r.c('Kirim: ' + fmtTgl(po.kirim)); }
+  else r.c(sel === '*' ? 'Semua PO' : 'Tanpa PO');
+}
 function buildRekap() {
   const o = filtered(), comp = komponen(o), pk = perPaket(o), r = R();
-  r.c('REKAP PESANAN', {big: true, bold: true}).c(nowStr()).c('Status: ' + filt).hr('=');
+  r.c('REKAP PESANAN', {big: true, bold: true}); poHeader(r);
+  r.c('Status: ' + rfilt).c(nowStr()).hr('=');
   r.l('JUMLAH PER JENIS', {bold: true});
   comp.forEach(x => r.lr(x.nama, x.qty + ' pcs'));
   r.hr('-').l('PER MENU / PAKET', {bold: true});
@@ -658,7 +865,19 @@ function buildRekap() {
   r.hr('=').lr('TOTAL PCS', comp.reduce((s, x) => s + x.qty, 0) + ' pcs', {bold: true}).feed(1);
   return r;
 }
+function buildPemesan() {
+  const ppm = perPemesan(filtered()), r = R();
+  r.c('DAFTAR PEMESAN', {big: true, bold: true}); poHeader(r); r.c(nowStr()).hr('=');
+  ppm.forEach((p, i) => {
+    r.lr((i + 1) + '. ' + p.nama, 'Rp' + num(p.total), {bold: true});
+    perPaket(p.items).forEach(x => r.l('   ' + x.qty + ' x ' + x.nama));
+    r.hr('-');
+  });
+  r.lr('Jumlah pemesan', String(ppm.length), {bold: true}).feed(1);
+  return r;
+}
 function cetakRekap() { kirim(toBytes(buildRekap())); }
+function cetakPemesan() { kirim(toBytes(buildPemesan())); }
 function cetakTes() {
   const c = cfg(), r = R();
   r.c(c.toko || 'TOKO', {big: true, bold: true});
@@ -710,7 +929,7 @@ function strukForm() {
     <div class="mut">Pengaturan struk tersimpan di perangkat ini.</div></div>`;
 }
 
-const SVC = ['000018f0-0000-1000-8000-00805f9b34fb', 0xff00, '49535343-fe7d-4ae5-8fa9-9fafd205e455', 0xffe0, 0xfee7];
+var SVC = ['000018f0-0000-1000-8000-00805f9b34fb', 0xff00, '49535343-fe7d-4ae5-8fa9-9fafd205e455', 0xffe0, 0xfee7];
 async function sambung() {
   if (IN_GAS) return toast('Bluetooth diblokir di Apps Script. Gunakan RawBT atau versi PWA hosting.');
   if (!navigator.bluetooth) return toast('Browser ini tidak mendukung Web Bluetooth (gunakan Chrome Android/laptop), atau pakai RawBT');
@@ -770,6 +989,7 @@ if (!IN_GAS) {
 }
 
 load();
+window.__boot = true;
 </script>
 </body>
 </html>
