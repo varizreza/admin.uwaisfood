@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e8590c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Uwais Food</title>
+<style>
+:root{
+  --bg:#faf7f2;--surface:#fff;--soft:#f4efe7;--tx:#1f1b16;--mut:#7a7168;--ln:#ece6dd;
+  --pr:#e8590c;--pr-d:#c2410c;--pr-l:#fff1e6;--ok:#2f9e44;--ok-l:#e6f6ea;--bad:#e03131;--bad-l:#fdecec;
+  --r:16px;--sh:0 1px 2px #0000000d,0 8px 24px #0000000a;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#14110f;--surface:#1e1a17;--soft:#27221e;--tx:#f5efe8;--mut:#a79d92;--ln:#342e28;
+  --pr:#ff8a3d;--pr-d:#ffa566;--pr-l:#3a2415;--ok:#51cf66;--ok-l:#163020;--bad:#ff6b6b;--bad-l:#3a1b1b;
+  --sh:0 1px 2px #0006,0 8px 24px #0004}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;background:var(--bg);color:var(--tx);padding-bottom:84px}
+button,input{font:inherit;color:inherit}
+code{background:var(--soft);padding:1px 6px;border-radius:6px;font-size:13px}
+.app{display:block}
+.side{display:none}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:linear-gradient(135deg,var(--pr),#f59f00);color:#fff;box-shadow:0 4px 16px #0003}
+.brand{font-weight:800;font-size:18px;letter-spacing:.2px}
+.chip-pr{font-size:12px;background:#ffffff2e;border:1px solid #ffffff40;padding:5px 10px;border-radius:99px;cursor:pointer;white-space:nowrap}
+.wrap{max-width:1120px;margin:0 auto;padding:16px}
+h2{margin:6px 2px 12px;font-size:20px}
+h3{margin:18px 2px 10px;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut)}
+.card{background:var(--surface);border:1px solid var(--ln);border-radius:var(--r);padding:14px;box-shadow:var(--sh)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.grid.w{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.col{display:flex;flex-direction:column;gap:8px}
+.mut{color:var(--mut);font-size:13px}
+.price{font-weight:700;color:var(--pr)}
+.big{font-size:28px;font-weight:800;line-height:1}
+input{width:100%;padding:11px 12px;border:1.5px solid var(--ln);border-radius:12px;background:var(--surface);outline:none;transition:.15s}
+input:focus{border-color:var(--pr);box-shadow:0 0 0 3px var(--pr-l)}
+button,a.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:600;background:var(--pr);color:#fff;cursor:pointer;transition:.15s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:active{transform:scale(.97)}
+button:hover{filter:brightness(1.06)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.o,a.btn.o{background:var(--pr-l);color:var(--pr-d)}
+button.g{background:var(--ok)}button.r{background:var(--bad-l);color:var(--bad)}
+button.full{width:100%;padding:13px;font-size:16px}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:36px;height:36px;padding:0;font-size:20px;line-height:1;border-radius:10px}
+.step b{min-width:26px;text-align:center;font-size:17px}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts button,.acts a.btn{padding:8px 11px;font-size:14px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--soft);color:var(--mut)}
+.tag.pr{background:var(--pr-l);color:var(--pr-d);font-weight:600}
+.tag.ok{background:var(--ok-l);color:var(--ok);font-weight:600}
+button.tag{cursor:pointer;border:1px solid var(--ln);font-weight:500}
+.note{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:13px}
+.note.ok{background:var(--ok-l);color:var(--ok)}
+.note.ok .mut{color:inherit;opacity:.85}
+.note.warn{background:var(--pr-l);color:var(--pr-d)}
+.menu-card{display:flex;flex-direction:column;gap:10px;justify-content:space-between;transition:.15s}
+.menu-card.on{border-color:var(--pr);box-shadow:0 0 0 2px var(--pr-l),var(--sh)}
+.split{display:grid;gap:16px}
+.seg{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.seg button{background:var(--surface);color:var(--mut);border:1px solid var(--ln);white-space:nowrap}
+.seg button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.stat{display:flex;flex-direction:column;gap:6px;padding:16px}
+.stat .big{color:var(--pr)}
+.line{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--ln)}
+.line:last-child{border:0}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:var(--surface);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom)}
+.bottom button,.side button.nv{background:none;color:var(--mut);border-radius:0}
+.bottom button{flex:1;padding:10px 2px 9px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.bottom button span{font-size:20px}
+.bottom button.on{color:var(--pr);font-weight:700}
+.empty{text-align:center;color:var(--mut);padding:40px 10px}
+#msg{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#111e;color:#fff;padding:10px 16px;border-radius:12px;display:none;z-index:99;max-width:90%;text-align:center}
+.fab{position:fixed;right:16px;bottom:92px;z-index:25;box-shadow:0 8px 24px #0004;border-radius:99px;padding:12px 18px}
+
+/* Tablet */
+@media (min-width:640px){.wrap{padding:22px}.grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}}
+/* Laptop */
+@media (min-width:900px){
+  body{padding-bottom:0}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  .side{display:flex;flex-direction:column;gap:6px;padding:20px 14px;position:sticky;top:0;height:100vh;background:var(--surface);border-right:1px solid var(--ln)}
+  .side .logo{font-weight:800;font-size:20px;color:var(--pr);padding:4px 12px 18px}
+  .side button.nv{display:flex;gap:10px;align-items:center;justify-content:flex-start;text-align:left;padding:12px 14px;border-radius:12px;font-size:15px}
+  .side button.nv.on{background:var(--pr-l);color:var(--pr-d);font-weight:700}
+  .side .sp{flex:1}
+  .top{position:static;background:none;color:var(--tx);box-shadow:none;padding:18px 22px 0;justify-content:flex-end}
+  .brand{display:none}
+  .chip-pr{background:var(--soft);border-color:var(--ln);color:var(--mut)}
+  .bottom,.fab{display:none}
+  #msg{bottom:30px}
+}
+@media (min-width:1000px){.split.p{grid-template-columns:1fr 370px;align-items:start}.panel{position:sticky;top:18px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <div>
+    <div class="top"><span class="brand">🥐 Uwais Food</span><span class="chip-pr" id="pr" onclick="go('menu')"></span></div>
+    <main class="wrap" id="app"><div class="empty">Memuat…</div></main>
+  </div>
+</div>
+<nav class="bottom" id="bottom"></nav>
+<div id="msg"></div>
+
+<script>
+/* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
+const IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
+const LS = {
+  get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+// Opsional: isi URL /exec di sini agar tidak perlu mengisi lewat layar setup
+const DEFAULT_API = '';
+const getApi = () => LS.get('uf_api') || DEFAULT_API;
+
+let D = {menu: [], orders: [], pelanggan: []}, cart = {}, tab = 'pesan', filt = 'Baru', dev = null, chr = null, installEv = null;
+const $ = s => document.querySelector(s);
+const rp = n => 'Rp' + Number(n || 0).toLocaleString('id-ID');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let _t; function toast(t) { const m = $('#msg'); m.textContent = t; m.style.display = 'block'; clearTimeout(_t); _t = setTimeout(() => m.style.display = 'none', 3200); }
+$('#pr').textContent = IN_GAS ? '🖨️ Cetak via RawBT' : '🖨️ Printer: belum terhubung';
+
+/* Satu pintu ke backend: google.script.run (Apps Script) atau fetch (hosting) */
+async function run(fn, ...args) {
+  if (IN_GAS) return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
+  const url = getApi();
+  let res;
+  try {
+    res = fn === 'getData'
+      ? await fetch(url + (url.includes('?') ? '&' : '?') + 'action=getData', {redirect: 'follow'})
+      : await fetch(url, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action: fn, args}), redirect: 'follow'});
+  } catch (e) { throw new Error('Tidak bisa terhubung. Periksa internet & URL, serta akses deployment "Siapa saja".'); }
+  let j; try { j = await res.json(); } catch (e) { throw new Error('Respon bukan JSON. Pastikan URL berakhiran /exec dan sudah di-deploy ulang.'); }
+  if (!j.ok) throw new Error(j.error || 'Terjadi kesalahan');
+  return j.data;
+}
+const msgOf = e => (e && e.message) || String(e);
+
+async function load() {
+  if (needSetup()) return render();
+  try { D = await run('getData'); D.pelanggan = D.pelanggan || []; } catch (e) { toast('Gagal memuat: ' + msgOf(e)); }
+  render();
+}
+const needSetup = () => !IN_GAS && !getApi();
+
+/* ================= LOGIKA DATA ================= */
+// "6 Bolen Manis + 4 Banana Milk Cheese" -> [{n:6, nama:'Bolen Manis'}, ...]
+function parseIsi(isi) {
+  return String(isi || '').split('+').map(s => s.trim()).filter(Boolean).map(p => {
+    const m = p.match(/^(\d+)\s*(?:x|×|pcs|biji)?\s*(.+)$/i);
+    return m ? {n: +m[1], nama: m[2].trim()} : {n: 1, nama: p};
+  });
+}
+const key = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+function komponen(items) {
+  const r = {};
+  const add = (nama, q) => { const k = key(nama); r[k] = r[k] || {nama, qty: 0}; r[k].qty += q; };
+  items.forEach(it => {
+    const parts = parseIsi(it.isi);
+    if (parts.length) parts.forEach(p => add(p.nama, p.n * it.qty)); else add(it.item, it.qty);
+  });
+  return Object.values(r).sort((a, b) => b.qty - a.qty);
+}
+function perPaket(items) {
+  const r = {};
+  items.forEach(it => { r[it.item] = (r[it.item] || 0) + it.qty; });
+  return Object.entries(r).map(([nama, qty]) => ({nama, qty})).sort((a, b) => b.qty - a.qty);
+}
+function groups() {
+  const g = {};
+  D.orders.forEach(o => {
+    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, items: [], total: 0};
+    g[o.id].items.push(o); g[o.id].total += o.qty * o.harga;
+  });
+  return Object.values(g).reverse();
+}
+const filtered = () => D.orders.filter(o => filt === 'Semua' || o.status === filt);
+const findPel = n => D.pelanggan.find(p => key(p.nama) === key(n));
+function waLink(hp) {
+  let d = String(hp || '').replace(/\D/g, '');
+  if (d.startsWith('0')) d = '62' + d.slice(1); else if (d.startsWith('8')) d = '62' + d;
+  return 'https://wa.me/' + d;
+}
+
+/* ================= TAMPILAN ================= */
+const TABS = [['pesan', '➕', 'Pesan'], ['order', '📋', 'Orderan'], ['pelanggan', '👥', 'Pelanggan'], ['rekap', '🧮', 'Rekap'], ['menu', '🍽️', 'Menu']];
+function render() {
+  if (needSetup()) { $('#side').innerHTML = ''; $('#bottom').innerHTML = ''; $('#app').innerHTML = vSetup(); return; }
+  $('#side').innerHTML = '<div class="logo">🥐 Uwais Food</div>' +
+    TABS.map(t => `<button class="nv ${tab === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('') +
+    '<div class="sp"></div><div class="mut" style="padding:0 12px">Pengelola orderan</div>';
+  $('#bottom').innerHTML = TABS.map(t => `<button class="${tab === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('');
+  $('#app').innerHTML = {pesan: vPesan, order: vOrder, pelanggan: vPelanggan, rekap: vRekap, menu: vMenu}[tab]();
+}
+function go(t) { tab = t; render(); window.scrollTo(0, 0); }
+const chips = isi => parseIsi(isi).map(p => `<span class="tag pr">${p.n} ${esc(p.nama)}</span>`).join('');
+
+/* ---- Setup (hanya versi hosting) ---- */
+function vSetup() {
+  return `<div class="card col" style="max-width:520px;margin:30px auto">
+    <b style="font-size:18px">Hubungkan ke Spreadsheet</b>
+    <div class="mut">Tempel URL Web App dari Apps Script (berakhiran <code>/exec</code>). Pastikan saat deploy, akses diatur ke <b>Siapa saja</b>.</div>
+    <input id="apiurl" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+    <button class="full" onclick="simpanApi()">Hubungkan</button></div>`;
+}
+function simpanApi() {
+  const u = ($('#apiurl').value || '').trim();
+  if (!/^https:\/\/script\.google\.com\/.+\/exec/.test(u)) return toast('URL harus dari script.google.com dan berakhiran /exec');
+  LS.set('uf_api', u); toast('Menghubungkan…'); load();
+}
+function gantiApi() { if (confirm('Ganti URL Spreadsheet?')) { LS.del('uf_api'); render(); } }
+
+/* ---- Pesan ---- */
+function topPel() {
+  return D.pelanggan.map((p, i) => ({p, i})).sort((a, b) => b.p.jumlah - a.p.jumlah).slice(0, 6).filter(x => x.p.jumlah > 0);
+}
+function pinfo() {
+  const n = (window._n || '').trim();
+  if (!n) return '';
+  const p = findPel(n);
+  if (p) return `<div class="note ok">✔ Pelanggan lama${p.jumlah ? ` · ${p.jumlah}× order` : ''}${p.hp ? ` · ${esc(p.hp)}` : ''}
+      ${p.alamat ? `<div class="mut">📍 ${esc(p.alamat)}</div>` : ''}${p.catatan ? `<div class="mut">📝 ${esc(p.catatan)}</div>` : ''}</div>`;
+  return `<div class="note">Pelanggan baru — akan tersimpan otomatis.
+    <div class="col" style="margin-top:8px">
+      <input placeholder="No. HP (opsional)" inputmode="tel" value="${esc(window._hp || '')}" oninput="window._hp=this.value">
+      <input placeholder="Alamat (opsional)" value="${esc(window._al || '')}" oninput="window._al=this.value"></div></div>`;
+}
+function pilihPel(i) { window._n = D.pelanggan[i].nama; window._hp = ''; window._al = ''; const y = window.scrollY; render(); window.scrollTo(0, y); }
+
+function vPesan() {
+  const lines = D.menu.map((m, i) => ({m, i, q: cart[i] || 0})).filter(x => x.q > 0);
+  const total = lines.reduce((s, x) => s + x.q * x.m.harga, 0);
+  const comp = komponen(lines.map(x => ({item: x.m.nama, qty: x.q, isi: x.m.isi})));
+  const top = topPel();
+  const cards = D.menu.map((m, i) => `
+    <div class="card menu-card ${cart[i] ? 'on' : ''}">
+      <div><b style="font-size:16px">${esc(m.nama)}</b>
+        ${m.isi ? `<div class="tags" style="margin-top:6px">${chips(m.isi)}</div>` : '<div class="mut">Satuan</div>'}</div>
+      <div class="row"><span class="price">${rp(m.harga)}</span>
+        <div class="step"><button class="o" onclick="chg(${i},-1)">−</button><b>${cart[i] || 0}</b><button onclick="chg(${i},1)">+</button></div></div>
+    </div>`).join('');
+  const panel = `
+    <div class="card panel col">
+      <b style="font-size:16px">Pesanan baru</b>
+      ${top.length ? `<div><div class="mut" style="margin-bottom:6px">Pelanggan langganan</div><div class="tags">${top.map(x => `<button class="tag" onclick="pilihPel(${x.i})">${esc(x.p.nama)}</button>`).join('')}</div></div>` : ''}
+      <input id="nama" list="pelList" placeholder="Nama pemesan" value="${esc(window._n || '')}" oninput="window._n=this.value;$('#pinfo').innerHTML=pinfo()" autocomplete="off">
+      <datalist id="pelList">${D.pelanggan.map(p => `<option value="${esc(p.nama)}">`).join('')}</datalist>
+      <div id="pinfo">${pinfo()}</div>
+      ${lines.length ? lines.map(x => `<div class="line"><span>${x.q}× ${esc(x.m.nama)}</span><b>${rp(x.q * x.m.harga)}</b></div>`).join('') : '<div class="mut">Belum ada menu dipilih.</div>'}
+      ${comp.length ? `<div><div class="mut" style="margin-bottom:6px">Rincian isi</div><div class="tags">${comp.map(c => `<span class="tag ok">${c.qty} ${esc(c.nama)}</span>`).join('')}</div></div>` : ''}
+      <div class="row"><span class="mut">Total</span><span class="big">${rp(total)}</span></div>
+      <button class="full" onclick="simpan()">Simpan Pesanan</button>
+      ${lines.length ? '<button class="o" onclick="cart={};render()">Kosongkan</button>' : ''}
+    </div>`;
+  return `<h2>Buat Pesanan</h2><div class="split p"><div class="grid">${cards || '<div class="empty">Menu kosong. Tambah di tab Menu.</div>'}</div><div id="panel">${panel}</div></div>` +
+    (lines.length ? `<button class="fab" onclick="document.getElementById('panel').scrollIntoView({behavior:'smooth'})">🛒 ${rp(total)}</button>` : '');
+}
+function chg(i, d) { cart[i] = Math.max(0, (cart[i] || 0) + d); const y = window.scrollY; render(); window.scrollTo(0, y); }
+async function simpan() {
+  const nama = (window._n || '').trim();
+  const items = D.menu.map((m, i) => ({nama: m.nama, harga: m.harga, isi: m.isi, qty: cart[i] || 0})).filter(x => x.qty > 0);
+  if (!nama) { toast('Isi nama pemesan dulu'); const e = $('#nama'); if (e) e.focus(); return; }
+  if (!items.length) return toast('Pilih menu dulu');
+  const pel = findPel(nama) ? {} : {hp: (window._hp || '').trim(), alamat: (window._al || '').trim()};
+  toast('Menyimpan…');
+  try { await run('addOrder', nama, items, pel); } catch (e) { return toast('Gagal menyimpan: ' + msgOf(e)); }
+  cart = {}; window._n = ''; window._hp = ''; window._al = '';
+  await load(); go('order'); toast('Tersimpan ✔');
+}
+
+/* ---- Orderan ---- */
+function orderCard(g) {
+  const p = findPel(g.nama);
+  return `<div class="card col">
+    <div class="row"><b style="font-size:16px">${esc(g.nama)}</b><span class="tag ${g.status === 'Selesai' ? 'ok' : 'pr'}">${g.status}</span></div>
+    <div class="mut">${g.waktu}${p && p.hp ? ' · ' + esc(p.hp) : ''}</div>
+    <div>${g.items.map(o => `<div class="line"><span>${o.qty}× ${esc(o.item)}${o.isi ? `<div class="mut">${parseIsi(o.isi).map(x => (x.n * o.qty) + ' ' + esc(x.nama)).join(' · ')}</div>` : ''}</span><span>${rp(o.qty * o.harga)}</span></div>`).join('')}</div>
+    <div class="row"><span class="big" style="font-size:22px">${rp(g.total)}</span>
+      <span class="acts"><button class="o" onclick="cetakOrder('${g.id}')" title="Cetak">🖨️</button>
+      <button class="g" onclick="status('${g.id}','${g.status === 'Baru' ? 'Selesai' : 'Baru'}')">${g.status === 'Baru' ? '✓ Selesai' : 'Buka lagi'}</button>
+      <button class="r" onclick="hapus('${g.id}')" title="Hapus">🗑</button></span></div>
+  </div>`;
+}
+function olist() {
+  const q = (window._q || '').toLowerCase();
+  const l = groups().filter(g => (filt === 'Semua' || g.status === filt) && g.nama.toLowerCase().includes(q));
+  return l.length ? `<div class="grid w">${l.map(orderCard).join('')}</div>` : '<div class="empty">Tidak ada orderan.</div>';
+}
+function segFilter() {
+  return `<div class="seg">${['Baru', 'Selesai', 'Semua'].map(f => `<button class="${filt === f ? 'on' : ''}" onclick="filt='${f}';render()">${f}</button>`).join('')}</div>`;
+}
+function vOrder() {
+  return `<h2>Orderan</h2><div class="col" style="margin-bottom:14px">${segFilter()}
+    <input placeholder="🔍 Cari nama pemesan…" value="${esc(window._q || '')}" oninput="window._q=this.value;$('#olist').innerHTML=olist()"></div>
+    <div id="olist">${olist()}</div>`;
+}
+async function status(id, s) { try { await run('setStatus', id, s); } catch (e) { toast('Gagal: ' + msgOf(e)); } load(); }
+async function hapus(id) { if (confirm('Hapus pesanan ini?')) { try { await run('deleteOrder', id); } catch (e) { toast('Gagal: ' + msgOf(e)); } load(); } }
+
+/* ---- Pelanggan ---- */
+function plist() {
+  const q = (window._pq || '').toLowerCase();
+  const l = D.pelanggan.map((p, i) => ({p, i})).filter(({p}) => (p.nama + ' ' + p.hp).toLowerCase().includes(q))
+    .sort((a, b) => a.p.nama.localeCompare(b.p.nama));
+  if (!l.length) return '<div class="empty">Belum ada pelanggan. Pelanggan tersimpan otomatis saat ada pesanan, atau tambah manual.</div>';
+  return `<div class="grid w">${l.map(({p, i}) => `
+    <div class="card col">
+      <div class="row"><b style="font-size:16px">${esc(p.nama)}</b><span class="tag ${p.jumlah ? 'pr' : ''}">${p.jumlah}× order</span></div>
+      ${p.hp ? `<div>📞 ${esc(p.hp)}</div>` : ''}
+      ${p.alamat ? `<div class="mut">📍 ${esc(p.alamat)}</div>` : ''}
+      ${p.catatan ? `<div class="mut">📝 ${esc(p.catatan)}</div>` : ''}
+      ${p.terakhir ? `<div class="mut">Terakhir order: ${p.terakhir}</div>` : ''}
+      <div class="acts"><button onclick="pilihPel(${i});go('pesan')">🛒 Pesan</button>
+        ${p.hp ? `<a class="btn o" href="${waLink(p.hp)}" target="_blank" rel="noopener">💬 WA</a>` : ''}
+        <button class="o" onclick="editPel(${i})">✏️</button><button class="r" onclick="hapusPel(${i})">🗑</button></div>
+    </div>`).join('')}</div>`;
+}
+function vPelanggan() {
+  const e = window._pe;
+  const f = (ph, k, extra = '') => `<input placeholder="${ph}" ${extra} value="${esc(e[k])}" oninput="window._pe.${k}=this.value">`;
+  const form = e ? `<div class="card col" style="margin-bottom:14px"><b>${e.lama ? 'Edit pelanggan' : 'Pelanggan baru'}</b>
+      ${f('Nama', 'nama')}${f('No. HP', 'hp', 'inputmode="tel"')}${f('Alamat', 'alamat')}${f('Catatan (mis. suka pedas, alergi kacang)', 'catatan')}
+      <div class="row"><button class="o" onclick="window._pe=null;render()">Batal</button><button onclick="simpanPel()">Simpan</button></div></div>` : '';
+  return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Pelanggan</h2>
+      <button onclick="window._pe={lama:'',nama:'',hp:'',alamat:'',catatan:''};render()">+ Pelanggan</button></div>${form}
+    <input placeholder="🔍 Cari nama / HP…" value="${esc(window._pq || '')}" oninput="window._pq=this.value;$('#plist').innerHTML=plist()" style="margin:10px 0 14px">
+    <div id="plist">${plist()}</div>`;
+}
+function editPel(i) { const p = D.pelanggan[i]; window._pe = {lama: p.nama, nama: p.nama, hp: p.hp, alamat: p.alamat, catatan: p.catatan}; render(); window.scrollTo(0, 0); }
+async function simpanPel() {
+  const e = window._pe;
+  if (!e.nama.trim()) return toast('Nama wajib diisi');
+  try { await run('savePelanggan', e); } catch (x) { return toast('Gagal: ' + msgOf(x)); }
+  window._pe = null; await load(); toast('Pelanggan tersimpan ✔');
+}
+async function hapusPel(i) {
+  const p = D.pelanggan[i];
+  if (!confirm('Hapus pelanggan ' + p.nama + '? (riwayat orderan tidak ikut terhapus)')) return;
+  try { await run('deletePelanggan', p.nama); } catch (x) { toast('Gagal: ' + msgOf(x)); }
+  load();
+}
+
+/* ---- Rekap ---- */
+function vRekap() {
+  const o = filtered(), comp = komponen(o), pk = perPaket(o);
+  const pcs = comp.reduce((s, x) => s + x.qty, 0), omzet = o.reduce((s, x) => s + x.qty * x.harga, 0);
+  const nOrder = new Set(o.map(x => x.id)).size;
+  return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Rekap Produksi</h2>
+      <button onclick="cetakRekap()" ${o.length ? '' : 'disabled'}>🖨️ Cetak Rekap</button></div>
+    <div style="margin:10px 0 4px">${segFilter()}</div>
+    <div class="grid" style="margin-top:12px">
+      <div class="card stat"><span class="mut">Jumlah pesanan</span><span class="big">${nOrder}</span></div>
+      <div class="card stat"><span class="mut">Total pcs</span><span class="big">${pcs}</span></div>
+      <div class="card stat"><span class="mut">Total nilai</span><span class="big" style="font-size:22px">${rp(omzet)}</span></div>
+    </div>
+    <h3>Yang harus dibuat (pcs per jenis)</h3>
+    ${comp.length ? `<div class="grid">${comp.map(c => `<div class="card stat"><span>${esc(c.nama)}</span><span class="big">${c.qty}<span class="mut" style="font-size:14px;font-weight:500"> pcs</span></span></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}
+    <h3>Jumlah per menu / paket</h3>
+    ${pk.length ? `<div class="card">${pk.map(p => `<div class="line"><span>${esc(p.nama)}</span><b>${p.qty}</b></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}`;
+}
+
+/* ---- Menu & Printer ---- */
+function vMenu() {
+  const printer = IN_GAS
+    ? `<div class="note warn">Anda membuka lewat halaman Apps Script. Google memblokir Bluetooth langsung di halaman ini (pesan <i>permissions policy</i>) — ini batasan Google, bukan kerusakan aplikasi.
+        Cetak tetap bisa lewat aplikasi <b>RawBT</b>. Untuk Bluetooth langsung, pakai versi PWA hosting.</div>
+       <div class="acts"><button onclick="cetakTes()">Tes Cetak (RawBT)</button>
+       <a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">Pasang RawBT</a></div>`
+    : `<div class="mut">Sambungkan printer thermal Bluetooth 58mm. Jika printer Anda tidak muncul di daftar, kemungkinan memakai Bluetooth klasik — gunakan RawBT (cetak otomatis beralih ke RawBT bila printer belum terhubung).</div>
+       <div class="acts"><button onclick="sambung()">🔗 Hubungkan Printer</button><button class="o" onclick="cetakTes()">Tes Cetak</button>
+       <a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">RawBT</a></div>`;
+  const app = IN_GAS ? '' : `<h3>Aplikasi</h3><div class="card col">
+      <div class="mut">Terhubung ke: <code>${esc(getApi().slice(0, 48))}…</code></div>
+      <div class="acts">${installEv ? '<button onclick="pasang()">⬇️ Pasang aplikasi</button>' : ''}<button class="o" onclick="gantiApi()">Ganti URL Spreadsheet</button></div></div>`;
+  return `<h2>Menu &amp; Printer</h2>
+    <div class="card mut" style="margin-bottom:12px">Untuk <b>paket/varian</b>, isi kolom <b>Isi</b> dengan format
+      <code>6 Bolen Manis + 4 Banana Milk Cheese</code>. Kosongkan untuk menu satuan. Nama isi yang sama otomatis dijumlahkan di Rekap.</div>
+    <div class="grid w">${D.menu.map((m, i) => `
+      <div class="card col">
+        <input placeholder="Nama menu" value="${esc(m.nama)}" onchange="D.menu[${i}].nama=this.value.trim()">
+        <input type="number" inputmode="numeric" placeholder="Harga" value="${m.harga}" onchange="D.menu[${i}].harga=+this.value||0">
+        <input placeholder="Isi paket (opsional)" value="${esc(m.isi || '')}" onchange="D.menu[${i}].isi=this.value.trim()">
+        <button class="r" onclick="D.menu.splice(${i},1);render()">Hapus menu</button>
+      </div>`).join('')}</div>
+    <div class="row" style="margin-top:12px"><button class="o" onclick="D.menu.push({nama:'',harga:0,isi:''});render()">+ Tambah menu</button>
+      <button onclick="simpanMenu()">Simpan Menu</button></div>
+    <h3>Printer thermal</h3>
+    <div class="card col">${printer}</div>${app}`;
+}
+async function simpanMenu() {
+  D.menu = D.menu.filter(m => m.nama && m.nama.trim()); cart = {};
+  try { await run('saveMenu', D.menu); toast('Menu tersimpan ✔'); } catch (e) { toast('Gagal: ' + msgOf(e)); }
+  render();
+}
+
+/* ================= PRINTER THERMAL (ESC/POS, 58mm = 32 kolom) ================= */
+const W = 32, ENC = new TextEncoder();
+const CMD = {init: [27, 64], c: [27, 97, 1], l: [27, 97, 0], b1: [27, 69, 1], b0: [27, 69, 0], big: [29, 33, 17], nor: [29, 33, 0], cut: [29, 86, 66, 0]};
+const clean = s => String(s).replace(/[^\x20-\x7E\n]/g, '');
+const pad = (l, r) => { l = clean(l); r = clean(r); if (l.length + r.length + 1 > W) l = l.slice(0, W - r.length - 1); return l + ' '.repeat(Math.max(1, W - l.length - r.length)) + r + '\n'; };
+const hr = '-'.repeat(W) + '\n';
+function buf(parts) {
+  const out = [];
+  parts.forEach(p => Array.isArray(p) ? out.push(...p) : out.push(...ENC.encode(clean(p))));
+  return new Uint8Array(out);
+}
+const num = n => Number(n).toLocaleString('id-ID');
+function struk(g) {
+  const rows = [];
+  g.items.forEach(o => {
+    rows.push(pad(o.qty + 'x ' + o.item, num(o.qty * o.harga)));
+    parseIsi(o.isi).forEach(p => rows.push('   ' + clean((p.n * o.qty) + ' ' + p.nama).slice(0, W - 3) + '\n'));
+  });
+  return buf([CMD.init, CMD.c, CMD.big, CMD.b1, 'UWAIS FOOD\n', CMD.nor, CMD.b0, g.waktu + '\n', CMD.l, hr,
+    'Nama: ' + g.nama + '\n', hr, ...rows, hr,
+    CMD.b1, pad('TOTAL', 'Rp' + num(g.total)), CMD.b0, CMD.c, '\nTerima kasih!\n\n\n\n', CMD.cut]);
+}
+function cetakOrder(id) { kirim(struk(groups().find(g => g.id === id))); }
+function cetakRekap() {
+  const o = filtered(), comp = komponen(o), pk = perPaket(o);
+  kirim(buf([CMD.init, CMD.c, CMD.b1, 'REKAP PESANAN\n', CMD.b0, new Date().toLocaleString('id-ID') + '\n', 'Status: ' + filt + '\n', CMD.l, hr,
+    'JUMLAH PER JENIS\n', ...comp.map(x => pad(x.nama, x.qty + ' pcs')), hr,
+    'PER MENU / PAKET\n', ...pk.map(x => pad(x.nama, String(x.qty))), hr,
+    CMD.b1, pad('TOTAL PCS', comp.reduce((s, x) => s + x.qty, 0) + ' pcs'), CMD.b0, '\n\n\n\n', CMD.cut]));
+}
+function cetakTes() { kirim(buf([CMD.init, CMD.c, 'UWAIS FOOD\nTes printer OK\n\n\n\n', CMD.cut])); }
+
+const SVC = ['000018f0-0000-1000-8000-00805f9b34fb', 0xff00, '49535343-fe7d-4ae5-8fa9-9fafd205e455', 0xffe0, 0xfee7];
+async function sambung() {
+  if (IN_GAS) return toast('Bluetooth diblokir di Apps Script. Gunakan RawBT atau versi PWA hosting.');
+  if (!navigator.bluetooth) return toast('Browser ini tidak mendukung Web Bluetooth (gunakan Chrome Android/laptop), atau pakai RawBT');
+  try {
+    dev = await navigator.bluetooth.requestDevice({acceptAllDevices: true, optionalServices: SVC});
+    const srv = await dev.gatt.connect();
+    chr = null;
+    outer: for (const s of await srv.getPrimaryServices())
+      for (const c of await s.getCharacteristics())
+        if (c.properties.write || c.properties.writeWithoutResponse) { chr = c; break outer; }
+    if (!chr) throw new Error('Karakteristik tulis tidak ditemukan');
+    $('#pr').textContent = '🖨️ ' + (dev.name || 'Printer terhubung');
+    dev.addEventListener('gattserverdisconnected', () => { chr = null; $('#pr').textContent = '🖨️ Printer terputus'; });
+    toast('Printer terhubung ✔');
+  } catch (e) {
+    toast(/permissions policy/i.test(msgOf(e)) ? 'Bluetooth diblokir di halaman ini. Gunakan RawBT atau versi PWA.' : 'Bluetooth: ' + msgOf(e));
+  }
+}
+function rawbt(data) {
+  let bin = ''; data.forEach(b => bin += String.fromCharCode(b));
+  const a = document.createElement('a');
+  a.href = 'intent:base64,' + btoa(bin) + '#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;';
+  a.target = '_top';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+async function kirim(data) {
+  if (chr) { // Web Bluetooth langsung (hanya versi hosting)
+    try {
+      for (let i = 0; i < data.length; i += 100) {
+        const p = data.slice(i, i + 100);
+        chr.properties.writeWithoutResponse ? await chr.writeValueWithoutResponse(p) : await chr.writeValue(p);
+      }
+      return;
+    } catch (e) { toast('Gagal kirim lewat Bluetooth, mencoba RawBT…'); }
+  }
+  rawbt(data); // cadangan: aplikasi RawBT (Android)
+}
+
+/* ================= PWA (hanya versi hosting) ================= */
+function pasang() { if (installEv) { installEv.prompt(); installEv = null; render(); } }
+if (!IN_GAS) {
+  [['manifest', 'manifest.webmanifest'], ['icon', 'icon-192.png'], ['apple-touch-icon', 'icon-192.png']].forEach(([rel, href]) => {
+    const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l);
+  });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEv = e; if (tab === 'menu') render(); });
+}
+
+load();
+</script>
+</body>
+</html>
