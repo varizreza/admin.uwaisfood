@@ -99,6 +99,20 @@ button.tag{cursor:pointer;border:1px solid var(--ln);font-weight:500}
   #msg{bottom:30px}
 }
 @media (min-width:1000px){.split.p{grid-template-columns:1fr 370px;align-items:start}.panel{position:sticky;top:18px}}
+
+/* Struk */
+.ov{position:fixed;inset:0;background:#000a;z-index:60;display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto}
+.dlg{width:100%;max-width:440px;max-height:94vh;overflow:auto}
+.paper-wrap{background:var(--soft);border-radius:12px;padding:12px;display:flex;justify-content:safe center;overflow-x:auto}
+.paper{box-sizing:content-box;background:#fff;color:#111;font-family:"Courier New",ui-monospace,Menlo,Consolas,monospace;font-size:13px;padding:14px 12px;box-shadow:0 2px 10px #0003;border-radius:3px}
+.pl{white-space:pre;line-height:1.35}.pl.bg{font-size:2em;line-height:1.2}.pl.b{font-weight:700}
+#printArea{display:none}
+@media print{
+  html,body{background:#fff!important;padding:0!important}
+  .app,.bottom,#msg,#modal,.fab{display:none!important}
+  #printArea{display:block!important}
+  #printArea .paper{box-shadow:none!important;padding:0!important;font-size:2.5mm;color:#000;background:#fff}
+}
 </style>
 </head>
 <body>
@@ -110,6 +124,8 @@ button.tag{cursor:pointer;border:1px solid var(--ln);font-weight:500}
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
+<div id="modal"></div>
+<div id="printArea"></div>
 <div id="msg"></div>
 
 <script>
@@ -275,9 +291,9 @@ async function simpan() {
   if (!items.length) return toast('Pilih menu dulu');
   const pel = findPel(nama) ? {} : {hp: (window._hp || '').trim(), alamat: (window._al || '').trim()};
   toast('Menyimpan…');
-  try { await run('addOrder', nama, items, pel); } catch (e) { return toast('Gagal menyimpan: ' + msgOf(e)); }
+  let newId; try { newId = await run('addOrder', nama, items, pel); } catch (e) { return toast('Gagal menyimpan: ' + msgOf(e)); }
   cart = {}; window._n = ''; window._hp = ''; window._al = '';
-  await load(); go('order'); toast('Tersimpan ✔');
+  await load(); go('order'); toast('Tersimpan ✔'); if (newId) cetakOrder(newId);
 }
 
 /* ---- Orderan ---- */
@@ -397,6 +413,7 @@ function vMenu() {
       </div>`).join('')}</div>
     <div class="row" style="margin-top:12px"><button class="o" onclick="D.menu.push({nama:'',harga:0,isi:''});render()">+ Tambah menu</button>
       <button onclick="simpanMenu()">Simpan Menu</button></div>
+    ${strukForm()}
     <h3>Printer thermal</h3>
     <div class="card col">${printer}</div>${app}`;
 }
@@ -406,37 +423,169 @@ async function simpanMenu() {
   render();
 }
 
-/* ================= PRINTER THERMAL (ESC/POS, 58mm = 32 kolom) ================= */
-const W = 32, ENC = new TextEncoder();
-const CMD = {init: [27, 64], c: [27, 97, 1], l: [27, 97, 0], b1: [27, 69, 1], b0: [27, 69, 0], big: [29, 33, 17], nor: [29, 33, 0], cut: [29, 86, 66, 0]};
-const clean = s => String(s).replace(/[^\x20-\x7E\n]/g, '');
-const pad = (l, r) => { l = clean(l); r = clean(r); if (l.length + r.length + 1 > W) l = l.slice(0, W - r.length - 1); return l + ' '.repeat(Math.max(1, W - l.length - r.length)) + r + '\n'; };
-const hr = '-'.repeat(W) + '\n';
-function buf(parts) {
-  const out = [];
-  parts.forEach(p => Array.isArray(p) ? out.push(...p) : out.push(...ENC.encode(clean(p))));
+/* ================= STRUK & PRINTER THERMAL (ESC/POS) ================= */
+const ENC = new TextEncoder();
+const num = n => Number(n || 0).toLocaleString('id-ID');
+const CFG_DEF = {toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58};
+function cfg() { try { return Object.assign({}, CFG_DEF, JSON.parse(LS.get('uf_cfg') || '{}')); } catch (e) { return Object.assign({}, CFG_DEF); } }
+function simpanCfg(silent) {
+  const c = Object.assign({}, window._cfg || cfg()); c.lebar = +c.lebar === 80 ? 80 : 58;
+  LS.set('uf_cfg', JSON.stringify(c)); if (!silent) toast('Pengaturan struk tersimpan ✔');
+}
+const cols = () => (+cfg().lebar === 80 ? 48 : 32);   // 58mm = 32 kolom, 80mm = 48 kolom
+const asc = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\x20-\x7E]/g, '');
+function wrap(s, w) {                                  // bungkus teks per kata, indentasi awal dipertahankan
+  const t = asc(s), ind = (t.match(/^ */) || [''])[0], width = Math.max(4, w - ind.length), out = [];
+  let cur = '';
+  t.trim().split(/\s+/).filter(Boolean).forEach(word => {
+    while (word.length > width) { if (cur) { out.push(cur); cur = ''; } out.push(word.slice(0, width)); word = word.slice(width); }
+    if (!cur) cur = word; else if ((cur + ' ' + word).length <= width) cur += ' ' + word; else { out.push(cur); cur = word; }
+  });
+  if (cur) out.push(cur);
+  return out.map(x => ind + x);
+}
+// Satu model struk -> dipakai untuk pratinjau layar, ESC/POS, dan cetak browser (hasilnya selalu sama)
+function R() {
+  const w = cols(), half = Math.floor(w / 2), o = [];
+  const api = {
+    w, o,
+    c(t, opt = {}) { String(t == null ? '' : t).split('\n').forEach(part => wrap(part, opt.big ? half : w).forEach(x => o.push(Object.assign({k: 'c', t: x, ww: opt.big ? half : w}, opt)))); return api; },
+    l(t, opt = {}) { wrap(t, w).forEach(x => o.push(Object.assign({k: 'l', t: x, ww: w}, opt))); return api; },
+    lr(a, b, opt = {}) {
+      a = asc(a); b = asc(b);
+      const big = !!opt.big && a.trim().length + b.length + 1 <= half, ww = big ? half : w;
+      const ls = wrap(a, Math.max(4, ww - b.length - 1)); if (!ls.length) ls.push('');
+      ls.forEach((x, i) => o.push({k: 'lr', l: x, r: i === ls.length - 1 ? b : '', ww, big, bold: opt.bold}));
+      return api;
+    },
+    hr(ch = '-') { o.push({k: 'hr', ch}); return api; },
+    feed(n = 1) { for (let i = 0; i < n; i++) o.push({k: 'feed'}); return api; }
+  };
+  return api;
+}
+function lineOf(op, w) {
+  if (op.k === 'hr') return {t: op.ch.repeat(w)};
+  if (op.k === 'feed') return {t: ''};
+  if (op.k === 'c') return {t: ' '.repeat(Math.max(0, Math.floor((op.ww - op.t.length) / 2))) + op.t, big: op.big, bold: op.bold};
+  if (op.k === 'l') return {t: op.t, bold: op.bold};
+  return {t: op.l + ' '.repeat(Math.max(1, op.ww - op.l.length - op.r.length)) + op.r, big: op.big, bold: op.bold};
+}
+function toBytes(r) {
+  const out = [27, 64];
+  r.o.forEach(op => {
+    const L = lineOf(op, r.w);
+    if (L.big) out.push(29, 33, 17);
+    if (L.bold) out.push(27, 69, 1);
+    out.push(...ENC.encode(L.t + '\n'));
+    if (L.big) out.push(29, 33, 0);
+    if (L.bold) out.push(27, 69, 0);
+  });
+  out.push(10, 10, 10, 29, 86, 66, 0);
   return new Uint8Array(out);
 }
-const num = n => Number(n).toLocaleString('id-ID');
-function struk(g) {
-  const rows = [];
-  g.items.forEach(o => {
-    rows.push(pad(o.qty + 'x ' + o.item, num(o.qty * o.harga)));
-    parseIsi(o.isi).forEach(p => rows.push('   ' + clean((p.n * o.qty) + ' ' + p.nama).slice(0, W - 3) + '\n'));
+function toHtml(r) {
+  return r.o.map(op => { const L = lineOf(op, r.w); return `<div class="pl${L.big ? ' bg' : ''}${L.bold ? ' b' : ''}">${esc(L.t) || '&nbsp;'}</div>`; }).join('');
+}
+const two = n => String(n).padStart(2, '0');
+function nowStr() { const d = new Date(); return `${two(d.getDate())}/${two(d.getMonth() + 1)}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`; }
+
+function buildStruk(g, st) {
+  const c = cfg(), r = R();
+  r.c(c.toko || 'TOKO', {big: true, bold: true});
+  if (c.alamat) r.c(c.alamat);
+  if (c.telp) r.c('Telp/WA: ' + c.telp);
+  r.hr('=');
+  r.lr('No.', g.id).lr('Tanggal', g.waktu);
+  r.l('Pelanggan: ' + g.nama);
+  if (c.kasir) r.l('Kasir: ' + c.kasir);
+  r.hr('-');
+  g.items.forEach(it => {
+    r.l(it.item, {bold: true});
+    r.lr('  ' + it.qty + ' x ' + num(it.harga), num(it.qty * it.harga));
+    parseIsi(it.isi).forEach(p => r.l('   - ' + (p.n * it.qty) + ' ' + p.nama));
   });
-  return buf([CMD.init, CMD.c, CMD.big, CMD.b1, 'UWAIS FOOD\n', CMD.nor, CMD.b0, g.waktu + '\n', CMD.l, hr,
-    'Nama: ' + g.nama + '\n', hr, ...rows, hr,
-    CMD.b1, pad('TOTAL', 'Rp' + num(g.total)), CMD.b0, CMD.c, '\nTerima kasih!\n\n\n\n', CMD.cut]);
+  r.hr('-');
+  r.lr('Jumlah item', String(g.items.reduce((s, x) => s + x.qty, 0)));
+  r.lr('Subtotal', 'Rp' + num(g.total));
+  r.hr('-');
+  r.lr('TOTAL', 'Rp' + num(g.total), {big: true, bold: true});
+  const m = (st && st.metode) || 'Tunai', bayar = Number(st && st.bayar) || 0;
+  const lunas = m !== 'Belum Bayar' && !(m === 'Tunai' && bayar > 0 && bayar < g.total);
+  if (m !== 'Belum Bayar') {
+    if (m === 'Tunai' && bayar > 0 && bayar !== g.total) {
+      r.lr('Tunai', 'Rp' + num(bayar));
+      if (bayar > g.total) r.lr('Kembali', 'Rp' + num(bayar - g.total), {bold: true});
+      else r.lr('Kurang', 'Rp' + num(g.total - bayar), {bold: true});
+    } else r.lr('Pembayaran', m);
+  }
+  r.c(lunas ? '*** LUNAS ***' : '*** BELUM LUNAS ***', {bold: true});
+  r.hr('=');
+  if (c.footer) r.c(c.footer);
+  r.c('Dicetak ' + nowStr());
+  r.feed(1);
+  return r;
 }
-function cetakOrder(id) { kirim(struk(groups().find(g => g.id === id))); }
-function cetakRekap() {
-  const o = filtered(), comp = komponen(o), pk = perPaket(o);
-  kirim(buf([CMD.init, CMD.c, CMD.b1, 'REKAP PESANAN\n', CMD.b0, new Date().toLocaleString('id-ID') + '\n', 'Status: ' + filt + '\n', CMD.l, hr,
-    'JUMLAH PER JENIS\n', ...comp.map(x => pad(x.nama, x.qty + ' pcs')), hr,
-    'PER MENU / PAKET\n', ...pk.map(x => pad(x.nama, String(x.qty))), hr,
-    CMD.b1, pad('TOTAL PCS', comp.reduce((s, x) => s + x.qty, 0) + ' pcs'), CMD.b0, '\n\n\n\n', CMD.cut]));
+function buildRekap() {
+  const o = filtered(), comp = komponen(o), pk = perPaket(o), r = R();
+  r.c('REKAP PESANAN', {big: true, bold: true}).c(nowStr()).c('Status: ' + filt).hr('=');
+  r.l('JUMLAH PER JENIS', {bold: true});
+  comp.forEach(x => r.lr(x.nama, x.qty + ' pcs'));
+  r.hr('-').l('PER MENU / PAKET', {bold: true});
+  pk.forEach(x => r.lr(x.nama, String(x.qty)));
+  r.hr('=').lr('TOTAL PCS', comp.reduce((s, x) => s + x.qty, 0) + ' pcs', {bold: true}).feed(1);
+  return r;
 }
-function cetakTes() { kirim(buf([CMD.init, CMD.c, 'UWAIS FOOD\nTes printer OK\n\n\n\n', CMD.cut])); }
+function cetakRekap() { kirim(toBytes(buildRekap())); }
+function cetakTes() {
+  const c = cfg(), r = R();
+  r.c(c.toko || 'TOKO', {big: true, bold: true});
+  if (c.alamat) r.c(c.alamat);
+  if (c.telp) r.c('Telp/WA: ' + c.telp);
+  r.hr('=').l('Tes printer berhasil').l('Kertas ' + c.lebar + ' mm (' + r.w + ' kolom)').lr('Kiri', 'Kanan').hr('-').feed(1);
+  kirim(toBytes(r));
+}
+
+/* ---- Jendela struk: pratinjau + metode bayar + cetak ---- */
+function cetakOrder(id) { window._st = {id, metode: 'Tunai', bayar: ''}; showStruk(); }
+function closeStruk() { $('#modal').innerHTML = ''; }
+function curG() { return groups().find(x => x.id === (window._st || {}).id); }
+function updPaper() { const g = curG(), el = $('#paper'); if (g && el) el.innerHTML = toHtml(buildStruk(g, window._st)); }
+function showStruk() {
+  const st = window._st, g = curG();
+  if (!g) return toast('Pesanan tidak ditemukan');
+  const quick = [20000, 50000, 100000].filter(x => x >= g.total);
+  $('#modal').innerHTML = `<div class="ov" onclick="if(event.target===this)closeStruk()"><div class="dlg card col">
+    <div class="row"><b style="font-size:17px">🧾 Struk Pembelian</b><button class="o" onclick="closeStruk()">✕</button></div>
+    <div class="paper-wrap"><div id="paper" class="paper" style="width:${cols()}ch"></div></div>
+    <div class="seg">${['Tunai', 'Transfer', 'QRIS', 'Belum Bayar'].map(m => `<button class="${st.metode === m ? 'on' : ''}" onclick="_st.metode='${m}';showStruk()">${m}</button>`).join('')}</div>
+    ${st.metode === 'Tunai' ? `<input inputmode="numeric" placeholder="Uang diterima (opsional)" value="${esc(st.bayar)}" oninput="_st.bayar=this.value.replace(/\\D/g,'');updPaper()">
+      <div class="tags"><button class="tag" onclick="_st.bayar='${g.total}';showStruk()">Uang pas</button>${quick.map(q => `<button class="tag" onclick="_st.bayar='${q}';showStruk()">${num(q)}</button>`).join('')}</div>` : ''}
+    <div class="acts"><button onclick="cetakStruk()">🖨️ Cetak</button><button class="o" onclick="cetakBrowser()">Cetak via browser</button></div>
+  </div></div>`;
+  updPaper();
+}
+function cetakStruk() { const g = curG(); if (!g) return; kirim(toBytes(buildStruk(g, window._st))); toast('Mengirim ke printer…'); }
+function cetakBrowser() { // printer USB / printer bawaan komputer
+  const g = curG(); if (!g) return;
+  const r = buildStruk(g, window._st), mm = +cfg().lebar === 80 ? 80 : 58, pad = (mm - r.w * 1.5) / 2;
+  let st = $('#pgstyle'); if (!st) { st = document.createElement('style'); st.id = 'pgstyle'; document.head.appendChild(st); }
+  st.textContent = `@page{size:${mm}mm auto;margin:0}@media print{#printArea{width:${mm}mm;padding:3mm ${pad}mm}}`;
+  $('#printArea').innerHTML = `<div class="paper" style="width:${r.w}ch">${toHtml(r)}</div>`;
+  setTimeout(() => window.print(), 60);
+}
+
+/* ---- Pengaturan struk (disimpan per perangkat) ---- */
+function strukForm() {
+  if (!window._cfg) window._cfg = cfg();
+  const c = window._cfg;
+  const f = (l, k, ph) => `<label class="mut">${l}</label><input placeholder="${ph}" value="${esc(c[k])}" oninput="window._cfg.${k}=this.value">`;
+  return `<h3>Pengaturan struk</h3><div class="card col">
+    ${f('Nama toko', 'toko', 'UWAIS FOOD')}${f('Alamat', 'alamat', 'Jl. Contoh No. 1, Kota')}${f('Telepon / WhatsApp', 'telp', '08xxxxxxxxxx')}${f('Nama kasir (opsional)', 'kasir', '')}${f('Pesan di bawah struk', 'footer', 'Terima kasih sudah berbelanja!')}
+    <label class="mut">Lebar kertas printer</label>
+    <div class="seg">${[58, 80].map(x => `<button class="${+c.lebar === x ? 'on' : ''}" onclick="window._cfg.lebar=${x};render()">${x} mm</button>`).join('')}</div>
+    <div class="acts"><button onclick="simpanCfg()">Simpan pengaturan</button><button class="o" onclick="simpanCfg(true);cetakTes()">Tes cetak</button></div>
+    <div class="mut">Pengaturan struk tersimpan di perangkat ini.</div></div>`;
+}
 
 const SVC = ['000018f0-0000-1000-8000-00805f9b34fb', 0xff00, '49535343-fe7d-4ae5-8fa9-9fafd205e455', 0xffe0, 0xfee7];
 async function sambung() {
