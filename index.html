@@ -106,6 +106,7 @@ button.tag{cursor:pointer;border:1px solid var(--ln);font-weight:500}
 .paper-wrap{background:var(--soft);border-radius:12px;padding:12px;display:flex;justify-content:safe center;overflow-x:auto}
 .paper{box-sizing:content-box;background:#fff;color:#111;font-family:"Courier New",ui-monospace,Menlo,Consolas,monospace;font-size:13px;padding:14px 12px;box-shadow:0 2px 10px #0003;border-radius:3px}
 .pl{white-space:pre;line-height:1.35}.pl.bg{font-size:2em;line-height:1.2}.pl.b{font-weight:700}
+#upd{display:none;position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:70;background:var(--pr);color:#fff;padding:10px 16px;border-radius:12px;box-shadow:0 8px 24px #0004;cursor:pointer;font-weight:600;max-width:92%;text-align:center}
 #printArea{display:none}
 @media print{
   html,body{background:#fff!important;padding:0!important}
@@ -119,18 +120,19 @@ button.tag{cursor:pointer;border:1px solid var(--ln);font-weight:500}
 <div class="app">
   <aside class="side" id="side"></aside>
   <div>
-    <div class="top"><span class="brand">🥐 Uwais Food</span><span class="chip-pr" id="pr" onclick="go('menu')"></span></div>
+    <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="go('menu')"></span></span></div>
     <main class="wrap" id="app"><div class="empty">Memuat…</div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
 <div id="modal"></div>
+<div id="upd" onclick="location.reload()">🔄 Versi baru tersedia — ketuk untuk memuat ulang</div>
 <div id="printArea"></div>
 <div id="msg"></div>
 
 <script>
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-const APP_VER = 'v3 · struk';
+const APP_VER = 'v5 · offline';
 const IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 const LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -140,6 +142,8 @@ const LS = {
 // Opsional: isi URL /exec di sini agar tidak perlu mengisi lewat layar setup
 const DEFAULT_API = '';
 const getApi = () => LS.get('uf_api') || DEFAULT_API;
+const getTok = () => window._tok || LS.get('uf_tok');
+const setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
 
 let D = {menu: [], orders: [], pelanggan: []}, cart = {}, tab = 'pesan', filt = 'Baru', dev = null, chr = null, installEv = null;
 const $ = s => document.querySelector(s);
@@ -149,25 +153,35 @@ let _t; function toast(t) { const m = $('#msg'); m.textContent = t; m.style.disp
 $('#pr').textContent = IN_GAS ? '🖨️ Cetak via RawBT' : '🖨️ Printer: belum terhubung';
 
 /* Satu pintu ke backend: google.script.run (Apps Script) atau fetch (hosting) */
-async function run(fn, ...args) {
-  if (IN_GAS) return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args));
+const retryErr = m => { const er = new Error(m); er.retry = true; return er; };
+async function run(fn, ...args0) {
+  const args = fn === 'login' ? args0 : [getTok(), ...args0];
+  const fail = m => {
+    if (/SESI_HABIS/.test(m)) { setTok(''); closeStruk(); render(); throw new Error('Sesi berakhir, silakan masuk lagi'); }
+    throw new Error(String(m).replace(/^(Error|Exception):\s*/, ''));
+  };
+  if (IN_GAS) {
+    try { return await new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...args)); }
+    catch (e) { return fail(msgOf(e)); }
+  }
   const url = getApi();
   let res;
   try {
-    res = fn === 'getData'
-      ? await fetch(url + (url.includes('?') ? '&' : '?') + 'action=getData', {redirect: 'follow'})
-      : await fetch(url, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action: fn, args}), redirect: 'follow'});
-  } catch (e) { throw new Error('Tidak bisa terhubung. Periksa internet & URL, serta akses deployment "Siapa saja".'); }
-  let j; try { j = await res.json(); } catch (e) { throw new Error('Respon bukan JSON. Pastikan URL berakhiran /exec dan sudah di-deploy ulang.'); }
-  if (!j.ok) throw new Error(j.error || 'Terjadi kesalahan');
+    res = await fetch(url, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action: fn, args}), redirect: 'follow'});
+  } catch (e) { throw retryErr('Tidak bisa terhubung. Periksa internet & URL, serta akses deployment "Siapa saja".'); }
+  let j; try { j = await res.json(); } catch (e) { throw retryErr('Respon bukan JSON. Pastikan URL berakhiran /exec dan sudah di-deploy ulang dengan versi terbaru.'); }
+  if (!j.ok) return fail(j.error || 'Terjadi kesalahan');
   return j.data;
 }
 const msgOf = e => (e && e.message) || String(e);
 
 async function load() {
-  if (needSetup()) return render();
-  try { D = await run('getData'); D.pelanggan = D.pelanggan || []; } catch (e) { toast('Gagal memuat: ' + msgOf(e)); }
-  render();
+  if (needSetup() || !getTok()) return render();
+  const c = J.get('uf_data', null);
+  if (c) D = Object.assign({menu: [], orders: [], pelanggan: []}, c);
+  window._loading = !c;
+  render(); updSync();
+  await syncNow();
 }
 const needSetup = () => !IN_GAS && !getApi();
 
@@ -215,6 +229,7 @@ function waLink(hp) {
 const TABS = [['pesan', '➕', 'Pesan'], ['order', '📋', 'Orderan'], ['pelanggan', '👥', 'Pelanggan'], ['rekap', '🧮', 'Rekap'], ['menu', '🍽️', 'Menu']];
 function render() {
   if (needSetup()) { $('#side').innerHTML = ''; $('#bottom').innerHTML = ''; $('#app').innerHTML = vSetup(); return; }
+  if (!getTok()) { $('#side').innerHTML = ''; $('#bottom').innerHTML = ''; $('#app').innerHTML = vLogin(); setTimeout(() => { const p = $('#pin'); if (p) p.focus(); }, 60); return; }
   $('#side').innerHTML = '<div class="logo">🥐 Uwais Food</div>' +
     TABS.map(t => `<button class="nv ${tab === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('') +
     '<div class="sp"></div><div class="mut" style="padding:0 12px">Pengelola orderan</div>';
@@ -223,6 +238,108 @@ function render() {
 }
 function go(t) { tab = t; render(); window.scrollTo(0, 0); }
 const chips = isi => parseIsi(isi).map(p => `<span class="tag pr">${p.n} ${esc(p.nama)}</span>`).join('');
+
+/* ================= OFFLINE: cache lokal + antrean sinkron ================= */
+const MEM = {};
+const J = {
+  get(k, d) { if (k in MEM) return MEM[k]; try { const v = LS.get(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { MEM[k] = v; try { LS.set(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { delete MEM[k]; LS.del(k); }
+};
+let Q = J.get('uf_q', []), ONLINE = navigator.onLine !== false, flushing = false, refreshing = false;
+const saveQ = () => J.set('uf_q', Q);
+const saveCache = () => J.set('uf_data', {menu: D.menu, orders: D.orders.slice(-4000), pelanggan: D.pelanggan, sheetUrl: D.sheetUrl});
+function setOnline(v) { ONLINE = v; updSync(); }
+function updSync() {
+  const el = $('#sync'); if (!el) return;
+  const n = Q.length;
+  el.textContent = !ONLINE ? '⚠️ Offline' + (n ? ' · ' + n + ' antrean' : '') : n ? '🔄 Menyinkron ' + n : '● Online';
+}
+function newId() {
+  const d = new Date();
+  return 'O' + String(d.getFullYear()).slice(2) + two(d.getMonth() + 1) + two(d.getDate()) + two(d.getHours()) + two(d.getMinutes()) + two(d.getSeconds()) + Math.random().toString(36).slice(2, 4);
+}
+function upsertPelLocal(nama, pel) {
+  let p = findPel(nama);
+  if (!p) { p = {nama, hp: '', alamat: '', catatan: '', terakhir: '', jumlah: 0}; D.pelanggan.push(p); }
+  if (pel && pel.hp) p.hp = pel.hp;
+  if (pel && pel.alamat) p.alamat = pel.alamat;
+  const d = new Date();
+  p.jumlah += 1; p.terakhir = two(d.getDate()) + '/' + two(d.getMonth() + 1) + '/' + String(d.getFullYear()).slice(2);
+}
+// Setiap perubahan: tampil langsung di layar, disimpan di antrean, lalu dikirim ke server di latar belakang
+function enqueue(fn, ...args) { Q.push({fn, args, ts: Date.now(), tries: 0}); saveQ(); saveCache(); updSync(); flush(); }
+async function flush() {
+  if (flushing || !Q.length || !getTok() || needSetup()) return;
+  flushing = true;
+  try {
+    while (Q.length) {
+      const it = Q[0];
+      try { await run(it.fn, ...it.args); Q.shift(); saveQ(); setOnline(true); }
+      catch (e) {
+        if (e.retry) { window._err = msgOf(e); setOnline(false); break; }
+        if (/Sesi berakhir/.test(msgOf(e))) break;
+        it.tries = (it.tries || 0) + 1; saveQ();
+        if (it.tries < 3) { window._err = msgOf(e); break; }
+        Q.shift(); saveQ(); toast('Perubahan ditolak server: ' + msgOf(e));
+      }
+    }
+  } finally { flushing = false; updSync(); }
+  if (!Q.length) await refresh();
+}
+function softRender() {
+  const a = document.activeElement;
+  if (a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) return;
+  if (document.querySelector('#modal .ov')) return;
+  render();
+}
+async function refresh() {
+  if (refreshing || flushing || Q.length || !getTok() || needSetup()) return;
+  refreshing = true;
+  const wasLoading = window._loading;
+  try {
+    const d = await run('getData');
+    d.pelanggan = d.pelanggan || [];
+    if (Q.length) return;                         // ada perubahan baru selagi menunggu: jangan timpa
+    if (tab === 'menu') d.menu = D.menu;          // jangan hilangkan editan menu yang belum disimpan
+    const before = JSON.stringify([D.menu, D.orders, D.pelanggan]);
+    D = d; window._lastRef = Date.now(); window._err = ''; saveCache(); setOnline(true);
+    if (JSON.stringify([D.menu, D.orders, D.pelanggan]) !== before) softRender();
+  } catch (e) {
+    if (e.retry) { window._err = msgOf(e); setOnline(false); }
+    else if (!/Sesi berakhir/.test(msgOf(e))) toast('Gagal memuat: ' + msgOf(e));
+  } finally { refreshing = false; window._loading = false; updSync(); if (wasLoading) softRender(); }
+}
+function syncNow() { return Q.length ? flush() : refresh(); }
+window.addEventListener('online', () => { setOnline(true); syncNow(); });
+window.addEventListener('offline', () => setOnline(false));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) syncNow(); });
+setInterval(() => {
+  if (document.hidden || flushing || !getTok()) return;
+  if (Q.length) flush(); else if (Date.now() - (window._lastRef || 0) > 120000) refresh();
+}, 20000);
+
+/* ---- Login PIN ---- */
+function vLogin() {
+  return `<div class="card col" style="max-width:380px;margin:40px auto;text-align:center">
+    <div style="font-size:42px">🥐</div><b style="font-size:20px">Uwais Food</b>
+    <div class="mut">Masukkan PIN untuk masuk</div>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN" style="text-align:center;font-size:20px;letter-spacing:4px" onkeydown="if(event.key==='Enter')masuk()">
+    <button class="full" id="btnMasuk" onclick="masuk()">Masuk</button>
+    <div id="loginErr" style="color:var(--bad);min-height:20px;font-size:13px"></div></div>`;
+}
+async function masuk() {
+  const el = $('#pin'), pin = (el.value || '').trim();
+  if (!pin) return toast('Masukkan PIN');
+  const b = $('#btnMasuk'); b.disabled = true; b.textContent = 'Memeriksa…';
+  try { setTok(await run('login', pin)); await load(); }
+  catch (e) { b.disabled = false; b.textContent = 'Masuk'; el.value = ''; $('#loginErr').textContent = msgOf(e); }
+}
+function keluar() {
+  if (Q.length && !confirm(Q.length + ' perubahan belum terkirim ke server dan akan hilang jika keluar. Tetap keluar?')) return;
+  Q = []; J.del('uf_q'); J.del('uf_data'); setTok(''); closeStruk();
+  D = {menu: [], orders: [], pelanggan: []}; cart = {}; render(); updSync();
+}
 
 /* ---- Setup (hanya versi hosting) ---- */
 function vSetup() {
@@ -281,7 +398,7 @@ function vPesan() {
       <button class="full" onclick="simpan()">Simpan Pesanan</button>
       ${lines.length ? '<button class="o" onclick="cart={};render()">Kosongkan</button>' : ''}
     </div>`;
-  return `<h2>Buat Pesanan</h2><div class="split p"><div class="grid">${cards || '<div class="empty">Menu kosong. Tambah di tab Menu.</div>'}</div><div id="panel">${panel}</div></div>` +
+  return `<h2>Buat Pesanan</h2><div class="split p"><div class="grid">${cards || (window._loading ? '<div class="empty">Memuat…</div>' : '<div class="empty">Menu kosong. Tambah di tab Menu.</div>')}</div><div id="panel">${panel}</div></div>` +
     (lines.length ? `<button class="fab" onclick="document.getElementById('panel').scrollIntoView({behavior:'smooth'})">🛒 ${rp(total)}</button>` : '');
 }
 function chg(i, d) { cart[i] = Math.max(0, (cart[i] || 0) + d); const y = window.scrollY; render(); window.scrollTo(0, y); }
@@ -291,10 +408,12 @@ async function simpan() {
   if (!nama) { toast('Isi nama pemesan dulu'); const e = $('#nama'); if (e) e.focus(); return; }
   if (!items.length) return toast('Pilih menu dulu');
   const pel = findPel(nama) ? {} : {hp: (window._hp || '').trim(), alamat: (window._al || '').trim()};
-  toast('Menyimpan…');
-  let newId; try { newId = await run('addOrder', nama, items, pel); } catch (e) { return toast('Gagal menyimpan: ' + msgOf(e)); }
+  const id = newId(), waktu = nowStr();
+  items.forEach(i => D.orders.push({id, waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: 'Baru', isi: i.isi || ''}));
+  upsertPelLocal(nama, pel);
+  enqueue('addOrder', nama, items, pel, id, Date.now());
   cart = {}; window._n = ''; window._hp = ''; window._al = '';
-  await load(); go('order'); toast('Tersimpan ✔'); if (newId) cetakOrder(newId);
+  go('order'); toast(ONLINE ? 'Tersimpan ✔' : 'Tersimpan di perangkat — akan dikirim saat online'); cetakOrder(id);
 }
 
 /* ---- Orderan ---- */
@@ -323,8 +442,8 @@ function vOrder() {
     <input placeholder="🔍 Cari nama pemesan…" value="${esc(window._q || '')}" oninput="window._q=this.value;$('#olist').innerHTML=olist()"></div>
     <div id="olist">${olist()}</div>`;
 }
-async function status(id, s) { try { await run('setStatus', id, s); } catch (e) { toast('Gagal: ' + msgOf(e)); } load(); }
-async function hapus(id) { if (confirm('Hapus pesanan ini?')) { try { await run('deleteOrder', id); } catch (e) { toast('Gagal: ' + msgOf(e)); } load(); } }
+function status(id, s) { D.orders.forEach(o => { if (o.id === id) o.status = s; }); enqueue('setStatus', id, s); render(); }
+function hapus(id) { if (!confirm('Hapus pesanan ini?')) return; D.orders = D.orders.filter(o => o.id !== id); enqueue('deleteOrder', id); render(); }
 
 /* ---- Pelanggan ---- */
 function plist() {
@@ -356,17 +475,19 @@ function vPelanggan() {
     <div id="plist">${plist()}</div>`;
 }
 function editPel(i) { const p = D.pelanggan[i]; window._pe = {lama: p.nama, nama: p.nama, hp: p.hp, alamat: p.alamat, catatan: p.catatan}; render(); window.scrollTo(0, 0); }
-async function simpanPel() {
+function simpanPel() {
   const e = window._pe;
   if (!e.nama.trim()) return toast('Nama wajib diisi');
-  try { await run('savePelanggan', e); } catch (x) { return toast('Gagal: ' + msgOf(x)); }
-  window._pe = null; await load(); toast('Pelanggan tersimpan ✔');
+  const lama = key(e.lama || e.nama), ada = D.pelanggan.find(p => key(p.nama) === lama);
+  if (ada) Object.assign(ada, {nama: e.nama.trim(), hp: e.hp || '', alamat: e.alamat || '', catatan: e.catatan || ''});
+  else D.pelanggan.push({nama: e.nama.trim(), hp: e.hp || '', alamat: e.alamat || '', catatan: e.catatan || '', terakhir: '', jumlah: 0});
+  enqueue('savePelanggan', Object.assign({}, e));
+  window._pe = null; render(); toast('Pelanggan tersimpan ✔');
 }
-async function hapusPel(i) {
+function hapusPel(i) {
   const p = D.pelanggan[i];
   if (!confirm('Hapus pelanggan ' + p.nama + '? (riwayat orderan tidak ikut terhapus)')) return;
-  try { await run('deletePelanggan', p.nama); } catch (x) { toast('Gagal: ' + msgOf(x)); }
-  load();
+  D.pelanggan.splice(i, 1); enqueue('deletePelanggan', p.nama); render();
 }
 
 /* ---- Rekap ---- */
@@ -416,12 +537,13 @@ function vMenu() {
       <button onclick="simpanMenu()">Simpan Menu</button></div>
     ${strukForm()}
     <h3>Printer thermal</h3>
-    <div class="card col">${printer}</div>${app}`;
+    <div class="card col">${printer}</div>${app}
+    <h3>Keamanan</h3><div class="card col"><div class="mut">Data dikunci dengan PIN. Untuk mengganti PIN, ubah nilai <code>PIN</code> di Code.gs lalu terapkan versi baru; semua perangkat akan otomatis keluar.</div><button class="r" onclick="keluar()">🔒 Keluar</button></div>`;
 }
-async function simpanMenu() {
+function simpanMenu() {
   D.menu = D.menu.filter(m => m.nama && m.nama.trim()); cart = {};
-  try { await run('saveMenu', D.menu); toast('Menu tersimpan ✔'); } catch (e) { toast('Gagal: ' + msgOf(e)); }
-  render();
+  enqueue('saveMenu', JSON.parse(JSON.stringify(D.menu)));
+  toast(ONLINE ? 'Menu tersimpan ✔' : 'Menu tersimpan di perangkat — akan dikirim saat online'); render();
 }
 
 /* ================= STRUK & PRINTER THERMAL (ESC/POS) ================= */
@@ -641,8 +763,7 @@ if (!IN_GAS) {
     const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l);
   });
   if ('serviceWorker' in navigator) {
-    const had = !!navigator.serviceWorker.controller;
-    navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && !window._rl) { window._rl = 1; location.reload(); } });
+    navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'update') { const u = $('#upd'); if (u) u.style.display = 'block'; } });
     navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).then(r => r.update()).catch(() => {});
   }
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEv = e; if (tab === 'menu') render(); });
