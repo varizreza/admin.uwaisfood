@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<base target="_top">
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#e8590c">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="application-name" content="Uwais Food">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Uwais Food</title>
@@ -435,7 +439,7 @@ window.__len = 110321;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v10.8 · Kurir Pihak Ketiga';
+var APP_VER = 'v10.8.1 · Perbaikan Instalasi PWA';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -2025,13 +2029,11 @@ async function segarkan() {  // hapus cache & service worker lama, lalu muat ula
 }
 function pasang() { if (installEv) { installEv.prompt(); installEv = null; render(); } }
 if (!IN_GAS) {
-  [['manifest', 'manifest.webmanifest'], ['icon', 'icon-192.png'], ['apple-touch-icon', 'icon-192.png']].forEach(([rel, href]) => {
-    const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l);
-  });
+  // Manifest dan ikon sudah dicantumkan statis di <head> agar terdeteksi Chrome sejak parsing awal.
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'update') { showPwaUpdatePrompt(); } });
     navigator.serviceWorker.addEventListener('controllerchange', () => { if (pwaReloading) location.reload(); });
-    navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).then(r => {
+    navigator.serviceWorker.register('./sw.js', {scope: './', updateViaCache: 'none'}).then(r => {
       pwaReg = r;
       const cekMenunggu = () => { if (r.waiting && navigator.serviceWorker.controller) { showPwaUpdatePrompt(); } };
       cekMenunggu();

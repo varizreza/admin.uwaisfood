@@ -3,9 +3,13 @@
   "name": "Uwais Food - Modern Bakery Management",
   "short_name": "Uwais Food",
   "description": "Pengelolaan pesanan bakery dengan pelanggan, PO, Google Maps, ongkos kirim dan printer thermal.",
-  "start_url": "./",
+  "start_url": "./index.html?source=pwa",
   "scope": "./",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait-primary",
   "background_color": "#faf7f2",
   "theme_color": "#e8590c",
@@ -14,6 +18,7 @@
     "food",
     "productivity"
   ],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "./icon-192.png",
