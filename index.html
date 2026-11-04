@@ -170,7 +170,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 .bottom button.on:before{content:"";width:24px;height:3px;border-radius:9px;background:var(--pr);position:absolute;top:-7px;left:50%;transform:translateX(-50%)}
 #msg{border:1px solid #ffffff25;box-shadow:0 10px 30px #0002;font-weight:600}
 #msg{display:none!important}
-/* ===== NOTIFIKASI POPUP TERPUSAT v10.8.2 ===== */
+/* ===== NOTIFIKASI POPUP TERPUSAT v10.8.5 ===== */
 #notifyRoot{position:fixed;inset:0;z-index:180;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(20,16,13,.48);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
 #notifyRoot.on{display:flex;animation:notifyFade .16s ease-out both}
 .noti-dialog{position:relative;width:min(100%,420px);padding:26px 24px 22px;border:1px solid var(--ln);border-radius:22px;background:var(--surface);color:var(--tx);box-shadow:0 24px 80px #0003;text-align:center;animation:notifyPop .2s cubic-bezier(.2,.8,.2,1) both}
@@ -340,10 +340,11 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 @media(max-width:480px){.theme-choice{grid-template-columns:1fr}.theme-choice button{justify-content:flex-start}}
 
 @media print{
-  html,body{background:#fff!important;padding:0!important}
+  html,body{background:#fff!important;padding:0!important;margin:0!important}
   .app,.bottom,#msg,#modal,#notifyRoot,.fab{display:none!important}
-  #printArea{display:block!important}
-  #printArea .paper{box-shadow:none!important;padding:0!important;font-size:2.5mm;color:#000;background:#fff}
+  #printArea{display:block!important;position:static!important;margin:0 auto!important}
+  #printArea .paper{box-shadow:none!important;padding:0!important;color:#000!important;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea .paper .pl{color:#000!important}
 }
 
 /* ===== MENU PRODUK — katalog dan editor gambar v10.6 ===== */
@@ -389,7 +390,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.8.2)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.8.5)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -403,7 +404,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 /* Penjaga: jika program utama gagal jalan, tampilkan penyebabnya di layar (bukan "Memuat…" selamanya) */
 window.__boot = false;
 window.__errs = [];
-window.__len = 119452;;
+window.__len = 127072;
 (function () {
   var box = null;
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
@@ -412,10 +413,10 @@ window.__len = 119452;;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v10.8.2)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v10.8.5)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v10.8.2)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v10.8.5)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -439,7 +440,7 @@ window.__len = 119452;;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v10.8.2 · Perbaikan Pembukaan PWA Android';
+var APP_VER = 'v10.8.5 · Rekap Pisah Ongkir';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -1422,24 +1423,40 @@ function vRekap() {
   const o = filtered(), comp = komponen(o), pk = perPaket(o), ppm = perPemesan(o), po = findPO(viewPO());
   const pcs = comp.reduce((s, x) => s + x.qty, 0), omzet = o.reduce((s, x) => s + x.qty * x.harga, 0);
   const idsRekap = new Set(o.map(x => x.id));
-  const ongkirRekap = groups().filter(g => idsRekap.has(g.id)).reduce((s, g) => s + (g.metodeKirim === 'Kurir' ? Number(g.ongkir) || 0 : 0), 0);
+  // Semua jenis pengiriman berbayar (Maps maupun pihak ketiga) dihitung sebagai ongkir.
+  const ongkirRekap = groups().filter(g => idsRekap.has(g.id)).reduce((s, g) => {
+    const berbayar = g.metodeKirim === 'Kurir' || g.metodeKirim === 'Kurir Pihak Ketiga' || g.jenisKurir === 'Pihak Ketiga';
+    return s + (berbayar ? Math.max(0, Number(g.ongkir) || 0) : 0);
+  }, 0);
+  const totalTagihanRekap = omzet + ongkirRekap;
+  const ongkirPerPemesan = {};
+  groups().filter(g => idsRekap.has(g.id)).forEach(g => {
+    const berbayar = g.metodeKirim === 'Kurir' || g.metodeKirim === 'Kurir Pihak Ketiga' || g.jenisKurir === 'Pihak Ketiga';
+    if (berbayar) {
+      const k = key(g.nama);
+      ongkirPerPemesan[k] = (ongkirPerPemesan[k] || 0) + Math.max(0, Number(g.ongkir) || 0);
+    }
+  });
   const nOrder = new Set(o.map(x => x.id)).size;
   return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Rekap Produksi</h2>
       <span class="acts"><button onclick="cetakRekap()" ${o.length ? '' : 'disabled'}>🖨️ Cetak Rekap</button><button class="o" onclick="cetakPemesan()" ${o.length ? '' : 'disabled'}>🖨️ Daftar Pemesan</button></span></div>
     ${poBar('lihat')}
     ${po && po.kirim ? `<div class="mut" style="margin:-4px 2px 8px">📅 Ambil/kirim: ${fmtTgl(po.kirim)}${po.status === 'Selesai' ? ' · PO selesai' : ''}</div>` : ''}
     <div style="margin:4px 0">${segFilter('rfilt')}</div>
-    <div class="grid" style="margin-top:12px">
+    <h3 style="margin-top:14px">Ringkasan nilai pesanan</h3>
+    <div class="grid" style="margin-top:8px">
       <div class="card stat"><span class="mut">Jumlah pesanan</span><span class="big">${nOrder}</span></div>
       <div class="card stat"><span class="mut">Total pcs</span><span class="big">${pcs}</span></div>
-      <div class="card stat"><span class="mut">Total nilai + ongkir</span><span class="big" style="font-size:22px">${rp(omzet + ongkirRekap)}</span></div>
-    </div><div class="mut" style="margin-top:-4px">Produk: ${rp(omzet)} · Total ongkir kurir: ${rp(ongkirRekap)}</div>
+      <div class="card stat"><span class="mut">Nilai pesanan (produk)</span><span class="big" style="font-size:22px">${rp(omzet)}</span><span class="mut">Belum termasuk ongkos kirim</span></div>
+      <div class="card stat"><span class="mut">Total ongkos kirim</span><span class="big" style="font-size:22px">${rp(ongkirRekap)}</span><span class="mut">Kurir Maps dan pihak ketiga</span></div>
+      <div class="card stat" style="border-color:var(--pr);background:var(--pr-l)"><span class="mut">Total tagihan (produk + ongkir)</span><span class="big" style="font-size:22px">${rp(totalTagihanRekap)}</span><span class="mut">Nilai keseluruhan pesanan</span></div>
+    </div>
     <h3>Yang harus dibuat (pcs per jenis)</h3>
     ${comp.length ? `<div class="grid">${comp.map(c => `<div class="card stat"><span>${esc(c.nama)}</span><span class="big">${c.qty}<span class="mut" style="font-size:14px;font-weight:500"> pcs</span></span></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}
     <h3>Jumlah per menu / paket</h3>
     ${pk.length ? `<div class="card">${pk.map(p => `<div class="line"><span>${esc(p.nama)}</span><b>${p.qty}</b></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}
     <h3>Daftar pemesan (${ppm.length})</h3>
-    ${ppm.length ? `<div class="grid w">${ppm.map(p => `<div class="card col"><div class="row"><b>${esc(p.nama)}</b><span class="price">${rp(p.total)}</span></div><div class="mut">${perPaket(p.items).map(x => x.qty + ' ' + esc(x.nama)).join(' · ')}</div></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}`;
+    ${ppm.length ? `<div class="grid w">${ppm.map(p => { const ongkirP = ongkirPerPemesan[key(p.nama)] || 0; return `<div class="card col"><div class="row"><b>${esc(p.nama)}</b><span class="price">${rp(p.total + ongkirP)}</span></div><div class="line"><span class="mut">Nilai pesanan / produk</span><b>${rp(p.total)}</b></div><div class="line"><span class="mut">Ongkos kirim</span><b>${rp(ongkirP)}</b></div><div class="mut">Total tagihan pelanggan · ${perPaket(p.items).map(x => x.qty + ' ' + esc(x.nama)).join(' · ')}</div></div>`; }).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}`;
 }
 
 /* ---- PO: kelola periode pre-order ---- */
@@ -1678,7 +1695,7 @@ function vPengaturan() {
   const section = window._settingSection || 'home';
   if (section === 'home') {
     const settingItems = [
-      ['printer','🖨️','Printer','Bluetooth, QZ Tray, RawBT, dan uji cetak',IN_GAS ? 'Mode Apps Script' : (chr ? 'Terhubung' : 'Atur koneksi')],
+      ['printer','🖨️','Printer','Bluetooth, kualitas cetak, dan uji printer',IN_GAS ? 'Mode Apps Script' : (chr ? 'Terhubung' : 'Atur koneksi')],
       ['ongkir','📍','Ongkos Kirim','Google Maps, lokasi toko, tarif per kilometer, dan daerah','Google Maps'],
       ['struk','🧾','Struk','Identitas toko, pesan footer, dan ukuran kertas',(+cfg().lebar === 80 ? '80 mm' : '58 mm')],
       ['tampilan','🎨','Tampilan','Pilih tema terang, gelap, atau mengikuti perangkat',getThemeMode() === 'light' ? 'Tema terang' : getThemeMode() === 'dark' ? 'Tema gelap' : 'Ikuti perangkat'],
@@ -1691,9 +1708,10 @@ function vPengaturan() {
   }
   if (section === 'printer') {
     const printer = IN_GAS
-      ? `<div class="note warn">Anda membuka lewat halaman Apps Script. Google membatasi Bluetooth langsung pada halaman ini. Untuk Android gunakan RawBT; untuk laptop gunakan Cetak via browser atau printer yang sudah terpasang pada Windows. Bluetooth langsung melalui Web Bluetooth tersedia pada PWA HTTPS dan perangkat/printer BLE yang kompatibel.</div><div class="acts"><button onclick="cetakTes()">Tes Cetak</button><a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">Pasang RawBT (Android)</a></div>`
-      : `<div class="note">Hubungkan printer thermal melalui Bluetooth BLE pada Chrome/Edge yang mendukung Web Bluetooth. Untuk Bluetooth klasik/SPP di laptop, gunakan port COM/driver Windows atau cetak melalui browser. RawBT hanya untuk Android.</div><div class="acts"><button onclick="sambung()">🔗 Hubungkan Printer Bluetooth</button><button class="o" onclick="cetakTes()">Tes Cetak</button><a class="btn o" href="https://qz.io/download/" target="_blank" rel="noopener">QZ Tray (Laptop)</a><a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">RawBT (Android)</a></div>`;
-    return settingDetailHead('Printer','Atur koneksi printer dan metode pencetakan struk.') + `<div class="card col settings-detail-card"><div class="printer-status-row"><span class="setting-icon">🖨️</span><span><b>Status printer</b><small>${chr ? 'Printer Bluetooth terhubung' : (IN_GAS ? 'Gunakan cetak via browser atau RawBT' : 'Belum ada printer Bluetooth aktif')}</small></span><span class="status-pill ${chr ? 'good' : 'neutral'}">${chr ? 'Terhubung' : 'Siap diatur'}</span></div>${printer}<div class="settings-tip">Untuk Rongta RPP02N Bluetooth Classic, pasangkan terlebih dahulu di Windows dan periksa port COM. Jika printer terpasang sebagai printer Windows, gunakan tombol Cetak via browser pada pratinjau struk.</div></div>`;
+      ? `<div class="note warn">Anda membuka lewat halaman Apps Script. Google membatasi Bluetooth langsung pada halaman ini. Untuk Android gunakan RawBT; untuk laptop gunakan Cetak via browser atau printer yang sudah terpasang pada Windows. Bluetooth langsung melalui Web Bluetooth tersedia pada PWA HTTPS dan perangkat/printer BLE yang kompatibel.</div><div class="acts"><button onclick="cetakTes()">Tes Cetak Bluetooth</button><a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">Pasang RawBT (Android)</a></div>`
+      : `<div class="note">Hubungkan printer thermal melalui Bluetooth BLE pada Chrome/Edge yang mendukung Web Bluetooth. Untuk Bluetooth klasik/SPP di laptop, gunakan port COM/driver Windows atau cetak melalui browser. RawBT hanya untuk Android.</div><div class="acts"><button onclick="sambung()">🔗 Hubungkan Printer Bluetooth</button><button class="o" onclick="cetakTes()">Tes Cetak Bluetooth</button><a class="btn o" href="https://qz.io/download/" target="_blank" rel="noopener">QZ Tray (Laptop)</a><a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">RawBT (Android)</a></div>`;
+    if (!window._cfg) window._cfg = cfg();
+    return settingDetailHead('Printer','Atur koneksi printer, ketebalan tulisan, dan kualitas hasil cetak.') + `<div class="card col settings-detail-card"><div class="printer-status-row"><span class="setting-icon">🖨️</span><span><b>Status printer</b><small>${chr ? 'Printer Bluetooth terhubung' : (IN_GAS ? 'Gunakan cetak via browser atau RawBT' : 'Belum ada printer Bluetooth aktif')}</small></span><span class="status-pill ${chr ? 'good' : 'neutral'}">${chr ? 'Terhubung' : 'Siap diatur'}</span></div>${printer}<div class="settings-tip">Untuk Rongta RPP02N Bluetooth Classic, pasangkan terlebih dahulu di Windows dan periksa port COM. Jika printer terpasang sebagai printer Windows, gunakan tombol Cetak via browser pada pratinjau struk. <a href="https://www.rongtatech.com/driver-download/" target="_blank" rel="noopener">Unduh driver resmi Rongta</a> (halaman resmi mencantumkan RPP02N sebagai model yang didukung).</div></div>${browserPrintQualityForm()}`;
   }
   if (section === 'ongkir') return settingDetailHead('Ongkos Kirim','Atur titik toko, Google Maps, tarif per kilometer, dan master daerah.') + ongkirForm();
   if (section === 'struk') return settingDetailHead('Struk','Atur identitas Uwais Food dan format kertas thermal.') + strukForm();
@@ -1732,11 +1750,20 @@ function simpanMenu() {
 /* ================= STRUK & PRINTER THERMAL (ESC/POS) ================= */
 var ENC = new TextEncoder();
 var num = n => Number(n || 0).toLocaleString('id-ID');
-var CFG_DEF = {toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58};
+var CFG_DEF = {toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58, browserDensity: 'bold', browserFontSize: 2.4, browserLineHeight: 1.3, browserLeftMargin: 6};
 function cfg() { try { return Object.assign({}, CFG_DEF, JSON.parse(LS.get('uf_cfg') || '{}')); } catch (e) { return Object.assign({}, CFG_DEF); } }
 function simpanCfg(silent) {
   const c = Object.assign({}, window._cfg || cfg()); c.lebar = +c.lebar === 80 ? 80 : 58;
-  LS.set('uf_cfg', JSON.stringify(c)); if (!silent) toast('Pengaturan struk tersimpan ✔');
+  c.browserDensity = ['normal','bold','heavy'].includes(c.browserDensity) ? c.browserDensity : 'bold';
+  c.browserFontSize = [2.3,2.4,2.5].includes(Number(c.browserFontSize)) ? Number(c.browserFontSize) : 2.4;
+  c.browserLineHeight = [1.2,1.3,1.4].includes(Number(c.browserLineHeight)) ? Number(c.browserLineHeight) : 1.3;
+  c.browserLeftMargin = [5,6,7].includes(Number(c.browserLeftMargin)) ? Number(c.browserLeftMargin) : 6;
+  window._cfg = c; LS.set('uf_cfg', JSON.stringify(c)); if (!silent) toast('Pengaturan struk dan kualitas cetak tersimpan ✔');
+}
+function setBrowserPrintOption(key, value) {
+  if (!window._cfg) window._cfg = cfg();
+  window._cfg[key] = ['browserFontSize','browserLineHeight','browserLeftMargin'].includes(key) ? Number(value) : value;
+  simpanCfg(true); toast('Pengaturan kualitas cetak diperbarui');
 }
 var cols = () => (+cfg().lebar === 80 ? 48 : 32);   // 58mm = 32 kolom, 80mm = 48 kolom
 var asc = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\x20-\x7E]/g, '');
@@ -1849,9 +1876,19 @@ function poHeader(r) {
 }
 function buildRekap() {
   const o = filtered(), comp = komponen(o), pk = perPaket(o), r = R();
+  const ids = new Set(o.map(x => x.id));
+  const nilaiProduk = o.reduce((s, x) => s + (Number(x.qty) || 0) * (Number(x.harga) || 0), 0);
+  const nilaiOngkir = groups().filter(g => ids.has(g.id)).reduce((s, g) => {
+    const berbayar = g.metodeKirim === 'Kurir' || g.metodeKirim === 'Kurir Pihak Ketiga' || g.jenisKurir === 'Pihak Ketiga';
+    return s + (berbayar ? Math.max(0, Number(g.ongkir) || 0) : 0);
+  }, 0);
   r.c('REKAP PESANAN', {big: true, bold: true}); poHeader(r);
   r.c('Status: ' + rfilt).c(nowStr()).hr('=');
-  r.l('JUMLAH PER JENIS', {bold: true});
+  r.l('RINGKASAN NILAI', {bold: true});
+  r.lr('Nilai pesanan/produk', 'Rp' + num(nilaiProduk));
+  r.lr('Total ongkos kirim', 'Rp' + num(nilaiOngkir));
+  r.hr('-').lr('TOTAL TAGIHAN', 'Rp' + num(nilaiProduk + nilaiOngkir), {bold: true});
+  r.hr('=').l('JUMLAH PER JENIS', {bold: true});
   comp.forEach(x => r.lr(x.nama, x.qty + ' pcs'));
   r.hr('-').l('PER MENU / PAKET', {bold: true});
   pk.forEach(x => r.lr(x.nama, String(x.qty)));
@@ -1902,11 +1939,66 @@ function showStruk() {
 async function cetakStruk() { const g = curG(); if (!g) return; await kirim(toBytes(buildStruk(g, window._st))); }
 function cetakBrowser() { // printer USB / printer bawaan komputer
   const g = curG(); if (!g) return;
-  const r = buildStruk(g, window._st), mm = +cfg().lebar === 80 ? 80 : 58, pad = (mm - r.w * 1.5) / 2;
+  printBrowserReceipt(buildStruk(g, window._st));
+}
+function browserPrintOptions(receiptWidth) {
+  const c = cfg();
+  const mm = +c.lebar === 80 ? 80 : 58;
+  // Rongta RPP02N 58 mm umumnya memiliki area cetak efektif sekitar 48 mm.
+  // Sisakan ruang aman agar huruf pertama tidak jatuh ke area non-printable.
+  const contentMm = mm === 80 ? 70 : 46;
+  const leftMargin = [5,6,7].includes(Number(c.browserLeftMargin)) ? Number(c.browserLeftMargin) : 6;
+  const rightMargin = Math.max(3, mm - leftMargin - contentMm);
+  const requested = [2.3,2.4,2.5].includes(Number(c.browserFontSize)) ? Number(c.browserFontSize) : 2.4;
+  const columns = Math.max(1, Number(receiptWidth) || cols());
+  // Clamp font to the real content width, leaving a small tolerance for font/driver rounding.
+  const maxFont = (contentMm / (columns * 0.6)) * 0.985;
+  const fontSize = Math.min(requested, maxFont);
+  const density = {normal:600,bold:700,heavy:900}[c.browserDensity] || 700;
+  const lineHeight = [1.2,1.3,1.4].includes(Number(c.browserLineHeight)) ? Number(c.browserLineHeight) : 1.3;
+  return {mm, contentMm, leftMargin, rightMargin, fontSize, density, lineHeight};
+}
+function printBrowserReceipt(r) {
+  const o = browserPrintOptions(r.w);
   let st = $('#pgstyle'); if (!st) { st = document.createElement('style'); st.id = 'pgstyle'; document.head.appendChild(st); }
-  st.textContent = `@page{size:${mm}mm auto;margin:0}@media print{#printArea{width:${mm}mm;padding:3mm ${pad}mm}}`;
-  $('#printArea').innerHTML = `<div class="paper" style="width:${r.w}ch">${toHtml(r)}</div>`;
-  setTimeout(() => window.print(), 60);
+  st.textContent = `@page{size:${o.mm}mm auto;margin:0!important}
+    @media print{
+      html,body{width:${o.mm}mm!important;min-width:${o.mm}mm!important;max-width:${o.mm}mm!important;margin:0!important;padding:0!important;background:#fff!important;overflow:visible!important}
+      #printArea{display:block!important;position:static!important;box-sizing:border-box!important;width:${o.mm}mm!important;min-width:${o.mm}mm!important;max-width:${o.mm}mm!important;margin:0!important;padding:2mm ${o.rightMargin.toFixed(2)}mm 2mm ${o.leftMargin.toFixed(2)}mm!important;background:#fff!important;color:#000!important;overflow:visible!important}
+      #printArea .paper{display:block!important;box-sizing:border-box!important;width:${o.contentMm}mm!important;min-width:${o.contentMm}mm!important;max-width:${o.contentMm}mm!important;margin:0!important;padding:0!important;box-shadow:none!important;border:0!important;border-radius:0!important;background:#fff!important;color:#000!important;font-family:Consolas,'Lucida Console','Courier New',monospace!important;font-size:${o.fontSize.toFixed(3)}mm!important;font-weight:${o.density}!important;line-height:${o.lineHeight}!important;letter-spacing:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;overflow:visible!important}
+      #printArea .paper .pl{display:block!important;max-width:100%!important;box-sizing:border-box!important;font-size:1em!important;font-weight:${o.density}!important;line-height:${o.lineHeight}!important;color:#000!important;white-space:pre!important;text-shadow:none!important}
+      #printArea .paper .pl.b,#printArea .paper .pl.bg{font-weight:900!important}
+      #printArea .paper .pl.bg{font-size:2em!important;line-height:1.12!important}
+    }`;
+  $('#printArea').innerHTML = `<div class="paper" style="width:${o.contentMm}mm">${toHtml(r)}</div>`;
+  setTimeout(() => window.print(), 100);
+}
+function cetakTesBrowser() {
+  const r = R();
+  r.c(cfg().toko || 'UWAIS FOOD', {big:true,bold:true})
+   .c('TES KUALITAS CETAK', {bold:true}).hr('=')
+   .l('Teks normal: ABCDEFGH 1234567890')
+   .l('Teks tebal: TOTAL PEMBAYARAN', {bold:true})
+   .lr('Contoh nominal','Rp125.000',{bold:true})
+   .hr('-').l('Jika tulisan masih pucat, naikkan Darkness pada driver printer Windows.')
+   .feed(2).c('TERIMA KASIH');
+  printBrowserReceipt(r);
+}
+function browserPrintQualityForm() {
+  const c = window._cfg || cfg();
+  const density = ['normal','bold','heavy'].includes(c.browserDensity) ? c.browserDensity : 'bold';
+  const size = [2.3,2.4,2.5].includes(Number(c.browserFontSize)) ? Number(c.browserFontSize) : 2.4;
+  const line = [1.2,1.3,1.4].includes(Number(c.browserLineHeight)) ? Number(c.browserLineHeight) : 1.3;
+  const left = [5,6,7].includes(Number(c.browserLeftMargin)) ? Number(c.browserLeftMargin) : 6;
+  return `<div class="card col settings-detail-card">
+    <div class="row" style="align-items:center;gap:10px"><span class="setting-icon">🖨️</span><span><b>Kualitas Cetak via Browser</b><small class="mut">Pengaturan ini khusus untuk tombol “Cetak via browser”. Margin kiri dapat digeser bila hasil cetak terpotong.</small></span></div>
+    <div class="col" style="gap:5px"><label class="mut">Ketebalan tulisan</label><select class="sel" onchange="setBrowserPrintOption('browserDensity',this.value)"><option value="normal" ${density==='normal'?'selected':''}>Normal</option><option value="bold" ${density==='bold'?'selected':''}>Tebal (disarankan)</option><option value="heavy" ${density==='heavy'?'selected':''}>Sangat tebal</option></select></div>
+    <div class="col" style="gap:5px"><label class="mut">Ukuran huruf</label><select class="sel" onchange="setBrowserPrintOption('browserFontSize',this.value)"><option value="2.3" ${size===2.3?'selected':''}>Ringkas — 2,3 mm</option><option value="2.4" ${size===2.4?'selected':''}>Jelas — 2,4 mm (disarankan)</option><option value="2.5" ${size===2.5?'selected':''}>Besar — 2,5 mm (disesuaikan area cetak)</option></select></div>
+    <div class="col" style="gap:5px"><label class="mut">Margin kiri struk</label><select class="sel" onchange="setBrowserPrintOption('browserLeftMargin',this.value)"><option value="5" ${left===5?'selected':''}>5 mm — lebih ke kiri</option><option value="6" ${left===6?'selected':''}>6 mm — disarankan</option><option value="7" ${left===7?'selected':''}>7 mm — lebih ke kanan</option></select><small class="mut">Naikkan ke 7 mm bila huruf awal masih terpotong. Lebar konten otomatis disesuaikan agar sisi kanan tidak keluar kertas.</small></div>
+    <div class="col" style="gap:5px"><label class="mut">Jarak antarbaris</label><select class="sel" onchange="setBrowserPrintOption('browserLineHeight',this.value)"><option value="1.2" ${line===1.2?'selected':''}>Rapat</option><option value="1.3" ${line===1.3?'selected':''}>Normal</option><option value="1.4" ${line===1.4?'selected':''}>Lebih renggang</option></select></div>
+    <div class="acts"><button onclick="cetakTesBrowser()">🧾 Tes Cetak Browser</button><button class="o" onclick="openSetting('struk')">Pengaturan Struk</button></div>
+    <div class="settings-tip">Untuk Rongta RPP02N di Windows, jika hasil masih pucat buka Settings → Bluetooth & devices → Printers & scanners → Rongta RPP02N → Printing preferences. Naikkan Print Density/Darkness satu tingkat, nonaktifkan Draft/Eco bila tersedia, lalu lakukan tes lagi. Nama opsi bergantung pada driver yang terpasang. Pilihan di atas mempertebal tampilan teks; margin kiri menggeser isi struk ke kanan. Lebar konten dibatasi pada area cetak aman 58/80 mm. Darkness perangkat tetap diatur oleh driver printer.</div>
+  </div>`;
 }
 
 /* ---- Pengaturan struk (disimpan per perangkat) ---- */

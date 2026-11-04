@@ -1,6 +1,6 @@
-/* UWAIS FOOD PWA v10.8.2 — stable root launch URL */
+/* UWAIS FOOD PWA v10.8.5 — split order value and shipping recap */
 const CACHE_PREFIX = 'uwais-food-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v10-8-2-root-launch';
+const CACHE_NAME = CACHE_PREFIX + 'v10-8-5-split-recap-shipping';
 const SHELL_FILES = [
   './',
   './index.html',
