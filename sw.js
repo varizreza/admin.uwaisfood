@@ -1,6 +1,6 @@
-/* UWAIS FOOD PWA v10.8.6 — export PDF recap data */
+/* UWAIS FOOD PWA v10.8.10 — customizable WhatsApp invoice message */
 const CACHE_PREFIX = 'uwais-food-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v10-8-6-export-pdf-rekap-data';
+const CACHE_NAME = CACHE_PREFIX + 'v10-8-10-share-gesture-fix';
 const SHELL_FILES = [
   './',
   './index.html',

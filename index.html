@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-
+<base target="_top">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#e8590c">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icon-192.png" sizes="192x192" type="image/png">
-<link rel="apple-touch-icon" href="./icon-192.png">
-<meta name="application-name" content="Uwais Food">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Uwais Food</title>
@@ -390,7 +386,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.8.5)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.8.10)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -404,7 +400,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 /* Penjaga: jika program utama gagal jalan, tampilkan penyebabnya di layar (bukan "Memuat…" selamanya) */
 window.__boot = false;
 window.__errs = [];
-window.__len = 127072;
+window.__len = 155042;
 (function () {
   var box = null;
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
@@ -413,10 +409,10 @@ window.__len = 127072;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v10.8.5)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v10.8.10)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v10.8.5)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v10.8.10)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -440,7 +436,7 @@ window.__len = 127072;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v10.8.6 · Export PDF Rekap Data';
+var APP_VER = 'v10.8.10 · Perbaikan Bagikan WA';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -1336,7 +1332,7 @@ function orderCard(g) {
     <div class="line"><span class="mut">Subtotal produk</span><b>${rp(g.total)}</b></div>
     ${g.metodeKirim === 'Kurir' ? `<div class="line"><span class="mut">Ongkos kirim</span><b>${rp(g.ongkir)}</b></div>` : ''}
     <div class="row"><span class="big" style="font-size:22px">${rp(g.grandTotal)}</span>
-      <span class="acts"><button class="o" onclick="cetakOrder('${g.id}')" title="Cetak">🖨️</button><button class="o" onclick="editOrder('${g.id}')" title="Edit pesanan">✏️</button><button class="o" onclick="pindahDlg('${g.id}')" title="Pindah PO">📅</button>
+      <span class="acts"><button class="o" onclick="cetakOrder('${g.id}')" title="Lihat struk dan cetak">🧾</button><button class="o" onclick="downloadStrukImage('${g.id}')" title="Unduh struk sesuai format pengaturan">⬇️ Unduh Gambar</button><button class="o" onclick="shareStrukWhatsApp('${g.id}')" title="Bagikan struk ke WhatsApp">📲 WA</button><button class="o" onclick="editOrder('${g.id}')" title="Edit pesanan">✏️</button><button class="o" onclick="pindahDlg('${g.id}')" title="Pindah PO">📅</button>
       <button class="g" onclick="status('${g.id}','${g.status === 'Baru' ? 'Selesai' : 'Baru'}')">${g.status === 'Baru' ? '✓ Selesai' : 'Buka lagi'}</button>
       <button class="r" onclick="hapus('${g.id}')" title="Hapus">🗑</button></span></div>
   </div>`;
@@ -1697,7 +1693,7 @@ function vPengaturan() {
     const settingItems = [
       ['printer','🖨️','Printer','Bluetooth, kualitas cetak, dan uji printer',IN_GAS ? 'Mode Apps Script' : (chr ? 'Terhubung' : 'Atur koneksi')],
       ['ongkir','📍','Ongkos Kirim','Google Maps, lokasi toko, tarif per kilometer, dan daerah','Google Maps'],
-      ['struk','🧾','Struk','Identitas toko, pesan footer, dan ukuran kertas',(+cfg().lebar === 80 ? '80 mm' : '58 mm')],
+      ['struk','🧾','Struk','Identitas toko, format gambar, dan template chat WhatsApp',(+cfg().lebar === 80 ? '80 mm' : '58 mm')],
       ['tampilan','🎨','Tampilan','Pilih tema terang, gelap, atau mengikuti perangkat',getThemeMode() === 'light' ? 'Tema terang' : getThemeMode() === 'dark' ? 'Tema gelap' : 'Ikuti perangkat'],
       ['aplikasi','📱','Aplikasi','PWA, pembaruan, koneksi Spreadsheet, dan cache',IN_GAS ? 'Apps Script' : 'PWA'],
       ['keamanan','🛡️','Keamanan','PIN akses, sesi, dan keluar dari aplikasi','PIN aktif']
@@ -1750,7 +1746,8 @@ function simpanMenu() {
 /* ================= STRUK & PRINTER THERMAL (ESC/POS) ================= */
 var ENC = new TextEncoder();
 var num = n => Number(n || 0).toLocaleString('id-ID');
-var CFG_DEF = {toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58, browserDensity: 'bold', browserFontSize: 2.4, browserLineHeight: 1.3, browserLeftMargin: 6};
+var WA_MESSAGE_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan} 😊\nTerima kasih sudah memesan di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total pembayaran: {total}*\nPengiriman: {metode_pengiriman}\nKurir: {nama_kurir}\nAlamat tujuan: {alamat}\nStatus pembayaran: {status_pembayaran}\n\n{footer}';
+var CFG_DEF = {toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58, browserDensity: 'bold', browserFontSize: 2.4, browserLineHeight: 1.3, browserLeftMargin: 6, imageFormat: 'png', imageQuality: 'high', waMessageTemplate: WA_MESSAGE_TEMPLATE_DEFAULT};
 function cfg() { try { return Object.assign({}, CFG_DEF, JSON.parse(LS.get('uf_cfg') || '{}')); } catch (e) { return Object.assign({}, CFG_DEF); } }
 function simpanCfg(silent) {
   const c = Object.assign({}, window._cfg || cfg()); c.lebar = +c.lebar === 80 ? 80 : 58;
@@ -1758,6 +1755,9 @@ function simpanCfg(silent) {
   c.browserFontSize = [2.3,2.4,2.5].includes(Number(c.browserFontSize)) ? Number(c.browserFontSize) : 2.4;
   c.browserLineHeight = [1.2,1.3,1.4].includes(Number(c.browserLineHeight)) ? Number(c.browserLineHeight) : 1.3;
   c.browserLeftMargin = [5,6,7].includes(Number(c.browserLeftMargin)) ? Number(c.browserLeftMargin) : 6;
+  c.imageFormat = ['png','jpeg'].includes(String(c.imageFormat).toLowerCase()) ? String(c.imageFormat).toLowerCase() : 'png';
+  c.imageQuality = ['standard','high','maximum'].includes(String(c.imageQuality).toLowerCase()) ? String(c.imageQuality).toLowerCase() : 'high';
+  c.waMessageTemplate = String(c.waMessageTemplate == null ? WA_MESSAGE_TEMPLATE_DEFAULT : c.waMessageTemplate).slice(0, 4000);
   window._cfg = c; LS.set('uf_cfg', JSON.stringify(c)); if (!silent) toast('Pengaturan struk dan kualitas cetak tersimpan ✔');
 }
 function setBrowserPrintOption(key, value) {
@@ -1818,6 +1818,258 @@ function toBytes(r) {
 }
 function toHtml(r) {
   return r.o.map(op => { const L = lineOf(op, r.w); return `<div class="pl${L.big ? ' bg' : ''}${L.bold ? ' b' : ''}">${esc(L.t) || '&nbsp;'}</div>`; }).join('');
+}
+
+/* ================= STRUK DIGITAL: PNG / JPEG / WHATSAPP ================= */
+function receiptImageName(g, ext) {
+  const clean = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 36);
+  return 'Struk-UwaisFood-' + (clean(g.nama) || 'Pelanggan') + '-' + (clean(g.id) || Date.now()) + '.' + ext;
+}
+function receiptImageOptions() {
+  const c = cfg();
+  const ext = String(c.imageFormat || 'png').toLowerCase() === 'jpeg' ? 'jpg' : 'png';
+  const quality = ['standard','high','maximum'].includes(String(c.imageQuality)) ? String(c.imageQuality) : 'high';
+  // PNG tetap lossless; preset kualitas mengatur resolusi raster. JPEG memakai
+  // resolusi yang sama serta tingkat kompresi sesuai preset.
+  const scale = quality === 'standard' ? 1.8 : quality === 'maximum' ? 3.2 : 2.5;
+  const jpegQuality = quality === 'standard' ? 0.82 : quality === 'maximum' ? 0.97 : 0.92;
+  return {ext, mime: ext === 'jpg' ? 'image/jpeg' : 'image/png', scale, jpegQuality};
+}
+function receiptCanvas(r, quality) {
+  return new Promise((resolve, reject) => {
+    try {
+      const preset = ['standard','high','maximum'].includes(String(quality)) ? String(quality) : receiptImageOptions().quality;
+      const scale = preset === 'standard' ? 1.8 : preset === 'maximum' ? 3.2 : 2.5;
+      const charPx = 18 * scale, padX = 34 * scale, padY = 34 * scale, normalFont = 29 * scale, normalLine = 40 * scale;
+      const width = Math.ceil(r.w * charPx + padX * 2);
+      const rows = r.o.map(op => {
+        const L = lineOf(op, r.w);
+        const big = !!L.big;
+        return {op, L, big, h: big ? 60 * scale : normalLine};
+      });
+      const height = Math.ceil(padY * 2 + rows.reduce((sum, row) => sum + row.h, 0));
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('Browser tidak mendukung pembuatan gambar struk'));
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = '#111111'; ctx.textBaseline = 'middle';
+      let y = padY;
+      rows.forEach(({op, L, big, h}) => {
+        const fs = big ? Math.round(normalFont * 1.65) : normalFont;
+        const weight = (L.bold || big) ? 800 : 500;
+        ctx.font = `${weight} ${fs}px "Courier New", monospace`;
+        if (op.k === 'c') {
+          ctx.textAlign = 'center';
+          ctx.fillText(String(op.t || '').trim(), width / 2, y + h / 2, width - padX * 2);
+        } else {
+          ctx.textAlign = 'left';
+          ctx.fillText(String(L.t || ''), padX, y + h / 2, width - padX * 2);
+        }
+        y += h;
+      });
+      resolve(canvas);
+    } catch (e) { reject(e); }
+  });
+}
+function canvasBlob(canvas, mime, quality) {
+  return new Promise((resolve, reject) => {
+    try {
+      if (canvas.toBlob) {
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Gagal membuat file gambar')), mime, quality);
+      } else {
+        const data = canvas.toDataURL(mime, quality), raw = atob(data.split(',')[1]), bytes = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+        resolve(new Blob([bytes], {type: mime}));
+      }
+    } catch (e) { reject(e); }
+  });
+}
+function downloadReceiptBlob(blob, filename) {
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = filename; a.style.display = 'none';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+function receiptStateFor(id) {
+  if (window._st && window._st.id === id) return window._st;
+  // Pada daftar Orderan status pembayaran tidak tersimpan sebagai metode pembayaran,
+  // jadi gunakan label aman agar struk tidak keliru menyatakan LUNAS.
+  return {id, metode: 'Belum Bayar', bayar: ''};
+}
+function applyWhatsAppTemplate(template, values) {
+  return String(template == null ? '' : template).replace(/\{([a-z0-9_]+)\}/gi, (match, key) => {
+    return Object.prototype.hasOwnProperty.call(values, key.toLowerCase()) ? String(values[key.toLowerCase()] == null ? '' : values[key.toLowerCase()]) : match;
+  }).trim();
+}
+function whatsappTemplateValues(g, state) {
+  const c = cfg(), customer = findPel(g.nama) || {};
+  const total = Number(g.grandTotal == null ? Number(g.total || 0) + (g.metodeKirim === 'Kurir' ? Number(g.ongkir || 0) : 0) : g.grandTotal);
+  const method = (state && state.metode) || 'Belum Bayar';
+  const paidAmount = Number(state && state.bayar) || 0;
+  const isPaid = method !== 'Belum Bayar' && !(method === 'Tunai' && paidAmount > 0 && paidAmount < total);
+  const isCourier = g.metodeKirim === 'Kurir';
+  const shippingLabel = !isCourier ? 'Pickup (ambil di toko)' : (g.jenisKurir === 'Pihak Ketiga' ? 'Kurir pihak ketiga' : 'Kurir Maps');
+  const itemLines = (g.items || []).map(item => {
+    const line = '• ' + (Number(item.qty) || 0) + ' x ' + item.item + ' — ' + rp((Number(item.qty) || 0) * (Number(item.harga) || 0));
+    const parts = parseIsi(item.isi);
+    const detail = parts.map(part => '  - ' + ((Number(part.n) || 0) * (Number(item.qty) || 0)) + ' ' + part.nama).join('\n');
+    return detail ? line + '\n' + detail : line;
+  }).join('\n');
+  const address = [g.daerahKirim || '', g.alamatKirim || customer.alamat || ''].filter(Boolean).join(' — ');
+  const courier = g.namaKurir || (isCourier && g.jenisKurir === 'Maps' ? 'Kurir Maps' : '-');
+  const values = {
+    nama_toko: c.toko || 'UWAIS FOOD',
+    nama_pelanggan: g.nama || 'Pelanggan',
+    nomor_pesanan: g.id || '-',
+    no_pesanan: g.id || '-',
+    tanggal: g.waktu || '-',
+    daftar_produk: itemLines || '-',
+    subtotal: rp(g.total || 0),
+    ongkir: rp(isCourier ? Number(g.ongkir) || 0 : 0),
+    total: rp(total),
+    metode_pengiriman: shippingLabel,
+    nama_kurir: courier,
+    daerah_tujuan: g.daerahKirim || '-',
+    alamat: address || '-',
+    status_pembayaran: isPaid ? 'LUNAS' : 'BELUM LUNAS',
+    metode_pembayaran: method,
+    whatsapp_toko: c.telp || '-',
+    footer: c.footer || ''
+  };
+  return values;
+}
+function buildWhatsAppMessage(g, state) {
+  const c = cfg();
+  const template = String(c.waMessageTemplate || '').trim() || WA_MESSAGE_TEMPLATE_DEFAULT;
+  return applyWhatsAppTemplate(template, whatsappTemplateValues(g, state));
+}
+function sampleWhatsAppMessage(template) {
+  const sample = {
+    nama_toko: 'UWAIS FOOD', nama_pelanggan: 'Ibu Sari', nomor_pesanan: 'UF-00125', no_pesanan: 'UF-00125',
+    tanggal: '04/11/2026 10:30', daftar_produk: '• 2 x Bolen Pisang Premium — Rp130.000\n• 1 x Banana Milk Cheese — Rp50.000',
+    subtotal: 'Rp180.000', ongkir: 'Rp10.000', total: 'Rp190.000', metode_pengiriman: 'Kurir Maps',
+    nama_kurir: 'Kurir Maps', daerah_tujuan: 'Tanjungpinang Barat', alamat: 'Jl. Contoh No. 10, Tanjungpinang',
+    status_pembayaran: 'BELUM LUNAS', metode_pembayaran: 'Belum Bayar', whatsapp_toko: '08xxxxxxxxxx', footer: 'Terima kasih sudah berbelanja!'
+  };
+  return applyWhatsAppTemplate(template || WA_MESSAGE_TEMPLATE_DEFAULT, sample);
+}
+function setWhatsAppTemplate(value) {
+  if (!window._cfg) window._cfg = cfg();
+  window._cfg.waMessageTemplate = String(value == null ? '' : value);
+  updateWhatsAppTemplatePreview();
+}
+function updateWhatsAppTemplatePreview() {
+  const preview = document.getElementById('waTemplatePreview');
+  if (!preview) return;
+  const template = window._cfg ? window._cfg.waMessageTemplate : cfg().waMessageTemplate;
+  preview.textContent = sampleWhatsAppMessage(template);
+}
+function resetWhatsAppTemplate() {
+  if (!window._cfg) window._cfg = cfg();
+  window._cfg.waMessageTemplate = WA_MESSAGE_TEMPLATE_DEFAULT;
+  const field = document.getElementById('waMessageTemplate');
+  if (field) field.value = WA_MESSAGE_TEMPLATE_DEFAULT.replace(/\\n/g, '\n');
+  updateWhatsAppTemplatePreview();
+  toast('Template pesan WhatsApp dikembalikan ke format awal. Klik Simpan pengaturan untuk menerapkan.');
+}
+async function downloadStrukImage(id) {
+  const g = groups().find(x => x.id === id);
+  if (!g) return toast('Pesanan tidak ditemukan', 'error');
+  const opt = receiptImageOptions();
+  try {
+    const canvas = await receiptCanvas(buildStruk(g, receiptStateFor(id)), opt.quality);
+    const blob = await canvasBlob(canvas, opt.mime, opt.ext === 'jpg' ? opt.jpegQuality : 1);
+    downloadReceiptBlob(blob, receiptImageName(g, opt.ext));
+    toast('Gambar struk ' + opt.ext.toUpperCase() + ' berhasil diunduh ✔');
+  } catch (e) {
+    console.error(e); toast('Gagal membuat gambar struk: ' + (e.message || e), 'error');
+  }
+}
+var _shareCache = {};
+function closeSharePrompt() { const el = document.getElementById('sharePrompt'); if (el) el.remove(); }
+function showSharePrompt(id) {
+  closeSharePrompt();
+  const d = document.createElement('div');
+  d.id = 'sharePrompt';
+  d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px';
+  d.innerHTML = '<div style="background:#fff;color:#222;border-radius:14px;padding:20px;max-width:340px;width:100%;text-align:center;font-family:inherit">' +
+    '<div style="font-size:17px;font-weight:700;margin-bottom:6px">Invoice siap dibagikan</div>' +
+    '<div style="font-size:14px;margin-bottom:16px;color:#555">Ketuk tombol di bawah, lalu pilih WhatsApp.</div>' +
+    '<button id="sharePromptGo" style="width:100%;padding:12px;border:0;border-radius:10px;background:#25D366;color:#fff;font-size:16px;font-weight:700">📲 Bagikan sekarang</button>' +
+    '<button id="sharePromptX" style="width:100%;padding:10px;margin-top:8px;border:0;background:transparent;color:#666;font-size:14px">Batal</button></div>';
+  document.body.appendChild(d);
+  document.getElementById('sharePromptX').onclick = closeSharePrompt;
+  // Handler ini langsung memanggil navigator.share tanpa await sebelumnya, sehingga user gesture valid.
+  document.getElementById('sharePromptGo').onclick = function () { closeSharePrompt(); shareStrukWhatsApp(id); };
+}
+async function shareStrukWhatsApp(id) {
+  const g = groups().find(x => x.id === id);
+  if (!g) return toast('Pesanan tidak ditemukan', 'error');
+  const state = receiptStateFor(id), caption = buildWhatsAppMessage(g, state);
+  const customer = findPel(g.nama) || {};
+  const waTarget = customer.hp ? waLink(customer.hp) : 'https://wa.me/';
+  const canNativeShare = !!(navigator.share && navigator.canShare && typeof File !== 'undefined');
+  const likelyMobileShare = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+  const cacheKey = id + '|' + JSON.stringify(state || {}) + '|' + caption;
+  const cached = _shareCache[cacheKey];
+  const opt = receiptImageOptions();
+
+  // JALUR CEPAT: gambar sudah disiapkan -> navigator.share dipanggil langsung di dalam gesture klik (tanpa await sebelumnya).
+  if (cached && canNativeShare) {
+    let ok = false;
+    try { ok = navigator.canShare({files: [cached.file]}); } catch (_) {}
+    if (ok) {
+      try {
+        const p = navigator.share({files: [cached.file], title: 'Invoice Uwais Food', text: caption});
+        await p;
+        toast('Pilih WhatsApp pada menu berbagi untuk mengirim invoice beserta pesan.');
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        console.error(e); toast('Gagal membagikan struk: ' + (e.message || e), 'error');
+      }
+      return;
+    }
+  }
+
+  // Desktop: buka tab fallback sinkron agar tidak diblokir popup blocker.
+  let waTab = null;
+  if (!canNativeShare || !likelyMobileShare) {
+    try { waTab = window.open('about:blank', '_blank'); } catch (_) {}
+  }
+  try {
+    const canvas = await receiptCanvas(buildStruk(g, state), opt.quality);
+    const blob = await canvasBlob(canvas, opt.mime, opt.ext === 'jpg' ? opt.jpegQuality : 1);
+    const file = new File([blob], receiptImageName(g, opt.ext), {type: opt.mime});
+    _shareCache = {}; _shareCache[cacheKey] = {file, blob};
+    let canShareFile = false;
+    try { canShareFile = canNativeShare && navigator.canShare({files: [file]}); } catch (_) { canShareFile = false; }
+    if (canShareFile) {
+      if (waTab && !waTab.closed) waTab.close();
+      // Setelah proses gambar (async), gesture klik bisa sudah kedaluwarsa (Safari/iOS & beberapa WebView).
+      // Bila share ditolak (NotAllowedError), tampilkan tombol agar pengguna mengetuk ulang -> gesture baru.
+      const activation = navigator.userActivation;
+      if (activation && activation.isActive === false) { showSharePrompt(id); return; }
+      try {
+        await navigator.share({files: [file], title: 'Invoice Uwais Food', text: caption});
+        toast('Pilih WhatsApp pada menu berbagi untuk mengirim invoice beserta pesan.');
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        if (e && e.name === 'NotAllowedError') { showSharePrompt(id); return; }
+        throw e;
+      }
+      return;
+    }
+    downloadReceiptBlob(blob, receiptImageName(g, opt.ext));
+    const waUrl = waTarget + '?text=' + encodeURIComponent(caption);
+    if (waTab && !waTab.closed) waTab.location.href = waUrl;
+    else window.open(waUrl, '_blank', 'noopener');
+    toast(customer.hp ? 'Gambar invoice diunduh dan chat pelanggan dibuka. Lampirkan gambar lalu kirim di WhatsApp.' : 'Gambar invoice diunduh dan WhatsApp dibuka. Pilih pelanggan, lampirkan gambar lalu kirim.');
+  } catch (e) {
+    if (waTab && !waTab.closed) waTab.close();
+    if (e && e.name === 'AbortError') return;
+    console.error(e); toast('Gagal membagikan struk: ' + (e.message || e), 'error');
+  }
 }
 var two = n => String(n).padStart(2, '0');
 function nowStr() { const d = new Date(); return `${two(d.getDate())}/${two(d.getMonth() + 1)}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`; }
@@ -2031,7 +2283,9 @@ function showStruk() {
     <div class="seg">${['Tunai', 'Transfer', 'QRIS', 'Belum Bayar'].map(m => `<button class="${st.metode === m ? 'on' : ''}" onclick="_st.metode='${m}';showStruk()">${m}</button>`).join('')}</div>
     ${st.metode === 'Tunai' ? `<input inputmode="numeric" placeholder="Uang diterima (opsional)" value="${esc(st.bayar)}" oninput="_st.bayar=this.value.replace(/\\D/g,'');updPaper()">
       <div class="tags"><button class="tag" onclick="_st.bayar='${g.grandTotal || g.total}';showStruk()">Uang pas</button>${quick.map(q => `<button class="tag" onclick="_st.bayar='${q}';showStruk()">${num(q)}</button>`).join('')}</div>` : ''}
-    <div class="acts"><button onclick="cetakStruk()">🖨️ Cetak</button><button class="o" onclick="cetakBrowser()">Cetak via browser</button></div>
+    <div class="acts"><button onclick="cetakStruk()">🖨️ Cetak Thermal</button><button class="o" onclick="cetakBrowser()">Cetak via browser</button></div>
+    <div class="acts"><button class="o" onclick="downloadStrukImage(window._st.id)">⬇️ Unduh Gambar</button><button class="g" onclick="shareStrukWhatsApp(window._st.id)">📲 Bagikan WhatsApp</button></div>
+    <small class="mut">Format, kualitas gambar, dan template chat mengikuti Pengaturan → Struk. Pada Android, pilih WhatsApp pada menu berbagi untuk mengirim invoice beserta teks. Pada laptop, gambar diunduh dan chat WhatsApp dibuka untuk dilampirkan manual.</small>
   </div></div>`;
   updPaper();
 }
@@ -2109,6 +2363,14 @@ function strukForm() {
     ${f('Nama toko', 'toko', 'UWAIS FOOD')}${f('Alamat', 'alamat', 'Jl. Contoh No. 1, Kota')}${f('Telepon / WhatsApp', 'telp', '08xxxxxxxxxx')}${f('Nama kasir (opsional)', 'kasir', '')}${f('Pesan di bawah struk', 'footer', 'Terima kasih sudah berbelanja!')}
     <label class="mut">Lebar kertas printer</label>
     <div class="seg">${[58, 80].map(x => `<button class="${+c.lebar === x ? 'on' : ''}" onclick="window._cfg.lebar=${x};render()">${x} mm</button>`).join('')}</div>
+    <div class="col" style="gap:5px"><label class="mut">Format unduhan / WhatsApp</label><select class="sel" onchange="window._cfg.imageFormat=this.value"><option value="png" ${c.imageFormat!=='jpeg'?'selected':''}>PNG — tanpa kompresi, lebih tajam</option><option value="jpeg" ${c.imageFormat==='jpeg'?'selected':''}>JPEG — ukuran file lebih kecil</option></select></div>
+    <div class="col" style="gap:5px"><label class="mut">Kualitas gambar</label><select class="sel" onchange="window._cfg.imageQuality=this.value"><option value="standard" ${c.imageQuality==='standard'?'selected':''}>Standar — file lebih ringan</option><option value="high" ${!c.imageQuality || c.imageQuality==='high'?'selected':''}>Tinggi — disarankan</option><option value="maximum" ${c.imageQuality==='maximum'?'selected':''}>Maksimal — resolusi tertinggi</option></select><small class="mut">Pilihan ini berlaku untuk Unduh Gambar dan Bagikan WhatsApp. PNG bersifat lossless; kualitas mengatur resolusi gambar. JPEG memakai kompresi sesuai pilihan.</small></div>
+    <div class="col" style="gap:7px;margin-top:8px"><div><b style="font-size:15px">💬 Template Pesan WhatsApp</b><div class="mut">Atur teks yang otomatis disiapkan saat invoice dibagikan. Gunakan tanda *teks* untuk huruf tebal di WhatsApp.</div></div>
+      <div class="menu-admin-field"><label>Isi pesan WhatsApp</label><textarea id="waMessageTemplate" rows="10" maxlength="4000" oninput="setWhatsAppTemplate(this.value)">${esc(String(c.waMessageTemplate == null ? WA_MESSAGE_TEMPLATE_DEFAULT : c.waMessageTemplate).replace(/\\n/g, '\n'))}</textarea></div>
+      <div class="note"><b>Pratinjau pesan</b><pre id="waTemplatePreview" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;font:inherit;font-size:13px;color:var(--tx)">${esc(sampleWhatsAppMessage(c.waMessageTemplate))}</pre></div>
+      <div class="mut">Variabel yang bisa dipakai: <code>{nama_toko}</code>, <code>{nama_pelanggan}</code>, <code>{nomor_pesanan}</code>, <code>{tanggal}</code>, <code>{daftar_produk}</code>, <code>{subtotal}</code>, <code>{ongkir}</code>, <code>{total}</code>, <code>{metode_pengiriman}</code>, <code>{nama_kurir}</code>, <code>{daerah_tujuan}</code>, <code>{alamat}</code>, <code>{status_pembayaran}</code>, <code>{metode_pembayaran}</code>, <code>{whatsapp_toko}</code>, dan <code>{footer}</code>.</div>
+      <div class="acts"><button class="o" onclick="resetWhatsAppTemplate()">Gunakan template awal</button></div>
+    </div>
     <div class="acts"><button onclick="simpanCfg()">Simpan pengaturan</button><button class="o" onclick="simpanCfg(true);cetakTes()">Tes cetak</button></div>
     <div class="mut">Pengaturan struk tersimpan di perangkat ini.</div></div>`;
 }
@@ -2220,11 +2482,13 @@ async function segarkan() {  // hapus cache & service worker lama, lalu muat ula
 }
 function pasang() { if (installEv) { installEv.prompt(); installEv = null; render(); } }
 if (!IN_GAS) {
-  // Manifest dan ikon sudah dicantumkan statis di <head> agar terdeteksi Chrome sejak parsing awal.
+  [['manifest', 'manifest.webmanifest'], ['icon', 'icon-192.png'], ['apple-touch-icon', 'icon-192.png']].forEach(([rel, href]) => {
+    const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l);
+  });
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'update') { showPwaUpdatePrompt(); } });
     navigator.serviceWorker.addEventListener('controllerchange', () => { if (pwaReloading) location.reload(); });
-    navigator.serviceWorker.register(new URL('sw.js', document.baseURI), {scope: new URL('./', document.baseURI).pathname, updateViaCache: 'none'}).then(r => {
+    navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).then(r => {
       pwaReg = r;
       const cekMenunggu = () => { if (r.waiting && navigator.serviceWorker.controller) { showPwaUpdatePrompt(); } };
       cekMenunggu();
