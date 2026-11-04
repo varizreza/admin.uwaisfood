@@ -1,6 +1,6 @@
-/* UWAIS FOOD PWA v10.8.5 — split order value and shipping recap */
+/* UWAIS FOOD PWA v10.8.6 — export PDF recap data */
 const CACHE_PREFIX = 'uwais-food-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v10-8-5-split-recap-shipping';
+const CACHE_NAME = CACHE_PREFIX + 'v10-8-6-export-pdf-rekap-data';
 const SHELL_FILES = [
   './',
   './index.html',

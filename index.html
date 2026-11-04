@@ -440,7 +440,7 @@ window.__len = 127072;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v10.8.5 · Rekap Pisah Ongkir';
+var APP_VER = 'v10.8.6 · Export PDF Rekap Data';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -1439,7 +1439,7 @@ function vRekap() {
   });
   const nOrder = new Set(o.map(x => x.id)).size;
   return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Rekap Produksi</h2>
-      <span class="acts"><button onclick="cetakRekap()" ${o.length ? '' : 'disabled'}>🖨️ Cetak Rekap</button><button class="o" onclick="cetakPemesan()" ${o.length ? '' : 'disabled'}>🖨️ Daftar Pemesan</button></span></div>
+      <span class="acts"><button onclick="exportPdfRekap()" ${o.length ? '' : 'disabled'}>📄 Export PDF Rekap Data</button><button class="o" onclick="cetakPemesan()" ${o.length ? '' : 'disabled'}>🖨️ Daftar Pemesan</button></span></div>
     ${poBar('lihat')}
     ${po && po.kirim ? `<div class="mut" style="margin:-4px 2px 8px">📅 Ambil/kirim: ${fmtTgl(po.kirim)}${po.status === 'Selesai' ? ' · PO selesai' : ''}</div>` : ''}
     <div style="margin:4px 0">${segFilter('rfilt')}</div>
@@ -1906,7 +1906,106 @@ function buildPemesan() {
   r.lr('Jumlah pemesan', String(ppm.length), {bold: true}).feed(1);
   return r;
 }
-function cetakRekap() { kirim(toBytes(buildRekap())); }
+function exportPdfRekap() {
+  const orders = filtered();
+  if (!orders.length) return toast('Tidak ada data rekap untuk diekspor.');
+
+  // Open synchronously from the button click so Chrome does not block the report window.
+  const reportWindow = window.open('', '_blank');
+  if (!reportWindow) return toast('Popup diblokir. Izinkan popup untuk Uwais Food, lalu coba Export PDF kembali.');
+
+  const ids = new Set(orders.map(x => x.id));
+  const orderGroups = groups().filter(g => ids.has(g.id));
+  const productValue = orders.reduce((sum, x) => sum + (Number(x.qty) || 0) * (Number(x.harga) || 0), 0);
+  const shippingValue = orderGroups.reduce((sum, g) => sum + (g.metodeKirim === 'Kurir' ? Math.max(0, Number(g.ongkir) || 0) : 0), 0);
+  const grandValue = productValue + shippingValue;
+  const components = komponen(orders);
+  const packages = perPaket(orders);
+  const customers = perPemesan(orders);
+  const customerStats = {};
+  orderGroups.forEach(g => {
+    const k = key(g.nama);
+    customerStats[k] = customerStats[k] || {shipping:0, orderCount:0, delivery:[]};
+    customerStats[k].shipping += g.metodeKirim === 'Kurir' ? Math.max(0, Number(g.ongkir) || 0) : 0;
+    customerStats[k].orderCount += 1;
+    const delivery = g.metodeKirim === 'Kurir'
+      ? (g.jenisKurir === 'Pihak Ketiga' ? 'Kurir pihak ketiga' + (g.namaKurir ? ' (' + g.namaKurir + ')' : '') : 'Kurir Maps')
+      : 'Pickup';
+    if (!customerStats[k].delivery.includes(delivery)) customerStats[k].delivery.push(delivery);
+  });
+
+  const selectedPo = viewPO();
+  const selectedPoData = selectedPo !== '*' && selectedPo !== '-' ? findPO(selectedPo) : null;
+  const poLabel = selectedPo === '*' ? 'Semua periode PO' : selectedPo === '-' ? 'Tanpa PO' : (selectedPoData ? selectedPoData.nama : 'Periode PO');
+  const statusLabel = rfilt || 'Semua';
+  const generatedAt = new Date().toLocaleString('id-ID', {dateStyle:'long', timeStyle:'short'});
+  const reportDate = new Date().toISOString().slice(0,10);
+  const money = n => 'Rp ' + num(Math.round(Number(n) || 0));
+  const safe = v => esc(v == null || v === '' ? '-' : String(v));
+
+  const componentRows = components.length
+    ? components.map(x => `<tr><td>${safe(x.nama)}</td><td class="num">${num(x.qty)} pcs</td></tr>`).join('')
+    : '<tr><td colspan="2" class="empty">Tidak ada rincian produksi.</td></tr>';
+  const packageRows = packages.length
+    ? packages.map(x => `<tr><td>${safe(x.nama)}</td><td class="num">${num(x.qty)}</td></tr>`).join('')
+    : '<tr><td colspan="2" class="empty">Tidak ada rincian menu/paket.</td></tr>';
+  const customerRows = customers.length
+    ? customers.map((p, i) => {
+        const st = customerStats[key(p.nama)] || {shipping:0,orderCount:0,delivery:[]};
+        const total = p.total + st.shipping;
+        const menus = perPaket(p.items).map(x => `${num(x.qty)} × ${safe(x.nama)}`).join('<br>');
+        return `<tr><td class="num">${i+1}</td><td><b>${safe(p.nama)}</b><div class="sub">${menus || '-'}</div></td><td class="num">${st.orderCount}</td><td class="num">${money(p.total)}</td><td class="num">${money(st.shipping)}</td><td class="num strong">${money(total)}</td><td>${safe(st.delivery.join(', ') || '-')}</td></tr>`;
+      }).join('')
+    : '<tr><td colspan="7" class="empty">Tidak ada data pelanggan.</td></tr>';
+  const orderRows = orderGroups.length
+    ? orderGroups.map((g, i) => {
+        const ship = g.metodeKirim === 'Kurir' ? Math.max(0, Number(g.ongkir) || 0) : 0;
+        const delivery = g.metodeKirim === 'Kurir'
+          ? (g.jenisKurir === 'Pihak Ketiga' ? 'Pihak ketiga' + (g.namaKurir ? ' · ' + safe(g.namaKurir) : '') : 'Kurir Maps')
+          : 'Pickup';
+        const itemsLabel = (g.items || []).map(it => `${num(it.qty)} × ${safe(it.item)}`).join('<br>');
+        const orderTotal = (Number(g.total) || 0) + ship;
+        return `<tr><td class="num">${i+1}</td><td>${safe(g.id)}<div class="sub">${safe(g.waktu)}</div></td><td><b>${safe(g.nama)}</b><div class="sub">${itemsLabel}</div></td><td>${delivery}</td><td class="num">${money(g.total)}</td><td class="num">${money(ship)}</td><td class="num strong">${money(orderTotal)}</td></tr>`;
+      }).join('')
+    : '<tr><td colspan="7" class="empty">Tidak ada rincian pesanan.</td></tr>';
+
+  const title = `Rekap Data Uwais Food ${reportDate}`;
+  const html = `<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safe(title)}</title>
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;padding:0;color:#24201c;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.4}
+    body{padding:22px}.toolbar{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto 18px;padding:12px 14px;border:1px solid #eadfd4;border-radius:12px;background:#fff8f2;color:#55483f}
+    .toolbar button{border:0;border-radius:8px;background:#e8590c;color:white;padding:10px 15px;font-weight:700;cursor:pointer}.toolbar .secondary{background:#eee7df;color:#453a32}.toolbar span{font-size:12px}
+    .report{max-width:1100px;margin:0 auto}.head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:3px solid #e8590c;padding:0 0 15px;margin-bottom:16px}
+    .brand{font-size:20pt;font-weight:800;color:#d94f0b;letter-spacing:.2px}.kicker{font-size:9pt;color:#85766b;font-weight:700;letter-spacing:1.2px;margin-top:3px}.title{font-size:17pt;font-weight:800;margin:8px 0 4px}.meta{font-size:9pt;color:#62584f}.generated{text-align:right;font-size:9pt;color:#665b52;white-space:nowrap}
+    .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0 20px}.metric{border:1px solid #e9e1d9;border-radius:10px;padding:11px 12px;min-width:0}.metric .label{font-size:8pt;color:#7d7167;margin-bottom:5px}.metric .value{font-size:14pt;font-weight:800;overflow-wrap:anywhere}.metric.total{background:#fff2e8;border-color:#f0b58f}.metric.total .value{color:#c64b0b}
+    h2{font-size:11pt;margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid #e9e1d9;color:#352c25}.table-wrap{width:100%;overflow:visible}table{width:100%;border-collapse:collapse;font-size:8.4pt;table-layout:auto}thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}th{background:#f6eee7;color:#56463a;text-align:left;font-size:7.7pt;padding:8px 7px;border:1px solid #e5dbd1}td{padding:7px;border:1px solid #e9e3dc;vertical-align:top}tbody tr:nth-child(even){background:#fffdfa}.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.strong{font-weight:800}.sub{font-size:7.3pt;color:#82766c;margin-top:3px}.empty{text-align:center;color:#8d8279;padding:12px}.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}.totals{max-width:440px;margin:14px 0 0 auto;border:1px solid #e9e1d9;border-radius:10px;padding:10px 12px}.totals div{display:flex;justify-content:space-between;gap:15px;padding:4px 0}.totals .final{border-top:1px solid #dfd4c9;margin-top:5px;padding-top:9px;font-size:12pt;font-weight:800;color:#c64b0b}.foot{border-top:1px solid #e9e1d9;margin-top:22px;padding-top:9px;color:#8a7e73;font-size:8pt;display:flex;justify-content:space-between;gap:12px}
+    @page{size:A4 portrait;margin:13mm 11mm 14mm}@media print{html,body{background:#fff!important}body{padding:0}.toolbar{display:none!important}.report{max-width:none}.head{break-inside:avoid;page-break-inside:avoid}.metric{break-inside:avoid;page-break-inside:avoid}h2{break-after:avoid-page}.foot{break-inside:avoid}}
+    @media screen and (max-width:700px){body{padding:12px}.head{display:block}.generated{text-align:left;margin-top:10px;white-space:normal}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}.table-wrap{overflow-x:auto}table{min-width:760px}}
+  </style></head><body>
+  <div class="toolbar"><button onclick="window.print()">📄 Simpan sebagai PDF</button><button class="secondary" onclick="window.close()">Tutup</button><span>Pada dialog cetak Chrome, pilih tujuan <b>Save as PDF / Simpan sebagai PDF</b>.</span></div>
+  <main class="report">
+    <header class="head"><div><div class="brand">UWAIS FOOD</div><div class="kicker">BAKERY · ORDER MANAGEMENT</div><div class="title">Laporan Rekap Data Pesanan</div><div class="meta">Periode: <b>${safe(poLabel)}</b> &nbsp;·&nbsp; Status: <b>${safe(statusLabel)}</b></div></div><div class="generated">Dibuat pada<br><b>${safe(generatedAt)}</b></div></header>
+    <section class="summary">
+      <div class="metric"><div class="label">Jumlah Pesanan</div><div class="value">${num(new Set(orders.map(x=>x.id)).size)}</div></div>
+      <div class="metric"><div class="label">Total Produksi</div><div class="value">${num(components.reduce((s,x)=>s+x.qty,0))} pcs</div></div>
+      <div class="metric"><div class="label">Nilai Pesanan / Produk</div><div class="value">${money(productValue)}</div></div>
+      <div class="metric"><div class="label">Total Ongkos Kirim</div><div class="value">${money(shippingValue)}</div></div>
+    </section>
+    <div class="totals"><div><span>Nilai pesanan / produk</span><b>${money(productValue)}</b></div><div><span>Ongkos kirim</span><b>${money(shippingValue)}</b></div><div class="final"><span>Total tagihan</span><span>${money(grandValue)}</span></div></div>
+    <h2>Rekap Per Pelanggan</h2><div class="table-wrap"><table><thead><tr><th style="width:28px">No.</th><th>Pelanggan & menu</th><th class="num">Order</th><th class="num">Nilai produk</th><th class="num">Ongkir</th><th class="num">Total</th><th>Pengiriman</th></tr></thead><tbody>${customerRows}</tbody></table></div>
+    <h2>Rincian Pesanan</h2><div class="table-wrap"><table><thead><tr><th style="width:28px">No.</th><th>No. pesanan / tanggal</th><th>Pelanggan & produk</th><th>Pengiriman</th><th class="num">Nilai produk</th><th class="num">Ongkir</th><th class="num">Total</th></tr></thead><tbody>${orderRows}</tbody></table></div>
+    <div class="split"><section><h2>Jumlah Produksi per Jenis</h2><div class="table-wrap"><table><thead><tr><th>Jenis produk</th><th class="num">Jumlah</th></tr></thead><tbody>${componentRows}</tbody></table></div></section><section><h2>Jumlah per Menu / Paket</h2><div class="table-wrap"><table><thead><tr><th>Menu / paket</th><th class="num">Jumlah</th></tr></thead><tbody>${packageRows}</tbody></table></div></section></div>
+    <footer class="foot"><span>Uwais Food · Laporan Rekap Data Pesanan</span><span>Nilai total = nilai produk + ongkos kirim</span></footer>
+  </main></body></html>`;
+
+  reportWindow.document.open();
+  reportWindow.document.write(html);
+  reportWindow.document.close();
+  setTimeout(() => { try { reportWindow.focus(); reportWindow.print(); } catch (e) { toast('Laporan terbuka. Gunakan tombol Simpan sebagai PDF pada halaman laporan.'); } }, 500);
+}
+// Alias kompatibilitas untuk tombol/shortcut versi lama.
+function cetakRekap() { exportPdfRekap(); }
+
 function cetakPemesan() { kirim(toBytes(buildPemesan())); }
 function cetakTes() {
   const c = cfg(), r = R();
