@@ -1,6 +1,6 @@
-/* UWAIS FOOD PWA — Modern Bakery UI + Theme v10.5 */
+/* UWAIS FOOD PWA — Modern Bakery UI + Theme + Popup Notifications v10.8 */
 const CACHE_PREFIX = 'uwais-food-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v10-5-20261104';
+const CACHE_NAME = CACHE_PREFIX + 'v10-8-thirdparty-20261104';
 const SHELL_FILES = ['index.html','manifest.webmanifest','icon-192.png','icon-512.png','icon-maskable-512.png'];
 function scopedUrl(path){return new URL(path,self.registration.scope).toString();}
 self.addEventListener('install',event=>{event.waitUntil((async()=>{
