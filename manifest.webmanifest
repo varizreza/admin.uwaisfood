@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Uwais Food - Pengelola Orderan",
+  "name": "Uwais Food - Modern Bakery Management",
   "short_name": "Uwais Food",
-  "description": "Aplikasi pengelolaan pesanan, pelanggan, pre-order, ongkos kirim, dan cetak struk Uwais Food.",
+  "description": "Pengelolaan pesanan bakery dengan pelanggan, PO, Google Maps, ongkos kirim dan printer thermal.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -8,6 +8,16 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Uwais Food</title>
+<script>
+/* Terapkan preferensi tema sebelum CSS digambar agar tidak berkedip. */
+(function(){
+  try {
+    var mode = localStorage.getItem('uf_theme') || 'system';
+    if (!['light','dark','system'].includes(mode)) mode = 'system';
+    document.documentElement.setAttribute('data-uf-theme', mode);
+  } catch (e) { document.documentElement.setAttribute('data-uf-theme', 'system'); }
+})();
+</script>
 <style>
 :root{
   --bg:#faf7f2;--surface:#fff;--soft:#f4efe7;--tx:#1f1b16;--mut:#7a7168;--ln:#ece6dd;
@@ -110,6 +120,198 @@ select.sel:focus{border-color:var(--pr);box-shadow:0 0 0 3px var(--pr-l)}
 .pl{white-space:pre;line-height:1.35}.pl.bg{font-size:2em;line-height:1.2}.pl.b{font-weight:700}
 #upd{display:none;position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:70;background:var(--pr);color:#fff;padding:10px 16px;border-radius:12px;box-shadow:0 8px 24px #0004;cursor:pointer;font-weight:600;max-width:92%;text-align:center}
 #printArea{display:none}
+.map-mini{width:100%;height:190px;border:1px solid var(--ln);border-radius:12px;overflow:hidden;background:var(--soft)}
+.maps-place-host{width:100%;min-width:0}
+.maps-place-host gmp-place-autocomplete{display:block;width:100%;max-width:100%}
+.maps-hint{font-size:12px;color:var(--mut);line-height:1.4}
+
+
+/* ===== UWAIS FOOD MODERN BAKERY UI v10.4 ===== */
+body{background:var(--bg);letter-spacing:.005em}
+.app{min-height:100vh}
+.wrap{max-width:1460px;padding:22px 28px 32px}
+.top{min-height:66px;padding:14px 28px;background:rgba(255,255,255,.82);color:var(--tx);border-bottom:1px solid var(--ln);box-shadow:0 2px 12px #38241608;backdrop-filter:blur(14px)}
+.brand{color:var(--pr);font-size:19px}
+.chip-pr{background:var(--soft);border:1px solid var(--ln);color:var(--mut);font-weight:650}
+.side{background:var(--surface);border-right:1px solid var(--ln);padding:22px 16px 16px;gap:5px}
+.side .logo{display:flex;align-items:center;gap:11px;padding:2px 10px 25px;color:var(--tx);font-size:19px;letter-spacing:-.03em}
+.logo-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:var(--pr-l);font-size:23px}
+.logo-copy{display:flex;flex-direction:column;line-height:1.12;font-weight:850}
+.logo-copy small{font-size:9px;letter-spacing:.13em;color:var(--mut);font-weight:750;margin-top:5px}
+.nav-label{padding:8px 12px 5px;color:var(--mut);font-size:10px;font-weight:800;letter-spacing:.12em}
+.nav-label-gap{margin-top:13px}
+.side button.nv{gap:12px;min-height:44px;padding:10px 12px;border-radius:12px;color:var(--mut);font-size:13px;font-weight:650;transition:background .16s,color .16s,transform .16s}
+.side button.nv:hover{background:var(--soft);color:var(--tx)}
+.side button.nv.on{background:var(--pr-l);color:var(--pr-d);box-shadow:inset 3px 0 0 var(--pr)}
+.nv-ico{width:24px;text-align:center;font-size:17px}
+.side-spacer{flex:1}
+.side-foot{margin:14px 7px 2px;padding:13px 9px 4px;border-top:1px solid var(--ln);font-size:11px;color:var(--mut)}
+.side-foot small{display:block;margin:4px 0 0 14px;font-size:9px;opacity:.7}
+.online-dot{display:inline-block;width:7px;height:7px;margin-right:5px;border-radius:50%;background:var(--ok)}
+h2{font-size:25px;letter-spacing:-.035em;font-weight:850;margin:0 0 5px}
+h3{font-size:11px;letter-spacing:.12em;margin-top:22px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:2px 0 20px;flex-wrap:wrap}
+.eyebrow{font-size:10px;letter-spacing:.14em;font-weight:850;color:var(--pr);margin-bottom:6px}
+.page-subtitle{font-size:13px;color:var(--mut);margin-top:4px}
+.page-head-action{min-width:min(100%,280px)}
+.page-head-action .row{gap:8px}
+.card{border-radius:18px;box-shadow:0 3px 14px #4a2a1308;border-color:var(--ln)}
+button,a.btn{border-radius:12px;font-weight:700}
+input,select.sel{border-radius:12px}
+button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
+.bottom{padding:7px 8px calc(7px + env(safe-area-inset-bottom));border-top:1px solid var(--ln);box-shadow:0 -8px 28px #24160d0b;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(16px)}
+.bottom button{font-size:10px;font-weight:650;gap:4px;padding:6px 2px 5px;color:var(--mut)}
+.bottom button span{font-size:19px;line-height:1.2}
+.bottom button.on{color:var(--pr);position:relative}
+.bottom button.on:before{content:"";width:24px;height:3px;border-radius:9px;background:var(--pr);position:absolute;top:-7px;left:50%;transform:translateX(-50%)}
+#msg{border:1px solid #ffffff25;box-shadow:0 10px 30px #0002;font-weight:600}
+.order-workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,390px);gap:22px;align-items:start}
+.product-section{min-width:0}
+.product-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px;flex-wrap:wrap}
+.product-toolbar>div:first-child{display:flex;flex-direction:column;gap:3px}
+.product-toolbar b{font-size:15px}
+.product-toolbar small{font-size:11px;color:var(--mut)}
+.product-search{display:flex;align-items:center;gap:8px;border:1px solid var(--ln);background:var(--surface);border-radius:12px;padding:0 10px;min-width:210px;max-width:300px;flex:1}
+.product-search>span{font-size:20px;color:var(--mut)}
+.product-search input{border:0!important;box-shadow:none!important;padding:10px 0;background:transparent}
+.product-grid{grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:13px}
+.product-card{padding:12px;min-width:0;min-height:218px;gap:10px}
+.product-card[hidden]{display:none!important}
+.product-visual{height:104px;border-radius:13px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 30%,#fff 0,#fff8ef 48%,#f4e8d8 100%);border:1px solid #f0e5d9}
+.product-visual:after{content:"";position:absolute;width:130px;height:130px;border:1px solid #e9d8c7;border-radius:50%;opacity:.55}
+.product-visual span{font-size:43px;filter:drop-shadow(0 7px 4px #62310c18);z-index:1}
+.product-visual small{position:absolute;bottom:7px;left:8px;background:#ffffffc9;color:#8b7160;padding:3px 6px;border-radius:5px;font-size:8px;font-weight:850;letter-spacing:.1em}
+.product-name{min-height:42px;display:flex;flex-direction:column;gap:4px}
+.product-name>b{font-size:13px;line-height:1.35}
+.product-bottom{margin-top:auto}
+.product-card .step{gap:5px}
+.product-card .step button{width:31px;height:31px}
+.product-card .step b{font-size:14px;min-width:20px}
+.product-card.on{border-color:var(--pr);box-shadow:0 0 0 2px var(--pr-l),0 5px 18px #e8590c12}
+#panel{min-width:0}
+.panel{position:sticky;top:18px;padding:18px;gap:12px}
+.panel-heading{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--ln)}
+.panel-heading-icon{height:38px;width:38px;border-radius:12px;display:grid;place-items:center;background:var(--pr-l);font-size:19px}
+.panel-heading>span:last-child{display:flex;flex-direction:column;gap:2px}
+.panel-heading b{font-size:15px}
+.panel-heading small{color:var(--mut);font-size:11px}
+.field-label{font-size:11px;font-weight:750;color:var(--mut);margin-bottom:-4px}
+.shipping-selector{padding:12px;border-radius:14px;background:var(--soft);gap:10px;display:flex;flex-direction:column}
+.shipping-seg{width:100%}
+.shipping-seg button{flex:1;font-size:12px;padding:10px 7px}
+.cart-lines{border-top:1px dashed var(--ln);padding-top:7px}
+.totals-box{padding:10px 12px;border-radius:13px;background:var(--soft)}
+.grand-total{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:9px;margin-top:5px;border-top:1px solid var(--ln);font-weight:750}
+.grand-total strong{font-size:21px;color:var(--pr);letter-spacing:-.03em}
+.checkout-btn{display:flex;justify-content:space-between!important;padding:14px 16px!important;box-shadow:0 7px 18px #e8590c25}
+.checkout-btn span{font-size:19px}
+.fab{border-radius:16px;padding:13px 17px;bottom:94px;font-size:13px}
+.settings-badge{border:1px solid var(--ln);background:var(--surface);padding:8px 11px;border-radius:99px;color:var(--mut);font-size:10px;font-weight:750}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.setting-card,.more-card{width:100%;display:flex;align-items:center;gap:13px;text-align:left;background:var(--surface);border:1px solid var(--ln);color:var(--tx);padding:17px;border-radius:17px;box-shadow:0 3px 14px #4a2a1308;transition:transform .16s,border-color .16s,box-shadow .16s}
+.setting-card:hover,.more-card:hover{border-color:color-mix(in srgb,var(--pr) 40%,var(--ln));box-shadow:0 7px 20px #4a2a1310;transform:translateY(-2px)}
+.setting-icon,.more-icon{width:46px;height:46px;flex:0 0 46px;border-radius:14px;display:grid;place-items:center;background:var(--pr-l);font-size:22px}
+.setting-card-copy,.more-copy{min-width:0;display:flex;flex-direction:column;gap:4px;flex:1}
+.setting-card-copy b,.more-copy b{font-size:14px}
+.setting-card-copy small,.more-copy small{font-size:11px;color:var(--mut);line-height:1.4;font-weight:450}
+.setting-card-copy em,.more-copy em{font-size:10px;color:var(--pr-d);font-style:normal;font-weight:800;margin-top:3px}
+.setting-chevron,.more-arrow{font-size:25px;color:var(--mut);font-weight:300}
+.more-note{display:flex;gap:10px;padding:13px 15px;margin-top:16px;border:1px solid var(--ln);border-radius:14px;color:var(--mut);font-size:12px;line-height:1.5;background:var(--surface)}
+.setting-detail-head{margin:2px 0 18px}
+.back-setting{background:transparent;color:var(--pr-d);padding:5px 0 12px;font-size:11px;font-weight:800}
+.settings-detail-card{max-width:900px;padding:19px;gap:14px}
+.printer-status-row,.security-summary{display:flex;align-items:center;gap:12px;padding:4px 0 12px;border-bottom:1px solid var(--ln)}
+.printer-status-row>span:nth-child(2),.security-summary>span:nth-child(2){display:flex;flex-direction:column;gap:3px;flex:1}
+.printer-status-row small,.security-summary small{font-size:11px;color:var(--mut)}
+.status-pill{font-size:10px;font-weight:800;padding:5px 9px;border-radius:99px;background:var(--soft);color:var(--mut);white-space:nowrap}
+.status-pill.good{background:var(--ok-l);color:var(--ok)}
+.status-pill.neutral{background:var(--soft);color:var(--mut)}
+.settings-tip{font-size:11px;line-height:1.5;color:var(--mut);background:var(--soft);border-radius:11px;padding:11px 12px}
+.api-address{padding:11px;background:var(--soft);border-radius:10px;overflow-wrap:anywhere;margin-top:6px}
+.api-address code{font-size:11px}
+.more-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.more-card{padding:15px}
+.more-copy em{font-size:10px}
+.empty-state-card{max-width:520px;margin:28px auto;text-align:center;padding:30px;align-items:center}
+.empty-illustration{width:66px;height:66px;border-radius:22px;background:var(--pr-l);display:grid;place-items:center;font-size:31px}
+.page-head-action select{min-width:0}
+@media (min-width:900px){
+  .app{grid-template-columns:252px minmax(0,1fr)}
+  .side{width:252px;z-index:21}
+  .top{min-height:66px;justify-content:flex-end;padding:12px 28px}
+  .brand{display:none}
+  .wrap{padding:25px 32px 40px}
+  .split.p{grid-template-columns:minmax(0,1fr) 390px;align-items:start}
+}
+@media (max-width:899px){
+  body{padding-bottom:84px}
+  .top{position:sticky;top:0;min-height:57px;padding:10px 15px}
+  .brand{display:inline;font-size:17px}
+  .wrap{padding:17px 15px 28px}
+  .page-head{margin-bottom:16px;align-items:flex-start}
+  h2{font-size:22px}
+  .order-workspace{grid-template-columns:1fr;gap:15px}
+  #panel{order:2}
+  .panel{position:static}
+  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .product-card{padding:9px;min-height:199px}
+  .product-visual{height:88px}
+  .product-visual span{font-size:37px}
+  .product-name>b{font-size:12px}
+  .product-card .price{font-size:12px}
+  .settings-grid,.more-grid{grid-template-columns:1fr}
+  .setting-card,.more-card{padding:14px}
+  .settings-badge{display:none}
+  .page-head-action{width:100%}
+  .page-head-action select{max-width:100%}
+  .product-search{max-width:none;min-width:100%}
+  .fab{bottom:91px;right:13px;max-width:calc(100% - 26px)}
+}
+@media (max-width:380px){
+  .wrap{padding-left:11px;padding-right:11px}
+  .product-grid{gap:8px}
+  .product-card{min-height:188px;padding:8px}
+  .product-visual{height:78px}
+  .step button{width:29px;height:29px}
+  .bottom button{font-size:9px}
+}
+
+/* ===== TEMA TERANG / GELAP / IKUTI PERANGKAT v10.5 ===== */
+:root[data-uf-theme="light"]{
+  color-scheme:light;
+  --bg:#faf7f2;--surface:#fff;--soft:#f4efe7;--tx:#1f1b16;--mut:#7a7168;--ln:#ece6dd;
+  --pr:#e8590c;--pr-d:#c2410c;--pr-l:#fff1e6;--ok:#2f9e44;--ok-l:#e6f6ea;--bad:#e03131;--bad-l:#fdecec;
+  --sh:0 1px 2px #0000000d,0 8px 24px #0000000a;
+}
+:root[data-uf-theme="dark"]{
+  color-scheme:dark;
+  --bg:#151210;--surface:#211c18;--soft:#2c241e;--tx:#f6eee6;--mut:#b5a89c;--ln:#40362e;
+  --pr:#ff9558;--pr-d:#ffb17c;--pr-l:#472719;--ok:#63d486;--ok-l:#1e3829;--bad:#ff7777;--bad-l:#482525;
+  --sh:0 1px 2px #0008,0 9px 28px #0005;
+}
+:root[data-uf-theme="dark"] body{background:var(--bg);color:var(--tx)}
+:root[data-uf-theme="dark"] .top{background:rgba(33,28,24,.9);color:var(--tx);border-color:var(--ln);box-shadow:0 2px 14px #0003}
+:root[data-uf-theme="dark"] .side{background:var(--surface);border-color:var(--ln)}
+:root[data-uf-theme="dark"] .bottom{background:color-mix(in srgb,var(--surface) 94%,transparent);border-color:var(--ln)}
+:root[data-uf-theme="dark"] .product-visual{background:radial-gradient(circle at 50% 30%,#40352c 0,#332920 48%,#292119 100%);border-color:#514236}
+:root[data-uf-theme="dark"] .product-visual:after{border-color:#67513d;opacity:.4}
+:root[data-uf-theme="dark"] .product-visual small{background:#211c18d9;color:#e0c7b2}
+:root[data-uf-theme="dark"] .paper-wrap{background:var(--soft)}
+:root[data-uf-theme="dark"] .setting-card,
+:root[data-uf-theme="dark"] .more-card{box-shadow:0 3px 14px #0002}
+:root[data-uf-theme="dark"] .setting-card:hover,
+:root[data-uf-theme="dark"] .more-card:hover{box-shadow:0 7px 20px #0003}
+:root[data-uf-theme="dark"] .maps-hint{color:var(--mut)}
+.theme-choice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.theme-choice button{min-width:0;justify-content:center;gap:6px;padding:12px 9px;font-size:12px}
+.theme-choice button:not(.on){background:var(--surface);color:var(--mut);border:1px solid var(--ln)}
+.theme-choice button.on{background:var(--pr);color:#fff;border:1px solid var(--pr)}
+.theme-preview{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.theme-preview-card{border:1px solid var(--ln);border-radius:14px;padding:13px;background:var(--surface);color:var(--tx);min-width:0}
+.theme-preview-card small{display:block;color:var(--mut);font-size:10px;margin-top:5px}
+.theme-preview-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--pr);margin-right:5px}
+@media(max-width:480px){.theme-choice{grid-template-columns:1fr}.theme-choice button{justify-content:flex-start}}
+
 @media print{
   html,body{background:#fff!important;padding:0!important}
   .app,.bottom,#msg,#modal,.fab{display:none!important}
@@ -122,7 +324,7 @@ select.sel:focus{border-color:var(--pr);box-shadow:0 0 0 3px var(--pr-l)}
 <div class="app">
   <aside class="side" id="side"></aside>
   <div>
-    <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="go('menu')"></span></span></div>
+    <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
     <main class="wrap" id="app"><div class="empty">Memuat… <small>(v8)</small></div></main>
   </div>
 </div>
@@ -136,7 +338,7 @@ select.sel:focus{border-color:var(--pr);box-shadow:0 0 0 3px var(--pr-l)}
 /* Penjaga: jika program utama gagal jalan, tampilkan penyebabnya di layar (bukan "Memuat…" selamanya) */
 window.__boot = false;
 window.__errs = [];
-window.__len = 68661;
+window.__len = 86220;
 (function () {
   var box = null;
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
@@ -172,21 +374,56 @@ window.__len = 68661;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v9 · ongkir + printer';
+var APP_VER = 'v10.5 · Modern Bakery UI + Tema';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
+
+/* Preferensi tema hanya disimpan di perangkat/browser masing-masing. */
+var THEME_MODES = ['light','dark','system'];
+function getThemeMode() {
+  const mode = LS.get('uf_theme') || 'system';
+  return THEME_MODES.includes(mode) ? mode : 'system';
+}
+function effectiveTheme(mode) {
+  if (mode !== 'system') return mode;
+  try { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+  catch (e) { return 'light'; }
+}
+function applyThemeMode(mode, notify) {
+  mode = THEME_MODES.includes(mode) ? mode : 'system';
+  LS.set('uf_theme', mode);
+  document.documentElement.setAttribute('data-uf-theme', mode);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', effectiveTheme(mode) === 'dark' ? '#151210' : '#e8590c');
+  if (notify) toast('Tema ' + (mode === 'light' ? 'terang' : mode === 'dark' ? 'gelap' : 'mengikuti perangkat') + ' diterapkan');
+  if (tab === 'pengaturan' && window._settingSection === 'tampilan') render();
+}
+function setThemeMode(mode) { applyThemeMode(mode, true); }
+applyThemeMode(getThemeMode(), false);
+try {
+  const colorPref = window.matchMedia('(prefers-color-scheme: dark)');
+  const onColorPref = () => { if (getThemeMode() === 'system') applyThemeMode('system', false); };
+  if (colorPref.addEventListener) colorPref.addEventListener('change', onColorPref);
+  else if (colorPref.addListener) colorPref.addListener(onColorPref);
+} catch (e) {}
 // Opsional: isi URL /exec di sini agar tidak perlu mengisi lewat layar setup
-var DEFAULT_API = 'https://script.google.com/macros/s/AKfycbwWcnvTcBJzY4SXIxKY30sPXj31oNapu-nIYPnQWDplQOOb5Xvb8WvT3vcZwGDhVOBpFw/exec';
+var DEFAULT_API = '';
 var getApi = () => LS.get('uf_api') || DEFAULT_API;
 var getTok = () => window._tok || LS.get('uf_tok');
 var setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
 
-var D = {menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: ''}}, cart = {}, tab = 'pesan', filt = 'Semua', rfilt = 'Semua', curPO = LS.get('uf_po'), editing = null, dev = null, chr = null, installEv = null;
+var D = {menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0}}, cart = {}, tab = 'pesan', filt = 'Semua', rfilt = 'Semua', curPO = LS.get('uf_po'), editing = null, dev = null, chr = null, installEv = null;
 var shippingMode = 'Pickup';
+var mapsLoading = null, mapsPlaces = null, mapsRoutes = null, destMapObj = null, destMapEl = null, destPolylines = [], originMapObj = null, originPolylines = [];
+var _routePlaceId = '';
+var _routePath = [];
+var _routeDestination = null;
+var mapsKey = () => String(LS.get('uf_maps_key') || '').trim();
+window._selectedDestination = null; window._selectedOrigin = null;
 var $ = s => document.querySelector(s);
 var rp = n => 'Rp' + Number(n || 0).toLocaleString('id-ID');
 var esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -219,7 +456,7 @@ var msgOf = e => (e && e.message) || String(e);
 async function load() {
   if (needSetup() || !getTok()) return render();
   const c = J.get('uf_data', null);
-  if (c) D = Object.assign({menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: ''}}, c);
+  if (c) D = Object.assign({menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0}}, c);
   window._loading = !c;
   render(); updSync();
   await syncNow();
@@ -253,7 +490,7 @@ function perPaket(items) {
 function groups() {
   const g = {};
   D.orders.forEach(o => {
-    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, po: o.po || '', items: [], total: 0, metodeKirim: o.metodeKirim || 'Pickup', daerahKirim: o.daerahKirim || '', alamatKirim: o.alamatKirim || '', jarakKm: Number(o.jarakKm) || 0, ongkir: Number(o.ongkir) || 0};
+    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, po: o.po || '', items: [], total: 0, metodeKirim: o.metodeKirim || 'Pickup', daerahKirim: o.daerahKirim || '', alamatKirim: o.alamatKirim || '', jarakKm: Number(o.jarakKm) || 0, ongkir: Number(o.ongkir) || 0, placeId: o.placeId || '', lat: o.lat == null ? null : Number(o.lat), lng: o.lng == null ? null : Number(o.lng)};
     g[o.id].items.push(o); g[o.id].total += o.qty * o.harga;
   });
   return Object.values(g).map(x => { x.grandTotal = x.total + (x.metodeKirim === 'Kurir' ? Number(x.ongkir) || 0 : 0); return x; }).reverse();
@@ -298,38 +535,53 @@ function poBar(mode) {
 var findPel = n => D.pelanggan.find(p => key(p.nama) === key(n));
 var normArea = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
 var findTarifArea = area => (D.tarifOngkir || []).find(t => t.aktif !== false && normArea(t.area) === normArea(area));
+var findTarifPlace = placeId => placeId ? (D.tarifOngkir || []).find(t => t.aktif !== false && String(t.placeId || '') === String(placeId)) : null;
 var newTarifId = () => 'T' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function feeFromDistance(km) {
+  const c = D.ongkirConfig || {}, rate = Math.max(0, Number(c.ratePerKm) || 0), min = Math.max(0, Number(c.minFee) || 0);
+  if (!rate) return null;
+  return Math.max(min, Math.ceil(Math.max(0, Number(km) || 0)) * rate);
+}
 function currentShipping() {
-  if (shippingMode !== 'Kurir') return {valid: true, metode: 'Pickup', area: '', alamat: '', jarakKm: 0, ongkir: 0};
+  if (shippingMode !== 'Kurir') return {valid: true, metode: 'Pickup', area: '', alamat: '', jarakKm: 0, ongkir: 0, placeId: '', lat: null, lng: null};
   const area = String(window._area || '').trim();
   const customer = findPel(window._n || '');
   const alamat = String(window._al == null ? (customer && customer.alamat || '') : window._al).trim();
+  const selected = window._selectedDestination || (customer && customer.placeId ? {placeId: customer.placeId, lat: customer.lat, lng: customer.lng, address: customer.alamat} : null);
   if (!area) return {valid: false, error: 'Isi daerah / nama alamat tujuan untuk menentukan ongkir'};
-  if (!alamat) return {valid: false, error: 'Isi alamat lengkap tujuan kurir'};
-  const saved = findTarifArea(area);
-  if (saved) return {valid: true, metode: 'Kurir', area: saved.area, alamat, jarakKm: Number(saved.jarakKm) || 0, ongkir: Number(saved.ongkir) || 0, saved: true};
+  if (!alamat) return {valid: false, error: 'Cari alamat tujuan di Google Maps atau isi alamat lengkap pelanggan'};
+  const saved = findTarifPlace(selected && selected.placeId) || findTarifArea(area);
+  if (saved) return {valid: true, metode: 'Kurir', area: saved.area, alamat, jarakKm: Number(saved.jarakKm) || 0, ongkir: Number(saved.ongkir) || 0, placeId: (selected && selected.placeId) || saved.placeId || '', lat: selected && selected.lat != null ? Number(selected.lat) : (saved.lat == null ? null : Number(saved.lat)), lng: selected && selected.lng != null ? Number(selected.lng) : (saved.lng == null ? null : Number(saved.lng)), saved: true};
   const kmText = String(window._km == null ? '' : window._km).trim();
-  const ongkirText = String(window._ongkir == null ? '' : window._ongkir).trim();
-  const km = Number(kmText), ongkir = Number(ongkirText);
-  if (!kmText || !Number.isFinite(km) || km < 0) return {valid: false, error: 'Isi jarak dari toko dalam kilometer'};
-  if (!ongkirText || !Number.isFinite(ongkir) || ongkir < 0) return {valid: false, error: 'Isi nominal ongkos kirim'};
-  return {valid: true, metode: 'Kurir', area, alamat, jarakKm: km, ongkir: Math.round(ongkir), saved: false};
+  const km = Number(kmText);
+  if (!kmText || !Number.isFinite(km) || km < 0) return {valid: false, error: 'Pilih alamat di Maps agar jarak rute dapat dihitung, atau isi jarak manual'};
+  let ongkirText = String(window._ongkir == null ? '' : window._ongkir).trim();
+  let ongkir = ongkirText === '' ? feeFromDistance(km) : Number(ongkirText);
+  if (ongkir == null || !Number.isFinite(ongkir) || ongkir < 0) return {valid: false, error: 'Isi nominal ongkos kirim atau atur tarif per km di Pengaturan Ongkos Kirim'};
+  return {valid: true, metode: 'Kurir', area, alamat, jarakKm: km, ongkir: Math.round(ongkir), placeId: selected && selected.placeId || '', lat: selected && selected.lat != null ? Number(selected.lat) : null, lng: selected && selected.lng != null ? Number(selected.lng) : null, saved: false};
 }
 function tarifInfo() {
   const area = String(window._area || '').trim();
-  if (!area) return '<div class="mut">Masukkan nama daerah/alamat tarif. Daerah yang sudah pernah disimpan akan terisi otomatis.</div>';
-  const t = findTarifArea(area);
-  if (t) return `<div class="note ok">✔ Tarif tersimpan ditemukan untuk <b>${esc(t.area)}</b><br>Jarak: <b>${Number(t.jarakKm) || 0} km</b> · Ongkir: <b>${rp(t.ongkir)}</b><div class="mut">Tarif lama digunakan otomatis. Kelola perubahan tarif melalui menu Menu & Printer.</div></div>`;
-  return `<div class="note warn">Daerah baru. Isi jarak dari toko dan ongkir di bawah. Tarif akan disimpan otomatis untuk pemesanan berikutnya.</div>
-    <label class="mut">Jarak dari toko (km)</label><input type="number" min="0" step="0.1" inputmode="decimal" placeholder="Contoh: 4.5" value="${esc(window._km == null ? '' : window._km)}" oninput="window._km=this.value;updateTarifInfo(false)">
-    <label class="mut">Ongkos kirim (Rp)</label><input type="number" min="0" step="500" inputmode="numeric" placeholder="Contoh: 10000" value="${esc(window._ongkir == null ? '' : window._ongkir)}" oninput="window._ongkir=this.value;updateTarifInfo(false)">`;
+  if (!area) return '<div class="mut">Pilih alamat di Google Maps. Nama alamat dapat digunakan sebagai kunci tarif daerah.</div>';
+  const selected = window._selectedDestination;
+  const saved = findTarifPlace(selected && selected.placeId) || findTarifArea(area);
+  if (saved) return `<div class="note ok">✔ Tarif tersimpan ditemukan untuk <b>${esc(saved.area)}</b><br>Jarak: <b>${Number(saved.jarakKm) || 0} km</b> · Ongkir: <b>${rp(saved.ongkir)}</b><div class="mut">Tarif tersimpan digunakan otomatis. Untuk memperbarui tarif, buka Pengaturan → Ongkos Kirim.</div></div>`;
+  const fee = feeFromDistance(window._km);
+  return `<div class="note ${window._km ? 'ok' : 'warn'}">${window._km ? `✔ Jarak rute Google Maps: <b>${Number(window._km).toFixed(1)} km</b>${fee != null ? `<br>Estimasi ongkir: <b>${rp(fee)}</b>` : '<br>Masukkan ongkir manual di bawah.'}` : 'Daerah baru. Pilih alamat tujuan di Maps untuk menghitung jarak berkendara.'}<div class="mut">Tarif akan disimpan otomatis untuk pemesanan berikutnya.</div></div>
+    <label class="mut">Jarak dari toko (km) — otomatis dari Maps</label><input id="kmOngkir" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Pilih alamat di Maps" value="${esc(window._km == null ? '' : window._km)}" oninput="window._km=this.value;updateTarifInfo(false)">
+    <label class="mut">Ongkos kirim (Rp) ${fee != null ? '— otomatis dari tarif per km' : ''}</label><input id="feeOngkir" type="number" min="0" step="500" inputmode="numeric" placeholder="Contoh: 10000" value="${esc(window._ongkir == null || window._ongkir === '' ? (fee == null ? '' : fee) : window._ongkir)}" oninput="window._ongkir=this.value;updateTarifInfo(false)">`;
 }
 function kirimBox() {
   if (shippingMode !== 'Kurir') return '<div class="note ok">📦 Pickup dipilih — tidak ada ongkos kirim.</div>';
   const areas = (D.tarifOngkir || []).filter(t => t.aktif !== false).map(t => `<option value="${esc(t.area)}">`).join('');
+  const hasOrigin = !!((D.ongkirConfig || {}).placeId || ((D.ongkirConfig || {}).lat != null && (D.ongkirConfig || {}).lng != null));
   return `<div class="col">
+    <label class="mut">Cari alamat tujuan melalui Google Maps</label>
+    <div id="destinationPlaceHost" class="maps-place-host"><div class="mut">${mapsKey() ? 'Memuat pencarian Google Maps…' : 'Atur Google Maps API Key di Pengaturan → Ongkos Kirim.'}</div></div>
+    <div id="destinationRouteStatus" class="note">${hasOrigin ? 'Pilih salah satu alamat pada hasil pencarian untuk menghitung jarak rute berkendara.' : 'Tentukan titik lokasi toko terlebih dahulu di Pengaturan Ongkos Kirim.'}</div>
+    <div id="destinationMap" class="map-mini" aria-label="Peta rute pengiriman"></div>
     <label class="mut">Daerah / nama alamat untuk tarif ongkir</label>
-    <input list="tarifAreaList" placeholder="Mis. Batu 9 / Tanjungpinang Barat" value="${esc(window._area || '')}" oninput="window._area=this.value;window._km='';window._ongkir='';updateTarifInfo(true)" autocomplete="off">
+    <input id="shippingArea" list="tarifAreaList" placeholder="Otomatis dari alamat Maps atau isi nama daerah" value="${esc(window._area || '')}" oninput="window._area=this.value;updateTarifInfo(true)" autocomplete="off">
     <datalist id="tarifAreaList">${areas}</datalist>
     <div id="tarifInfo">${tarifInfo()}</div>
   </div>`;
@@ -340,8 +592,205 @@ function updateTarifInfo(rebuild) {
   if (total) total.textContent = rp(Number(window._subtotal || 0) + (ship.valid ? ship.ongkir : 0));
   if (fee) fee.textContent = rp(ship.valid ? ship.ongkir : 0);
 }
-function setMetodeKirim(mode) { shippingMode = mode === 'Kurir' ? 'Kurir' : 'Pickup'; render(); }
+function setMetodeKirim(mode) { shippingMode = mode === 'Kurir' ? 'Kurir' : 'Pickup'; if (shippingMode === 'Pickup') { window._selectedDestination = null; window._km = ''; window._ongkir = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; } render(); }
 
+/* ---- Google Maps: Places Autocomplete + Routes API ---- */
+function loadMapsApi() {
+  const key = mapsKey();
+  if (!key) return Promise.reject(new Error('Masukkan Google Maps API Key terlebih dahulu di Pengaturan.'));
+  if (window.google && google.maps && google.maps.importLibrary) return Promise.resolve();
+  if (mapsLoading) return mapsLoading;
+  mapsLoading = new Promise((resolve, reject) => {
+    const cb = '__uwaisMapsReady';
+    window[cb] = () => resolve();
+    window.gm_authFailure = () => reject(new Error('Google Maps menolak API Key. Periksa restriction, billing, dan API yang diaktifkan.'));
+    const old = document.getElementById('uwaisMapsScript');
+    if (old) { old.addEventListener('error', () => reject(new Error('Gagal memuat Google Maps JavaScript API.'))); return; }
+    const script = document.createElement('script');
+    script.id = 'uwaisMapsScript'; script.async = true; script.defer = true;
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&v=weekly&loading=async&callback=' + cb;
+    script.onerror = () => reject(new Error('Tidak dapat memuat Google Maps. Periksa koneksi dan API Key.'));
+    document.head.appendChild(script);
+  }).catch(err => { mapsLoading = null; throw err; });
+  return mapsLoading;
+}
+async function mapsLibraries() {
+  await loadMapsApi();
+  if (!mapsPlaces || !mapsRoutes) {
+    const [p, r, m] = await Promise.all([google.maps.importLibrary('places'), google.maps.importLibrary('routes'), google.maps.importLibrary('maps')]);
+    mapsPlaces = p; mapsRoutes = r; window._uwaisMapsLib = m;
+  }
+  return {places: mapsPlaces, routes: mapsRoutes, maps: window._uwaisMapsLib};
+}
+function originForRoute(libs) {
+  const c = D.ongkirConfig || {};
+  if (c.placeId) return new libs.places.Place({id: c.placeId});
+  if (c.lat != null && c.lng != null) return {lat: Number(c.lat), lng: Number(c.lng)};
+  if (c.origin) return c.origin;
+  throw new Error('Pilih dan simpan titik lokasi rumah/toko terlebih dahulu.');
+}
+function showRouteStatus(message, ok) {
+  const el = $('#destinationRouteStatus');
+  if (el) el.innerHTML = `<b>${ok ? '✔ ' : 'ℹ️ '}${esc(message)}</b>`;
+}
+function drawDestinationPath(libs) {
+  if (!destMapObj || !_routePath.length || !google.maps || !google.maps.Polyline) return;
+  destPolylines.forEach(p => p.setMap(null)); destPolylines = [];
+  const line = new google.maps.Polyline({path: _routePath, geodesic: true, strokeOpacity: 0.9, strokeWeight: 4, map: destMapObj});
+  destPolylines = [line];
+  const bounds = new google.maps.LatLngBounds();
+  _routePath.forEach(point => bounds.extend(point));
+  if (_routeDestination) bounds.extend(_routeDestination);
+  destMapObj.fitBounds(bounds);
+}
+async function calculateDestinationRoute(place) {
+  const selected = window._selectedDestination;
+  const status = $('#destinationRouteStatus');
+  if (!place || !selected) return;
+  if (!mapsKey()) { showRouteStatus('Maps API Key belum diatur.', false); return; }
+  if (!((D.ongkirConfig || {}).placeId || (D.ongkirConfig || {}).lat != null || (D.ongkirConfig || {}).origin)) {
+    showRouteStatus('Lokasi toko belum ditetapkan. Atur titik asal di Pengaturan Ongkos Kirim.', false); return;
+  }
+  const saved = findTarifPlace(selected.placeId) || findTarifArea(window._area);
+  if (saved) {
+    window._km = String(saved.jarakKm); window._ongkir = String(saved.ongkir);
+    showRouteStatus('Alamat/daerah sudah memiliki tarif. Jarak ' + saved.jarakKm + ' km dan ongkir ' + rp(saved.ongkir) + ' digunakan dari master tarif.', true);
+    updateTarifInfo(true); return;
+  }
+  if (status) status.textContent = 'Menghitung jarak rute dari toko…';
+  try {
+    const libs = await mapsLibraries();
+    const origin = originForRoute(libs);
+    const destination = selected.placeId ? new libs.places.Place({id: selected.placeId}) : place;
+    const result = await libs.routes.Route.computeRoutes({origin, destination, travelMode: 'DRIVING', fields: ['distanceMeters', 'durationMillis', 'path']});
+    const route = result && result.routes && result.routes[0];
+    if (!route || !Number.isFinite(Number(route.distanceMeters))) throw new Error('Rute berkendara tidak ditemukan untuk alamat tersebut.');
+    const km = Math.round((Number(route.distanceMeters) / 1000) * 10) / 10;
+    window._km = String(km); window._routeDuration = Number(route.durationMillis) || 0;
+    const autoFee = feeFromDistance(km);
+    window._ongkir = autoFee == null ? '' : String(autoFee);
+    const path = route.path || [];
+    _routePath = path.map(point => ({
+      lat: typeof point.lat === 'function' ? point.lat() : Number(point.lat),
+      lng: typeof point.lng === 'function' ? point.lng() : Number(point.lng)
+    })).filter(point => Number.isFinite(point.lat) && Number.isFinite(point.lng));
+    if (destMapObj) drawDestinationPath(libs);
+    showRouteStatus(`Jarak rute berkendara ${km.toFixed(1)} km${window._routeDuration ? ' · Perkiraan ' + Math.round(window._routeDuration / 60000) + ' menit' : ''}. ${saved ? 'Tarif lama dipakai.' : (autoFee == null ? 'Isi nominal ongkir.' : 'Ongkir dihitung dari tarif per km.')}`, true);
+    updateTarifInfo(true);
+  } catch (err) {
+    showRouteStatus(msgOf(err), false);
+    toast('Maps: ' + msgOf(err));
+  }
+}
+async function attachPlaceAutocomplete(hostId, onPlace, placeholder) {
+  let host = document.getElementById(hostId); if (!host || host.dataset.mapsReady === '1' || host.dataset.mapsLoading === '1') return;
+  if (!mapsKey()) { host.innerHTML = '<div class="maps-hint">Google Maps belum dikonfigurasi. Masukkan API Key di Pengaturan.</div>'; return; }
+  host.dataset.mapsLoading = '1';
+  try {
+    const libs = await mapsLibraries();
+    host = document.getElementById(hostId); if (!host) return;
+    if (host.dataset.mapsReady === '1') return;
+    const el = new libs.places.PlaceAutocompleteElement();
+    el.placeholder = placeholder || 'Cari alamat atau nama tempat…';
+    el.includedRegionCodes = ['id'];
+    const cfg = D.ongkirConfig || {};
+    if (cfg.lat != null && cfg.lng != null) el.locationBias = {radius: 50000, center: {lat: Number(cfg.lat), lng: Number(cfg.lng)}};
+    el.style.width = '100%';
+    el.addEventListener('gmp-select', async event => {
+      try {
+        const place = event.placePrediction.toPlace();
+        await place.fetchFields({fields: ['displayName', 'formattedAddress', 'location']});
+        const loc = place.location;
+        const value = {displayName: place.displayName || '', address: place.formattedAddress || place.displayName || '', placeId: place.id || '', lat: loc ? (typeof loc.lat === 'function' ? loc.lat() : loc.lat) : null, lng: loc ? (typeof loc.lng === 'function' ? loc.lng() : loc.lng) : null};
+        await onPlace(value, place);
+      } catch (err) { toast('Alamat Maps: ' + msgOf(err)); }
+    });
+    host.innerHTML = ''; host.appendChild(el); host.dataset.mapsReady = '1'; delete host.dataset.mapsLoading;
+  } catch (err) {
+    host = document.getElementById(hostId);
+    if (host) { host.innerHTML = `<div class="maps-hint">${esc(msgOf(err))}</div>`; delete host.dataset.mapsLoading; }
+  }
+}
+function setAddressInOrder(address) {
+  window._al = address;
+  const input = $('#alamatPesanan'); if (input) input.value = address;
+}
+async function initDestinationMapsUi() {
+  let host = $('#destinationPlaceHost'); if (!host) return;
+  await attachPlaceAutocomplete('destinationPlaceHost', async (value, place) => {
+    window._selectedDestination = value;
+    _routePlaceId = value.placeId || '';
+    _routePath = []; _routeDestination = value.lat != null && value.lng != null ? {lat:value.lat, lng:value.lng} : null;
+    destPolylines.forEach(p => p.setMap(null)); destPolylines = [];
+    setAddressInOrder(value.address);
+    window._area = value.address;
+    window._lastMapsArea = value.address;
+    const area = $('#shippingArea'); if (area) area.value = window._area;
+    if (destMapObj && value.lat != null && value.lng != null) destMapObj.setCenter({lat: value.lat, lng: value.lng});
+    await calculateDestinationRoute(place);
+  }, 'Cari alamat pelanggan di Google Maps…');
+  host = $('#destinationPlaceHost');
+  if (mapsKey() && host && host.dataset.mapsReady === '1') {
+    try {
+      const libs = await mapsLibraries();
+      const el = $('#destinationMap');
+      if (el && (!destMapObj || destMapEl !== el)) {
+        destPolylines.forEach(p => p.setMap(null)); destPolylines = [];
+        const c = D.ongkirConfig || {};
+        const center = c.lat != null && c.lng != null ? {lat: Number(c.lat), lng: Number(c.lng)} : {lat: -0.5, lng: 117.5};
+        destMapObj = new libs.maps.Map(el, {center, zoom: 11, mapTypeControl: false, streetViewControl: false, fullscreenControl: false});
+        destMapEl = el;
+        if (_routeDestination) destMapObj.setCenter(_routeDestination);
+        if (_routePath.length) drawDestinationPath(libs);
+      }
+      const selected = window._selectedDestination;
+      if (selected && selected.placeId && _routePlaceId !== selected.placeId) {
+        _routePlaceId = selected.placeId;
+        await calculateDestinationRoute(new libs.places.Place({id:selected.placeId}));
+      }
+    } catch (_) {}
+  }
+}
+async function initOriginMapsUi() {
+  const host = $('#originPlaceHost'); if (!host || host.dataset.mapsReady === '1') return;
+  await attachPlaceAutocomplete('originPlaceHost', async value => {
+    window._selectedOrigin = value;
+    const input = $('#asalOngkir'); if (input) input.value = value.address;
+    const info = $('#originLocationInfo'); if (info) info.textContent = 'Titik toko dipilih dari Maps: ' + value.address;
+  }, 'Cari alamat rumah/toko di Google Maps…');
+}
+async function initCustomerMapsUi() {
+  const host = $('#pelangganPlaceHost'); if (!host || host.dataset.mapsReady === '1' || !window._pe) return;
+  await attachPlaceAutocomplete('pelangganPlaceHost', async value => {
+    Object.assign(window._pe, {alamat: value.address, placeId: value.placeId, lat: value.lat, lng: value.lng});
+    const input = $('#pelAlamat'); if (input) input.value = value.address;
+    const info = $('#pelangganMapsInfo'); if (info) info.textContent = 'Alamat dan koordinat Maps berhasil dipilih.';
+  }, 'Cari alamat pelanggan di Google Maps…');
+}
+async function recalcTarifMaps(value, place) {
+  try {
+    const libs = await mapsLibraries(), origin = originForRoute(libs), destination = value.placeId ? new libs.places.Place({id: value.placeId}) : place;
+    const result = await libs.routes.Route.computeRoutes({origin, destination, travelMode: 'DRIVING', fields: ['distanceMeters']});
+    const route = result && result.routes && result.routes[0];
+    if (!route) throw new Error('Rute tidak ditemukan');
+    const km = Math.round(Number(route.distanceMeters) / 1000 * 10) / 10;
+    const e = window._te; if (!e) return;
+    e.area = e.area || value.address; e.placeId = value.placeId; e.lat = value.lat; e.lng = value.lng; e.jarakKm = km;
+    const fee = feeFromDistance(km); if (fee != null) e.ongkir = fee;
+    const a = $('#tarifArea'); if (a) a.value = e.area;
+    const k = $('#tarifKm'); if (k) k.value = km;
+    const f = $('#tarifFee'); if (f && fee != null) f.value = fee;
+    toast('Jarak Maps ' + km.toFixed(1) + ' km berhasil dihitung.');
+  } catch (err) { toast('Gagal hitung jarak Maps: ' + msgOf(err)); }
+}
+async function initTarifMapsUi() {
+  const host = $('#tarifPlaceHost'); if (!host || host.dataset.mapsReady === '1' || !window._te) return;
+  await attachPlaceAutocomplete('tarifPlaceHost', async value => {
+    window._te.area = value.address; window._te.placeId = value.placeId; window._te.lat = value.lat; window._te.lng = value.lng;
+    const a = $('#tarifArea'); if (a) a.value = value.address;
+    await recalcTarifMaps(value, null);
+  }, 'Cari daerah/alamat tarif di Google Maps…');
+}
 function waLink(hp) {
   let d = String(hp || '').replace(/\D/g, '');
   if (d.startsWith('0')) d = '62' + d.slice(1); else if (d.startsWith('8')) d = '62' + d;
@@ -349,17 +798,64 @@ function waLink(hp) {
 }
 
 /* ================= TAMPILAN ================= */
-var TABS = [['pesan', '➕', 'Pesan'], ['order', '📋', 'Orderan'], ['rekap', '🧮', 'Rekap'], ['po', '📅', 'PO'], ['pelanggan', '👥', 'Pelanggan'], ['menu', '🍽️', 'Menu']];
+var MAIN_TABS = [['pesan', '🛒', 'Pesan'], ['order', '📋', 'Orderan'], ['rekap', '📊', 'Rekap'], ['lainnya', '☰', 'Lainnya']];
+var DESKTOP_TX = [['pesan', '🛒', 'Buat Pesanan'], ['order', '📋', 'Orderan'], ['rekap', '📊', 'Rekap']];
+var DESKTOP_MGMT = [['po', '📅', 'Periode PO'], ['pelanggan', '👥', 'Pelanggan'], ['menu', '🥐', 'Menu Produk']];
+function sideButton(t) {
+  const active = tab === t[0] || (t[0] === 'lainnya' && ['po','pelanggan','menu','pengaturan'].includes(tab));
+  return `<button class="nv ${active ? 'on' : ''}" onclick="${t[0] === 'pengaturan' ? "openSetting('home')" : `go('${t[0]}')`}"><span class="nv-ico">${t[1]}</span><span>${t[2]}</span></button>`;
+}
 function render() {
   if (needSetup()) { $('#side').innerHTML = ''; $('#bottom').innerHTML = ''; $('#app').innerHTML = vSetup(); return; }
   if (!getTok()) { $('#side').innerHTML = ''; $('#bottom').innerHTML = ''; $('#app').innerHTML = vLogin(); setTimeout(() => { const p = $('#pin'); if (p) p.focus(); }, 60); return; }
-  $('#side').innerHTML = '<div class="logo">🥐 Uwais Food</div>' +
-    TABS.map(t => `<button class="nv ${tab === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('') +
-    '<div class="sp"></div><div class="mut" style="padding:0 12px">Pengelola orderan</div>';
-  $('#bottom').innerHTML = TABS.map(t => `<button class="${tab === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('');
-  $('#app').innerHTML = {pesan: vPesan, order: vOrder, rekap: vRekap, po: vPO, pelanggan: vPelanggan, menu: vMenu}[tab]();
+  $('#side').innerHTML = `<div class="logo"><span class="logo-mark">🥐</span><span class="logo-copy">Uwais Food<small>BAKERY MANAGEMENT</small></span></div>
+    <div class="nav-label">TRANSAKSI</div>${DESKTOP_TX.map(sideButton).join('')}
+    <div class="nav-label nav-label-gap">PENGELOLAAN</div>${DESKTOP_MGMT.map(sideButton).join('')}
+    <div class="side-spacer"></div>${sideButton(['pengaturan','⚙️','Pengaturan'])}
+    <div class="side-foot"><span class="online-dot"></span> Pengelola orderan <small>${APP_VER}</small></div>`;
+  const activeBottom = ['po','pelanggan','menu','pengaturan'].includes(tab) ? 'lainnya' : tab;
+  $('#bottom').innerHTML = MAIN_TABS.map(t => `<button class="${activeBottom === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('');
+  const views = {pesan: vPesan, order: vOrder, rekap: vRekap, po: vPO, pelanggan: vPelanggan, menu: vMenu, pengaturan: vPengaturan, lainnya: vLainnya};
+  $('#app').innerHTML = (views[tab] || vPesan)();
+  if (tab === 'pesan' && shippingMode === 'Kurir') setTimeout(initDestinationMapsUi, 0);
+  if (tab === 'pengaturan' && (window._settingSection || 'home') === 'ongkir') {
+    setTimeout(initOriginMapsUi, 0);
+    if (window._te) setTimeout(initTarifMapsUi, 0);
+  }
+  if (tab === 'pelanggan' && window._pe) setTimeout(initCustomerMapsUi, 0);
 }
-function go(t) { tab = t; render(); window.scrollTo(0, 0); }
+function go(t) {
+  tab = t;
+  if (t === 'pengaturan') window._settingSection = 'home';
+  render(); window.scrollTo(0, 0);
+}
+function openSetting(section) { window._settingSection = section || 'home'; tab = 'pengaturan'; render(); window.scrollTo(0, 0); }
+function filterProducts(value) {
+  const q = key(value);
+  document.querySelectorAll('.product-card').forEach(el => { el.hidden = !!q && !(el.dataset.search || '').includes(q); });
+  const empty = $('#productSearchEmpty');
+  if (empty) empty.style.display = [...document.querySelectorAll('.product-card')].some(el => !el.hidden) ? 'none' : 'block';
+}
+function productEmoji(name) {
+  const n = key(name);
+  if (n.includes('banana')) return '🍌';
+  if (n.includes('bolen')) return '🥐';
+  if (n.includes('cake') || n.includes('cheese')) return '🍰';
+  if (n.includes('daging')) return '🥟';
+  if (n.includes('cokelat')) return '🍫';
+  return '🧁';
+}
+function vLainnya() {
+  const items = [
+    ['po','📅','Periode PO','Atur periode pre-order dan tanggal pengambilan','Kelola PO'],
+    ['pelanggan','👥','Pelanggan','Data pelanggan, alamat Maps, dan riwayat pesanan','Buka pelanggan'],
+    ['menu','🥐','Menu Produk','Kelola nama produk, harga, dan komposisi paket','Kelola menu'],
+    ['pengaturan','⚙️','Pengaturan','Printer, ongkir, struk, aplikasi, dan keamanan','Buka pengaturan']
+  ];
+  return `<div class="page-head"><div><div class="eyebrow">AREA PENGELOLAAN</div><h2>Lainnya</h2><div class="page-subtitle">Akses data dan konfigurasi Uwais Food.</div></div></div>
+    <div class="more-grid">${items.map(x => `<button class="more-card" onclick="${x[0] === 'pengaturan' ? "openSetting('home')" : `go('${x[0]}')`}"><span class="more-icon">${x[1]}</span><span class="more-copy"><b>${x[2]}</b><small>${x[3]}</small><em>${x[4]} →</em></span><span class="more-arrow">›</span></button>`).join('')}</div>
+    <div class="more-note"><span>💡</span><span>Aktivitas pemesanan tetap tersedia pada menu utama. Bagian ini berisi pengelolaan data dan pengaturan aplikasi.</span></div>`;
+}
 var chips = isi => parseIsi(isi).map(p => `<span class="tag pr">${p.n} ${esc(p.nama)}</span>`).join('');
 
 /* ================= OFFLINE: cache lokal + antrean sinkron ================= */
@@ -371,7 +867,7 @@ var J = {
 };
 var Q = J.get('uf_q', []), ONLINE = navigator.onLine !== false, flushing = false, refreshing = false;
 var saveQ = () => J.set('uf_q', Q);
-var saveCache = () => J.set('uf_data', {menu: D.menu, orders: D.orders.slice(-4000), pelanggan: D.pelanggan, pos: D.pos, tarifOngkir: D.tarifOngkir || [], ongkirConfig: D.ongkirConfig || {origin: ''}, sheetUrl: D.sheetUrl});
+var saveCache = () => J.set('uf_data', {menu: D.menu, orders: D.orders.slice(-4000), pelanggan: D.pelanggan, pos: D.pos, tarifOngkir: D.tarifOngkir || [], ongkirConfig: D.ongkirConfig || {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0}, sheetUrl: D.sheetUrl});
 function setOnline(v) { ONLINE = v; updSync(); }
 function updSync() {
   const el = $('#sync'); if (!el) return;
@@ -387,6 +883,9 @@ function upsertPelLocal(nama, pel) {
   if (!p) { p = {nama, hp: '', alamat: '', catatan: '', terakhir: '', jumlah: 0}; D.pelanggan.push(p); }
   if (pel && pel.hp) p.hp = pel.hp;
   if (pel && pel.alamat) p.alamat = pel.alamat;
+  if (pel && pel.placeId) p.placeId = pel.placeId;
+  if (pel && pel.lat != null) p.lat = pel.lat;
+  if (pel && pel.lng != null) p.lng = pel.lng;
   const d = new Date();
   p.jumlah += 1; p.terakhir = two(d.getDate()) + '/' + two(d.getMonth() + 1) + '/' + String(d.getFullYear()).slice(2);
 }
@@ -423,11 +922,11 @@ async function refresh() {
   try {
     const d = await run('getData');
     d.pelanggan = d.pelanggan || []; d.pos = d.pos || [];
-    d.tarifOngkir = d.tarifOngkir || []; d.ongkirConfig = d.ongkirConfig || {origin: ''};
+    d.tarifOngkir = d.tarifOngkir || []; d.ongkirConfig = Object.assign({origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0}, d.ongkirConfig || {});
     if (Q.length) return;                         // ada perubahan baru selagi menunggu: jangan timpa
     if (tab === 'menu') d.menu = D.menu;          // jangan hilangkan editan menu yang belum disimpan
     const before = JSON.stringify([D.menu, D.orders, D.pelanggan, D.pos, D.tarifOngkir || [], D.ongkirConfig || {}]);
-    D = d; window._lastRef = Date.now(); window._err = ''; saveCache(); setOnline(true);
+    D = d; window._lastRef = Date.now(); window._err = ''; if (D.ongkirConfig && D.ongkirConfig.placeId && !window._selectedOrigin) window._selectedOrigin = {address:D.ongkirConfig.origin,placeId:D.ongkirConfig.placeId,lat:D.ongkirConfig.lat,lng:D.ongkirConfig.lng}; saveCache(); setOnline(true);
     if (JSON.stringify([D.menu, D.orders, D.pelanggan, D.pos, D.tarifOngkir || [], D.ongkirConfig || {}]) !== before) softRender();
   } catch (e) {
     if (e.retry) { window._err = msgOf(e); setOnline(false); }
@@ -462,7 +961,7 @@ async function masuk() {
 function keluar() {
   if (Q.length && !confirm(Q.length + ' perubahan belum terkirim ke server dan akan hilang jika keluar. Tetap keluar?')) return;
   Q = []; editing = null; J.del('uf_q'); J.del('uf_data'); setTok(''); closeStruk();
-  D = {menu: [], orders: [], pelanggan: [], pos: []}; cart = {}; render(); updSync();
+  D = {menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin:'', placeId:'', lat:null, lng:null, ratePerKm:0, minFee:0}}; cart = {}; render(); updSync();
 }
 
 /* ---- Setup (hanya versi hosting) ---- */
@@ -491,11 +990,30 @@ function pinfo() {
   return `${p ? `<div class="note ok">✔ Pelanggan lama${p.jumlah ? ` · ${p.jumlah}× order` : ''}</div>` : '<div class="note">Pelanggan baru — akan tersimpan otomatis.</div>'}
     <div class="col" style="margin-top:8px">
       ${editing ? '' : `<label class="mut">No. HP (opsional)</label><input placeholder="08xxxxxxxxxx" inputmode="tel" value="${esc(hp || '')}" oninput="window._hp=this.value">`}
-      <label class="mut">Alamat lengkap (untuk pengiriman kurir)</label><input placeholder="Alamat lengkap pelanggan" value="${esc(alamat || '')}" oninput="window._al=this.value">
+      <label class="mut">Alamat lengkap (untuk pengiriman kurir)</label><input id="alamatPesanan" placeholder="Pilih dari Maps atau isi alamat lengkap" value="${esc(alamat || '')}" oninput="window._al=this.value;if(window._selectedDestination&&this.value!==window._selectedDestination.address){window._selectedDestination=null;window._km='';window._ongkir='';_routePlaceId='';_routePath=[];_routeDestination=null;updateTarifInfo(true)}">
       ${p && p.catatan ? `<div class="mut">📝 ${esc(p.catatan)}</div>` : ''}
     </div>`;
 }
-function pilihPel(i) { const p = D.pelanggan[i]; window._n = p.nama; window._hp = p.hp || ''; window._al = p.alamat || ''; const y = window.scrollY; render(); window.scrollTo(0, y); }
+function setDataPelangganPesanan(p) {
+  window._hp = p ? (p.hp || '') : '';
+  window._al = p ? (p.alamat || '') : '';
+  window._selectedDestination = p && p.placeId ? {displayName:p.alamat,address:p.alamat,placeId:p.placeId,lat:p.lat,lng:p.lng} : null;
+  window._area = p ? (p.alamat || '') : '';
+  window._km = ''; window._ongkir = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null;
+}
+function ubahNamaPesanan(value) {
+  window._n = value;
+  const p = findPel(value);
+  setDataPelangganPesanan(p);
+  const info = $('#pinfo'); if (info) info.innerHTML = pinfo();
+  const area = $('#shippingArea'); if (area) area.value = window._area || '';
+  updateTarifInfo(true);
+  if (p && p.placeId && shippingMode === 'Kurir' && mapsKey()) setTimeout(initDestinationMapsUi, 0);
+}
+function pilihPel(i) {
+  const p = D.pelanggan[i]; window._n = p.nama; setDataPelangganPesanan(p);
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+}
 
 var priceOf = m => { const o = editing && editing.orig[m.nama]; return o ? o.harga : m.harga; };   // saat edit: harga lama tetap
 var isiOf = m => { const o = editing && editing.orig[m.nama]; return o ? o.isi : m.isi; };
@@ -505,7 +1023,7 @@ function editBanner() {
     Item yang sudah dipesan tetap memakai harga saat dipesan; data pengiriman dipertahankan.</div>`;
 }
 function vPesan() {
-  if (!editing && !poTarget()) return `<h2>Buat Pesanan</h2><div class="card col" style="text-align:center;padding:26px;max-width:460px;margin:20px auto"><div style="font-size:38px">📅</div><b style="font-size:17px">Belum ada PO yang dibuka</b><div class="mut">Buat PO (periode pre-order) dulu. Semua pesanan, rekap, dan struk akan dikelompokkan per PO.</div><button onclick="bukaFormPO()">+ Buat PO baru</button></div>`;
+  if (!editing && !poTarget()) return `<div class="page-head"><div><div class="eyebrow">TRANSAKSI</div><h2>Buat Pesanan</h2><div class="page-subtitle">Mulai pesanan baru untuk pelanggan Uwais Food.</div></div></div><div class="card col empty-state-card"><div class="empty-illustration">📅</div><b style="font-size:17px">Belum ada PO yang dibuka</b><div class="mut">Buat periode pre-order terlebih dahulu agar pesanan, rekap, dan struk dapat dikelompokkan.</div><button onclick="bukaFormPO()">+ Buat PO baru</button></div>`;
   const ex = editing ? editing.extra : [];
   const lines = D.menu.map((m, i) => ({m, i, q: cart[i] || 0})).filter(x => x.q > 0);
   const total = lines.reduce((s, x) => s + x.q * priceOf(x.m), 0) + ex.reduce((s, x) => s + x.qty * x.harga, 0);
@@ -513,42 +1031,47 @@ function vPesan() {
   const shipPreview = currentShipping(), totalTagihan = total + (shipPreview.valid ? shipPreview.ongkir : 0);
   const comp = komponen([...lines.map(x => ({item: x.m.nama, qty: x.q, isi: isiOf(x.m)})), ...ex.filter(x => x.qty > 0).map(x => ({item: x.nama, qty: x.qty, isi: x.isi}))]);
   const top = editing ? [] : topPel();
+  const productQuery = key(window._productQuery || '');
+  const visibleProductCount = D.menu.filter(m => key(m.nama).includes(productQuery)).length + ex.filter(x => key(x.nama).includes(productQuery)).length;
   const exCards = ex.map((x, i) => `
-    <div class="card menu-card ${x.qty ? 'on' : ''}">
-      <div><b style="font-size:16px">${esc(x.nama)}</b> <span class="tag">tidak ada di menu</span>
-        ${x.isi ? `<div class="tags" style="margin-top:6px">${chips(x.isi)}</div>` : ''}</div>
-      <div class="row"><span class="price">${rp(x.harga)}</span>
-        <div class="step"><button class="o" onclick="chgExtra(${i},-1)">−</button><b>${x.qty}</b><button onclick="chgExtra(${i},1)">+</button></div></div>
+    <div class="card menu-card product-card ${x.qty ? 'on' : ''}" data-search="${esc(key(x.nama))}" ${productQuery && !key(x.nama).includes(productQuery) ? 'hidden' : ''}>
+      <div class="product-visual"><span>${productEmoji(x.nama)}</span><small>ITEM LAMA</small></div>
+      <div class="product-name"><b>${esc(x.nama)}</b><span class="tag">tidak ada di menu</span>${x.isi ? `<div class="tags" style="margin-top:6px">${chips(x.isi)}</div>` : ''}</div>
+      <div class="row product-bottom"><span class="price">${rp(x.harga)}</span><div class="step"><button class="o" onclick="chgExtra(${i},-1)">−</button><b>${x.qty}</b><button onclick="chgExtra(${i},1)">+</button></div></div>
     </div>`).join('');
   const cards = exCards + D.menu.map((m, i) => `
-    <div class="card menu-card ${cart[i] ? 'on' : ''}">
-      <div><b style="font-size:16px">${esc(m.nama)}</b>
-        ${isiOf(m) ? `<div class="tags" style="margin-top:6px">${chips(isiOf(m))}</div>` : '<div class="mut">Satuan</div>'}</div>
-      <div class="row"><span class="price">${rp(priceOf(m))}</span>
+    <div class="card menu-card product-card ${cart[i] ? 'on' : ''}" data-search="${esc(key(m.nama))}" ${productQuery && !key(m.nama).includes(productQuery) ? 'hidden' : ''}>
+      <div class="product-visual"><span>${productEmoji(m.nama)}</span><small>${m.isi ? 'PAKET' : 'PRODUK'}</small></div>
+      <div class="product-name"><b>${esc(m.nama)}</b>
+        ${isiOf(m) ? `<div class="tags" style="margin-top:6px">${chips(isiOf(m))}</div>` : '<div class="mut">Produk satuan</div>'}</div>
+      <div class="row product-bottom"><span class="price">${rp(priceOf(m))}</span>
         <div class="step"><button class="o" onclick="chg(${i},-1)">−</button><b>${cart[i] || 0}</b><button onclick="chg(${i},1)">+</button></div></div>
     </div>`).join('');
   const nLines = lines.length + ex.filter(x => x.qty > 0).length;
   const panel = `
     <div class="card panel col">
-      <b style="font-size:16px">${editing ? '✏️ Edit pesanan' : 'Pesanan baru'}</b>
+      <div class="panel-heading"><span class="panel-heading-icon">🛍️</span><span><b>${editing ? 'Edit pesanan' : 'Ringkasan pesanan'}</b><small>${nLines} jenis produk dipilih</small></span></div>
       ${top.length ? `<div><div class="mut" style="margin-bottom:6px">Pelanggan langganan</div><div class="tags">${top.map(x => `<button class="tag" onclick="pilihPel(${x.i})">${esc(x.p.nama)}</button>`).join('')}</div></div>` : ''}
-      <input id="nama" list="pelList" placeholder="Nama pemesan" value="${esc(window._n || '')}" oninput="window._n=this.value;window._hp=null;window._al=null;$('#pinfo').innerHTML=pinfo()" autocomplete="off">
+      <label class="field-label" for="nama">Nama pemesan</label>
+      <input id="nama" list="pelList" placeholder="Ketik nama pelanggan" value="${esc(window._n || '')}" oninput="ubahNamaPesanan(this.value)" autocomplete="off">
       <datalist id="pelList">${D.pelanggan.map(p => `<option value="${esc(p.nama)}">`).join('')}</datalist>
       <div id="pinfo">${pinfo()}</div>
-      <div class="col"><label class="mut">Metode penyerahan pesanan</label><div class="seg">
+      <div class="shipping-selector"><label class="field-label">Metode penyerahan</label><div class="seg shipping-seg">
         <button class="${shippingMode === 'Pickup' ? 'on' : ''}" onclick="setMetodeKirim('Pickup')">📦 Pickup</button>
         <button class="${shippingMode === 'Kurir' ? 'on' : ''}" onclick="setMetodeKirim('Kurir')">🚚 Via Kurir</button>
       </div><div id="kirimBox">${kirimBox()}</div></div>
-      ${nLines ? lines.map(x => `<div class="line"><span>${x.q}× ${esc(x.m.nama)}</span><b>${rp(x.q * priceOf(x.m))}</b></div>`).join('') + ex.filter(x => x.qty > 0).map(x => `<div class="line"><span>${x.qty}× ${esc(x.nama)}</span><b>${rp(x.qty * x.harga)}</b></div>`).join('') : '<div class="mut">Belum ada menu dipilih.</div>'}
-      ${comp.length ? `<div><div class="mut" style="margin-bottom:6px">Rincian isi</div><div class="tags">${comp.map(c => `<span class="tag ok">${c.qty} ${esc(c.nama)}</span>`).join('')}</div></div>` : ''}
-      <div class="line"><span class="mut">Subtotal produk</span><b>${rp(total)}</b></div>
+      <div class="cart-lines">${nLines ? lines.map(x => `<div class="line"><span>${x.q}× ${esc(x.m.nama)}</span><b>${rp(x.q * priceOf(x.m))}</b></div>`).join('') + ex.filter(x => x.qty > 0).map(x => `<div class="line"><span>${x.qty}× ${esc(x.nama)}</span><b>${rp(x.qty * x.harga)}</b></div>`).join('') : '<div class="mut">Belum ada produk dipilih. Tambahkan produk dari daftar.</div>'}</div>
+      ${comp.length ? `<div><div class="mut" style="margin-bottom:6px">Rincian isi paket</div><div class="tags">${comp.map(c => `<span class="tag ok">${c.qty} ${esc(c.nama)}</span>`).join('')}</div></div>` : ''}
+      <div class="totals-box"><div class="line"><span class="mut">Subtotal produk</span><b>${rp(total)}</b></div>
       ${shippingMode === 'Kurir' ? `<div class="line"><span class="mut">Ongkos kirim</span><b id="orderFee">${rp(shipPreview.valid ? shipPreview.ongkir : 0)}</b></div>` : ''}
-      <div class="row"><span class="mut">Total pembayaran</span><span class="big" id="orderTotal">${rp(totalTagihan)}</span></div>
-      <button class="full" onclick="${editing ? 'simpanEdit()' : 'simpan()'}">${editing ? 'Simpan Perubahan' : 'Simpan Pesanan'}</button>
-      ${editing ? '<button class="o" onclick="batalEdit()">Batal edit</button>' : (nLines ? '<button class="o" onclick="cart={};render()">Kosongkan</button>' : '')}
+      <div class="grand-total"><span>Total pembayaran</span><strong id="orderTotal">${rp(totalTagihan)}</strong></div></div>
+      <button class="full checkout-btn" onclick="${editing ? 'simpanEdit()' : 'simpan()'}">${editing ? 'Simpan Perubahan' : 'Simpan Pesanan'} <span>→</span></button>
+      ${editing ? '<button class="o" onclick="batalEdit()">Batal edit</button>' : (nLines ? '<button class="o" onclick="cart={};render()">Kosongkan keranjang</button>' : '')}
     </div>`;
-  return `<h2>${editing ? 'Edit Pesanan' : 'Buat Pesanan'}</h2>${editing ? editBanner() : poBar('pesan')}<div class="split p"><div class="grid">${cards || (window._loading ? '<div class="empty">Memuat…</div>' : '<div class="empty">Menu kosong. Tambah di tab Menu.</div>')}</div><div id="panel">${panel}</div></div>` +
-    (nLines ? `<button class="fab" onclick="document.getElementById('panel').scrollIntoView({behavior:'smooth'})">🛒 ${rp(total)}</button>` : '');
+  return `<div class="page-head"><div><div class="eyebrow">TRANSAKSI</div><h2>${editing ? 'Edit Pesanan' : 'Buat Pesanan'}</h2><div class="page-subtitle">Pilih produk, pelanggan, dan metode penyerahan pesanan.</div></div><div class="page-head-action">${editing ? '' : poBar('pesan')}</div></div>${editing ? editBanner() : ''}
+    <div class="order-workspace"><section class="product-section"><div class="product-toolbar"><div><b>Pilih Produk</b><small>${D.menu.length} produk tersedia</small></div><div class="product-search"><span>⌕</span><input placeholder="Cari produk…" value="${esc(window._productQuery || '')}" oninput="window._productQuery=this.value;filterProducts(this.value)"></div></div>
+    <div class="grid product-grid" id="productGrid">${cards || (window._loading ? '<div class="empty">Memuat…</div>' : '<div class="empty">Menu kosong. Tambah produk di Menu Produk.</div>')}</div><div id="productSearchEmpty" class="empty" style="display:${productQuery && !visibleProductCount ? 'block' : 'none'}">Produk tidak ditemukan.</div></section><aside id="panel">${panel}</aside></div>` +
+    (nLines ? `<button class="fab" onclick="document.getElementById('panel').scrollIntoView({behavior:'smooth'})">🛒 ${rp(totalTagihan)} · Lihat Pesanan</button>` : '');
 }
 function chgExtra(i, d) { const x = editing.extra[i]; x.qty = Math.max(0, x.qty + d); const y = window.scrollY; render(); window.scrollTo(0, y); }
 
@@ -563,9 +1086,10 @@ function editOrder(id) {
     if (i >= 0) cart[i] = (cart[i] || 0) + it.qty;
     else extra.push({nama: it.item, harga: it.harga, isi: it.isi || '', qty: it.qty});   // menu sudah dihapus/diganti nama
   });
-  editing = {id, nama0: g.nama, po: g.po, waktu: g.waktu, status: g.status, orig, extra, metodeKirim: g.metodeKirim || 'Pickup', daerahKirim: g.daerahKirim || '', alamatKirim: g.alamatKirim || '', jarakKm: g.jarakKm || 0, ongkir: g.ongkir || 0};
+  editing = {id, nama0: g.nama, po: g.po, waktu: g.waktu, status: g.status, orig, extra, metodeKirim: g.metodeKirim || 'Pickup', daerahKirim: g.daerahKirim || '', alamatKirim: g.alamatKirim || '', jarakKm: g.jarakKm || 0, ongkir: g.ongkir || 0, placeId: g.placeId || '', lat: g.lat, lng: g.lng};
   shippingMode = editing.metodeKirim; window._area = editing.daerahKirim; window._km = String(editing.jarakKm || ''); window._ongkir = String(editing.ongkir || '');
-  window._n = g.nama; window._hp = ''; window._al = g.alamatKirim || '';
+  window._n = g.nama; window._hp = ''; window._al = g.alamatKirim || ''; window._selectedDestination = g.placeId ? {address:g.alamatKirim,placeId:g.placeId,lat:g.lat,lng:g.lng} : null;
+  _routePlaceId = ''; _routePath = []; _routeDestination = g.lat != null && g.lng != null ? {lat:Number(g.lat),lng:Number(g.lng)} : null; destMapObj = null; destMapEl = null; destPolylines = [];
   go('pesan');
 }
 function batalEdit() { editing = null; cart = {}; window._n = ''; go('order'); }
@@ -575,12 +1099,20 @@ function simpanEdit() {
   const items = D.menu.map((m, i) => ({nama: m.nama, harga: priceOf(m), isi: isiOf(m), qty: cart[i] || 0})).filter(x => x.qty > 0)
     .concat(e.extra.filter(x => x.qty > 0).map(x => ({nama: x.nama, harga: x.harga, isi: x.isi, qty: x.qty})));
   if (!items.length) return toast('Pilih minimal satu menu (atau hapus pesanan dengan tombol 🗑)');
-  const at = Math.max(0, D.orders.findIndex(o => o.id === e.id));          // posisi asli dipertahankan
+  const shipping = currentShipping(); if (!shipping.valid) return toast(shipping.error);
+  const oldPel = findPel(nama);
+  const pel = {hp: String(window._hp == null ? (oldPel && oldPel.hp || '') : window._hp).trim(), alamat: shipping.metode === 'Kurir' ? shipping.alamat : (oldPel && oldPel.alamat || ''), placeId: shipping.metode === 'Kurir' ? shipping.placeId : '', lat: shipping.metode === 'Kurir' ? shipping.lat : null, lng: shipping.metode === 'Kurir' ? shipping.lng : null};
+  if (shipping.metode === 'Kurir' && !shipping.saved) {
+    const t = {id: newTarifId(), area: shipping.area, jarakKm: shipping.jarakKm, ongkir: shipping.ongkir, aktif: true, placeId: shipping.placeId, lat: shipping.lat, lng: shipping.lng};
+    D.tarifOngkir = D.tarifOngkir || []; D.tarifOngkir.push(t); enqueue('saveTarif', t);
+  }
+  const at = Math.max(0, D.orders.findIndex(o => o.id === e.id));
   D.orders = D.orders.filter(o => o.id !== e.id);
-  D.orders.splice(at, 0, ...items.map(i => ({id: e.id, waktu: e.waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: e.status, isi: i.isi || '', po: e.po, metodeKirim: e.metodeKirim || 'Pickup', daerahKirim: e.daerahKirim || '', alamatKirim: e.alamatKirim || '', jarakKm: e.jarakKm || 0, ongkir: e.ongkir || 0})));
-  if (!findPel(nama)) D.pelanggan.push({nama, hp: '', alamat: '', catatan: '', terakhir: '', jumlah: 0});
-  enqueue('editOrder', e.id, nama, items);
-  editing = null; cart = {}; window._n = ''; shippingMode = 'Pickup'; window._area = ''; window._km = ''; window._ongkir = '';
+  D.orders.splice(at, 0, ...items.map(i => ({id: e.id, waktu: e.waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: e.status, isi: i.isi || '', po: e.po,
+    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng})));
+  upsertPelLocal(nama, pel);
+  enqueue('editOrder', e.id, nama, items, shipping);
+  editing = null; cart = {}; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
   go('order'); toast(ONLINE ? 'Pesanan diperbarui ✔' : 'Perubahan tersimpan di perangkat — akan dikirim saat online');
 }
 function chg(i, d) { cart[i] = Math.max(0, (cart[i] || 0) + d); const y = window.scrollY; render(); window.scrollTo(0, y); }
@@ -593,19 +1125,19 @@ async function simpan() {
   const shipping = currentShipping();
   if (!shipping.valid) return toast(shipping.error);
   const oldPel = findPel(nama);
-  const pel = {hp: String(window._hp == null ? (oldPel && oldPel.hp || '') : window._hp).trim(), alamat: String(window._al == null ? (oldPel && oldPel.alamat || '') : window._al).trim()};
+  const pel = {hp: String(window._hp == null ? (oldPel && oldPel.hp || '') : window._hp).trim(), alamat: String(window._al == null ? (oldPel && oldPel.alamat || '') : window._al).trim(), placeId: shipping.placeId || (oldPel && oldPel.placeId) || '', lat: shipping.lat != null ? shipping.lat : oldPel && oldPel.lat, lng: shipping.lng != null ? shipping.lng : oldPel && oldPel.lng};
   const id = newId(), waktu = nowStr();
   // Daerah baru otomatis menjadi master tarif; order berikutnya memakai jarak dan harga yang sama.
   if (shipping.metode === 'Kurir' && !shipping.saved) {
-    const t = {id: newTarifId(), area: shipping.area, jarakKm: shipping.jarakKm, ongkir: shipping.ongkir, aktif: true};
+    const t = {id: newTarifId(), area: shipping.area, jarakKm: shipping.jarakKm, ongkir: shipping.ongkir, aktif: true, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng};
     D.tarifOngkir = D.tarifOngkir || []; D.tarifOngkir.push(t);
     enqueue('saveTarif', t);
   }
   items.forEach(i => D.orders.push({id, waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: 'Baru', isi: i.isi || '', po: tgt.id,
-    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || pel.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0}));
+    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || pel.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng}));
   upsertPelLocal(nama, pel);
   enqueue('addOrder', nama, items, pel, id, Date.now(), tgt.id, shipping);
-  cart = {}; window._n = ''; window._hp = ''; window._al = null; window._area = ''; window._km = ''; window._ongkir = ''; shippingMode = 'Pickup';
+  cart = {}; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
   go('order'); toast(ONLINE ? 'Tersimpan ✔' : 'Tersimpan di perangkat — akan dikirim saat online'); cetakOrder(id);
 }
 
@@ -679,20 +1211,23 @@ function vPelanggan() {
   const e = window._pe;
   const f = (ph, k, extra = '') => `<input placeholder="${ph}" ${extra} value="${esc(e[k])}" oninput="window._pe.${k}=this.value">`;
   const form = e ? `<div class="card col" style="margin-bottom:14px"><b>${e.lama ? 'Edit pelanggan' : 'Pelanggan baru'}</b>
-      ${f('Nama', 'nama')}${f('No. HP', 'hp', 'inputmode="tel"')}${f('Alamat', 'alamat')}${f('Catatan (mis. suka pedas, alergi kacang)', 'catatan')}
+      ${f('Nama', 'nama')}${f('No. HP', 'hp', 'inputmode="tel"')}
+      <label class="mut">Alamat pelanggan</label><input id="pelAlamat" placeholder="Pilih alamat di Maps atau ketik manual" value="${esc(e.alamat || '')}" oninput="window._pe.alamat=this.value;if(window._pe.placeId){window._pe.placeId='';window._pe.lat=null;window._pe.lng=null}">
+      <div id="pelangganPlaceHost" class="maps-place-host"></div><div id="pelangganMapsInfo" class="maps-hint">Cari dan pilih titik alamat pelanggan melalui Maps.</div>
+      ${f('Catatan (mis. suka pedas, alergi kacang)', 'catatan')}
       <div class="row"><button class="o" onclick="window._pe=null;render()">Batal</button><button onclick="simpanPel()">Simpan</button></div></div>` : '';
   return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Pelanggan</h2>
       <button onclick="window._pe={lama:'',nama:'',hp:'',alamat:'',catatan:''};render()">+ Pelanggan</button></div>${form}
     <input placeholder="🔍 Cari nama / HP…" value="${esc(window._pq || '')}" oninput="window._pq=this.value;$('#plist').innerHTML=plist()" style="margin:10px 0 14px">
     <div id="plist">${plist()}</div>`;
 }
-function editPel(i) { const p = D.pelanggan[i]; window._pe = {lama: p.nama, nama: p.nama, hp: p.hp, alamat: p.alamat, catatan: p.catatan}; render(); window.scrollTo(0, 0); }
+function editPel(i) { const p = D.pelanggan[i]; window._pe = {lama: p.nama, nama: p.nama, hp: p.hp, alamat: p.alamat, catatan: p.catatan, placeId: p.placeId || '', lat: p.lat, lng: p.lng}; render(); window.scrollTo(0, 0); }
 function simpanPel() {
   const e = window._pe;
   if (!e.nama.trim()) return toast('Nama wajib diisi');
   const lama = key(e.lama || e.nama), ada = D.pelanggan.find(p => key(p.nama) === lama);
-  if (ada) Object.assign(ada, {nama: e.nama.trim(), hp: e.hp || '', alamat: e.alamat || '', catatan: e.catatan || ''});
-  else D.pelanggan.push({nama: e.nama.trim(), hp: e.hp || '', alamat: e.alamat || '', catatan: e.catatan || '', terakhir: '', jumlah: 0});
+  if (ada) Object.assign(ada, {nama: e.nama.trim(), hp: e.hp || '', alamat: e.alamat || '', catatan: e.catatan || '', placeId: e.placeId || '', lat: e.lat, lng: e.lng});
+  else D.pelanggan.push({nama: e.nama.trim(), hp: e.hp || '', alamat: e.alamat || '', catatan: e.catatan || '', terakhir: '', jumlah: 0, placeId: e.placeId || '', lat: e.lat, lng: e.lng});
   enqueue('savePelanggan', Object.assign({}, e));
   window._pe = null; render(); toast('Pelanggan tersimpan ✔');
 }
@@ -786,32 +1321,50 @@ function vPO() {
 /* ---- Pengaturan ongkir ---- */
 function ongkirForm() {
   D.tarifOngkir = D.tarifOngkir || [];
-  D.ongkirConfig = D.ongkirConfig || {origin: ''};
-  const e = window._te;
+  D.ongkirConfig = Object.assign({origin:'', placeId:'', lat:null, lng:null, ratePerKm:0, minFee:0}, D.ongkirConfig || {});
+  const e = window._te, c = D.ongkirConfig;
   const form = e ? `<div class="card col" style="margin-bottom:12px"><b>${e.id ? 'Edit tarif ongkir' : 'Tarif daerah baru'}</b>
+      <label class="mut">Cari alamat/daerah tarif melalui Maps</label><div id="tarifPlaceHost" class="maps-place-host"></div>
       <label class="mut">Nama daerah / alamat acuan</label><input id="tarifArea" placeholder="Mis. Batu 9 / Tanjungpinang Barat" value="${esc(e.area || '')}" oninput="window._te.area=this.value">
-      <label class="mut">Jarak dari toko (km)</label><input type="number" min="0" step="0.1" placeholder="Contoh: 4.5" value="${esc(e.jarakKm == null ? '' : e.jarakKm)}" oninput="window._te.jarakKm=this.value">
-      <label class="mut">Ongkos kirim (Rp)</label><input type="number" min="0" step="500" placeholder="Contoh: 10000" value="${esc(e.ongkir == null ? '' : e.ongkir)}" oninput="window._te.ongkir=this.value">
+      <label class="mut">Jarak rute berkendara dari toko (km)</label><input id="tarifKm" type="number" min="0" step="0.1" placeholder="Dihitung otomatis dari Maps" value="${esc(e.jarakKm == null ? '' : e.jarakKm)}" oninput="window._te.jarakKm=this.value">
+      <label class="mut">Ongkos kirim (Rp)</label><input id="tarifFee" type="number" min="0" step="500" placeholder="Contoh: 10000" value="${esc(e.ongkir == null ? '' : e.ongkir)}" oninput="window._te.ongkir=this.value">
       <div class="row"><button class="o" onclick="window._te=null;render()">Batal</button><button onclick="simpanTarifForm()">Simpan tarif</button></div></div>` : '';
   const rows = D.tarifOngkir.filter(t => t.aktif !== false).slice().sort((a,b) => a.area.localeCompare(b.area));
-  return `<h3>Pengaturan Ongkos Kirim</h3><div class="card col">
-    <div class="mut">Alamat ini menjadi patokan jarak. Jarak tiap daerah diisi sekali; pesanan berikutnya dengan nama daerah yang sama akan memakai tarif tersimpan.</div>
-    <label class="mut">Alamat rumah / toko (titik awal pengiriman)</label>
-    <input id="asalOngkir" placeholder="Alamat toko Uwais Food" value="${esc(D.ongkirConfig.origin || '')}">
-    <button class="o" onclick="simpanAsalOngkir()">Simpan alamat toko</button>
-    <div class="row" style="margin-top:4px"><b>Daftar tarif (${rows.length})</b><button onclick="window._te={id:'',area:'',jarakKm:'',ongkir:''};render()">+ Tambah tarif</button></div>
+  return `<h3>Ongkos Kirim &amp; Google Maps</h3><div class="card col">
+    <div class="mut">Pilih lokasi rumah/toko dan alamat tujuan melalui Google Maps. Jarak dihitung mengikuti rute jalan berkendara. Tarif per daerah dapat disimpan untuk digunakan kembali.</div>
+    <label class="mut">Google Maps API Key (disimpan hanya di perangkat ini)</label>
+    <input id="mapsApiKey" type="password" autocomplete="off" placeholder="Tempel Google Maps API Key" value="${esc(mapsKey())}">
+    <div class="acts"><button class="o" onclick="simpanMapsKey()">Simpan API Key</button><a class="btn o" href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener">Buka Google Cloud</a></div>
+    <div class="maps-hint">Aktifkan Maps JavaScript API, Places API (New), dan Routes API pada satu project dengan Billing aktif. Batasi API Key menggunakan Website restrictions (HTTP referrers) dan API restrictions.</div>
+    <label class="mut">Cari alamat rumah / toko (titik awal pengiriman)</label>
+    <div id="originPlaceHost" class="maps-place-host"></div>
+    <input id="asalOngkir" placeholder="Alamat rumah/toko Uwais Food" value="${esc(c.origin || '')}" oninput="if(window._selectedOrigin&&this.value!==window._selectedOrigin.address)window._selectedOrigin=null">
+    <div id="originLocationInfo" class="maps-hint">${c.placeId ? 'Titik toko tersimpan dari Google Maps.' : 'Pilih alamat toko di hasil pencarian Maps agar penghitungan rute akurat.'}</div>
+    <div class="grid">
+      <div><label class="mut">Tarif per kilometer (Rp, opsional)</label><input id="ratePerKm" type="number" min="0" step="500" inputmode="numeric" placeholder="Mis. 2000" value="${esc(c.ratePerKm || '')}"></div>
+      <div><label class="mut">Ongkir minimum (Rp, opsional)</label><input id="minFee" type="number" min="0" step="500" inputmode="numeric" placeholder="Mis. 5000" value="${esc(c.minFee || '')}"></div>
+    </div>
+    <div class="maps-hint">Jika tarif per km diisi, ongkir dihitung otomatis: pembulatan jarak ke atas × tarif per km, lalu dibandingkan dengan ongkir minimum. Jika 0/kosong, nominal ongkir dapat diisi manual untuk daerah baru.</div>
+    <div class="acts"><button onclick="simpanAsalOngkir()">Simpan lokasi & tarif toko</button></div>
+    <div class="row" style="margin-top:4px"><b>Daftar tarif (${rows.length})</b><button onclick="window._te={id:'',area:'',jarakKm:'',ongkir:'',placeId:'',lat:null,lng:null};render()">+ Tambah tarif</button></div>
     ${form}
-    ${rows.length ? `<div class="grid w">${rows.map(t => `<div class="card col"><div class="row"><b>${esc(t.area)}</b><span class="tag pr">${t.jarakKm} km</span></div><div class="price">${rp(t.ongkir)}</div><div class="acts"><button class="o" onclick="editTarif('${t.id}')">✏️ Edit</button><button class="r" onclick="hapusTarif('${t.id}')">🗑 Hapus</button></div></div>`).join('')}</div>` : '<div class="empty">Belum ada tarif. Tarif pertama dapat dibuat dari formulir pemesanan saat memilih Via Kurir.</div>'}
+    ${rows.length ? `<div class="grid w">${rows.map(t => `<div class="card col"><div class="row"><b>${esc(t.area)}</b><span class="tag pr">${t.jarakKm} km</span></div><div class="price">${rp(t.ongkir)}</div>${t.placeId ? '<div class="maps-hint">Alamat terhubung ke Maps</div>' : ''}<div class="acts"><button class="o" onclick="editTarif('${t.id}')">✏️ Edit</button><button class="r" onclick="hapusTarif('${t.id}')">🗑 Hapus</button></div></div>`).join('')}</div>` : '<div class="empty">Belum ada tarif. Tarif pertama dapat dibuat dari formulir pemesanan atau tombol Tambah tarif.</div>'}
   </div>`;
+}
+function simpanMapsKey() {
+  const el = $('#mapsApiKey'), value = el ? el.value.trim() : '';
+  if (!value) return toast('Masukkan Google Maps API Key terlebih dahulu');
+  LS.set('uf_maps_key', value); mapsLoading = null; mapsPlaces = null; mapsRoutes = null;
+  toast('API Key tersimpan di perangkat ini. Memuat ulang aplikasi…'); setTimeout(() => location.reload(), 650);
 }
 function editTarif(id) { const t = (D.tarifOngkir || []).find(x => x.id === id); if (!t) return; window._te = Object.assign({}, t); render(); }
 function simpanTarifForm() {
   const e = window._te, area = String(e.area || '').trim(), km = Number(e.jarakKm), ongkir = Number(e.ongkir);
   if (!area) return toast('Nama daerah wajib diisi');
-  if (e.jarakKm === '' || !Number.isFinite(km) || km < 0) return toast('Jarak harus diisi dengan angka 0 atau lebih');
+  if (e.jarakKm === '' || !Number.isFinite(km) || km < 0) return toast('Jarak harus dihitung Maps atau diisi manual');
   if (e.ongkir === '' || !Number.isFinite(ongkir) || ongkir < 0) return toast('Ongkir harus diisi dengan angka 0 atau lebih');
-  const t = {id: e.id || newTarifId(), area, jarakKm: km, ongkir: Math.round(ongkir), aktif: true};
-  const ix = D.tarifOngkir.findIndex(x => x.id === t.id || normArea(x.area) === normArea(area));
+  const t = {id: e.id || newTarifId(), area, jarakKm: km, ongkir: Math.round(ongkir), aktif: true, placeId: e.placeId || '', lat: e.lat, lng: e.lng};
+  const ix = D.tarifOngkir.findIndex(x => x.id === t.id || (t.placeId && x.placeId === t.placeId) || normArea(x.area) === normArea(area));
   if (ix >= 0) D.tarifOngkir[ix] = t; else D.tarifOngkir.push(t);
   enqueue('saveTarif', t); window._te = null; render(); toast('Tarif ongkir tersimpan ✔');
 }
@@ -820,27 +1373,23 @@ function hapusTarif(id) {
   D.tarifOngkir = D.tarifOngkir.filter(x => x.id !== id); enqueue('deleteTarif', id); render();
 }
 function simpanAsalOngkir() {
-  const el = $('#asalOngkir'), origin = el ? el.value.trim() : '';
-  D.ongkirConfig = {origin}; enqueue('saveOngkirConfig', origin); toast('Alamat toko tersimpan ✔');
+  const el = $('#asalOngkir'), rate = $('#ratePerKm'), min = $('#minFee');
+  const selected = window._selectedOrigin;
+  const origin = el ? el.value.trim() : '';
+  if (!origin) return toast('Pilih alamat rumah/toko melalui Maps atau isi alamat manual');
+  const sameSavedOrigin = origin === String(D.ongkirConfig.origin || '');
+  const useSelected = !!(selected && selected.address === origin);
+  const config = {origin, placeId: useSelected ? selected.placeId : (sameSavedOrigin ? (D.ongkirConfig.placeId || '') : ''),
+    lat: useSelected ? selected.lat : (sameSavedOrigin ? D.ongkirConfig.lat : null), lng: useSelected ? selected.lng : (sameSavedOrigin ? D.ongkirConfig.lng : null),
+    ratePerKm: rate ? Math.max(0, Number(rate.value) || 0) : 0, minFee: min ? Math.max(0, Number(min.value) || 0) : 0};
+  if (!config.placeId && (config.lat == null || config.lng == null)) return toast('Untuk menghitung rute Maps, pilih titik toko pada hasil pencarian Google Maps.');
+  D.ongkirConfig = config; enqueue('saveOngkirConfig', config); toast('Lokasi toko dan tarif per km tersimpan ✔');
 }
 
-/* ---- Menu & Printer ---- */
+/* ---- Menu Produk ---- */
 function vMenu() {
-  const printer = IN_GAS
-    ? `<div class="note warn">Anda membuka lewat halaman Apps Script. Google memblokir Bluetooth langsung di halaman ini (pesan <i>permissions policy</i>) — ini batasan Google, bukan kerusakan aplikasi.
-        Cetak tetap bisa lewat aplikasi <b>RawBT</b>. Untuk Bluetooth langsung, pakai versi PWA hosting.</div>
-       <div class="acts"><button onclick="cetakTes()">Tes Cetak (RawBT)</button>
-       <a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">Pasang RawBT</a></div>`
-    : `<div class="mut">Sambungkan printer thermal Bluetooth 58mm. Jika printer Anda tidak muncul di daftar, kemungkinan memakai Bluetooth klasik — gunakan RawBT (cetak otomatis beralih ke RawBT bila printer belum terhubung).</div>
-       <div class="acts"><button onclick="sambung()">🔗 Hubungkan Printer</button><button class="o" onclick="cetakTes()">Tes Cetak</button>
-       <a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">RawBT</a></div>`;
-  const sheetLink = D.sheetUrl ? `<h3>Data</h3><div class="card"><a class="btn o" href="${esc(D.sheetUrl)}" target="_blank" rel="noopener">📄 Buka Spreadsheet</a></div>` : '';
-  const app = sheetLink + (IN_GAS ? '' : `<h3>Aplikasi</h3><div class="card col">
-      <div class="mut">Terhubung ke: <code>${esc(getApi().slice(0, 48))}…</code></div>
-      <div class="acts">${installEv ? '<button onclick="pasang()">⬇️ Pasang aplikasi</button>' : ''}<button class="o" onclick="segarkan()">🔄 Perbarui aplikasi</button><button class="o" onclick="gantiApi()">Ganti URL Spreadsheet</button></div></div>`);
-  return `<h2>Menu &amp; Printer <span class="mut" style="font-weight:400">· ${APP_VER}</span></h2>
-    <div class="card mut" style="margin-bottom:12px">Untuk <b>paket/varian</b>, isi kolom <b>Isi</b> dengan format
-      <code>6 Bolen Manis + 4 Banana Milk Cheese</code>. Kosongkan untuk menu satuan. Nama isi yang sama otomatis dijumlahkan di Rekap.</div>
+  return `<h2>Menu Produk</h2>
+    <div class="card mut" style="margin-bottom:12px">Kelola nama produk, harga, dan komposisi paket. Pengaturan perangkat tersedia di menu <b>Pengaturan</b>.</div>
     <div class="grid w">${D.menu.map((m, i) => `
       <div class="card col">
         <input placeholder="Nama menu" value="${esc(m.nama)}" onchange="D.menu[${i}].nama=this.value.trim()">
@@ -849,12 +1398,60 @@ function vMenu() {
         <button class="r" onclick="D.menu.splice(${i},1);render()">Hapus menu</button>
       </div>`).join('')}</div>
     <div class="row" style="margin-top:12px"><button class="o" onclick="D.menu.push({nama:'',harga:0,isi:''});render()">+ Tambah menu</button>
-      <button onclick="simpanMenu()">Simpan Menu</button></div>
-    ${ongkirForm()}
-    ${strukForm()}
-    <h3>Printer thermal</h3>
-    <div class="card col">${printer}</div>${app}
-    <h3>Keamanan</h3><div class="card col"><div class="mut">Data dikunci dengan PIN. Untuk mengganti PIN, ubah nilai <code>PIN</code> di Code.gs lalu terapkan versi baru; semua perangkat akan otomatis keluar.</div><button class="r" onclick="keluar()">🔒 Keluar</button></div>`;
+      <button onclick="simpanMenu()">Simpan Menu</button></div>`;
+}
+
+/* ---- Pengaturan Terpusat ---- */
+function settingDetailHead(title, subtitle) {
+  return `<div class="setting-detail-head"><button class="back-setting" onclick="openSetting('home')">← <span>Semua Pengaturan</span></button><div><div class="eyebrow">PUSAT PENGATURAN</div><h2>${title}</h2><div class="page-subtitle">${subtitle}</div></div></div>`;
+}
+function vPengaturan() {
+  const section = window._settingSection || 'home';
+  if (section === 'home') {
+    const settingItems = [
+      ['printer','🖨️','Printer','Bluetooth, QZ Tray, RawBT, dan uji cetak',IN_GAS ? 'Mode Apps Script' : (chr ? 'Terhubung' : 'Atur koneksi')],
+      ['ongkir','📍','Ongkos Kirim','Google Maps, lokasi toko, tarif per kilometer, dan daerah','Google Maps'],
+      ['struk','🧾','Struk','Identitas toko, pesan footer, dan ukuran kertas',(+cfg().lebar === 80 ? '80 mm' : '58 mm')],
+      ['tampilan','🎨','Tampilan','Pilih tema terang, gelap, atau mengikuti perangkat',getThemeMode() === 'light' ? 'Tema terang' : getThemeMode() === 'dark' ? 'Tema gelap' : 'Ikuti perangkat'],
+      ['aplikasi','📱','Aplikasi','PWA, pembaruan, koneksi Spreadsheet, dan cache',IN_GAS ? 'Apps Script' : 'PWA'],
+      ['keamanan','🛡️','Keamanan','PIN akses, sesi, dan keluar dari aplikasi','PIN aktif']
+    ];
+    return `<div class="page-head"><div><div class="eyebrow">PUSAT KONTROL</div><h2>Pengaturan</h2><div class="page-subtitle">Semua konfigurasi Uwais Food berada dalam satu tempat.</div></div><span class="settings-badge">⚙️ ${APP_VER}</span></div>
+      <div class="settings-grid">${settingItems.map(x => `<button class="setting-card" onclick="openSetting('${x[0]}')"><span class="setting-icon">${x[1]}</span><span class="setting-card-copy"><b>${x[2]}</b><small>${x[3]}</small><em>${x[4]}</em></span><span class="setting-chevron">›</span></button>`).join('')}</div>
+      <div class="more-note"><span>💡</span><span>Pengaturan ongkir dan koneksi Google Maps berlaku pada perangkat ini untuk API Key. Tarif daerah dan lokasi toko tersimpan pada data aplikasi.</span></div>`;
+  }
+  if (section === 'printer') {
+    const printer = IN_GAS
+      ? `<div class="note warn">Anda membuka lewat halaman Apps Script. Google membatasi Bluetooth langsung pada halaman ini. Untuk Android gunakan RawBT; untuk laptop gunakan Cetak via browser atau printer yang sudah terpasang pada Windows. Bluetooth langsung melalui Web Bluetooth tersedia pada PWA HTTPS dan perangkat/printer BLE yang kompatibel.</div><div class="acts"><button onclick="cetakTes()">Tes Cetak</button><a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">Pasang RawBT (Android)</a></div>`
+      : `<div class="note">Hubungkan printer thermal melalui Bluetooth BLE pada Chrome/Edge yang mendukung Web Bluetooth. Untuk Bluetooth klasik/SPP di laptop, gunakan port COM/driver Windows atau cetak melalui browser. RawBT hanya untuk Android.</div><div class="acts"><button onclick="sambung()">🔗 Hubungkan Printer Bluetooth</button><button class="o" onclick="cetakTes()">Tes Cetak</button><a class="btn o" href="https://qz.io/download/" target="_blank" rel="noopener">QZ Tray (Laptop)</a><a class="btn o" href="https://play.google.com/store/apps/details?id=ru.a402d.rawbtprinter" target="_blank" rel="noopener">RawBT (Android)</a></div>`;
+    return settingDetailHead('Printer','Atur koneksi printer dan metode pencetakan struk.') + `<div class="card col settings-detail-card"><div class="printer-status-row"><span class="setting-icon">🖨️</span><span><b>Status printer</b><small>${chr ? 'Printer Bluetooth terhubung' : (IN_GAS ? 'Gunakan cetak via browser atau RawBT' : 'Belum ada printer Bluetooth aktif')}</small></span><span class="status-pill ${chr ? 'good' : 'neutral'}">${chr ? 'Terhubung' : 'Siap diatur'}</span></div>${printer}<div class="settings-tip">Untuk Rongta RPP02N Bluetooth Classic, pasangkan terlebih dahulu di Windows dan periksa port COM. Jika printer terpasang sebagai printer Windows, gunakan tombol Cetak via browser pada pratinjau struk.</div></div>`;
+  }
+  if (section === 'ongkir') return settingDetailHead('Ongkos Kirim','Atur titik toko, Google Maps, tarif per kilometer, dan master daerah.') + ongkirForm();
+  if (section === 'struk') return settingDetailHead('Struk','Atur identitas Uwais Food dan format kertas thermal.') + strukForm();
+  if (section === 'tampilan') {
+    const mode = getThemeMode();
+    return settingDetailHead('Tampilan','Sesuaikan tampilan aplikasi dengan kenyamanan mata Anda.') + `<div class="card col settings-detail-card">
+      <b style="font-size:15px">Mode tampilan</b>
+      <div class="mut">Pilihan tema disimpan pada perangkat ini dan akan tetap digunakan saat aplikasi dibuka kembali.</div>
+      <div class="seg theme-choice">
+        <button class="${mode === 'light' ? 'on' : ''}" onclick="setThemeMode('light')">☀️ Terang</button>
+        <button class="${mode === 'dark' ? 'on' : ''}" onclick="setThemeMode('dark')">🌙 Gelap</button>
+        <button class="${mode === 'system' ? 'on' : ''}" onclick="setThemeMode('system')">💻 Ikuti perangkat</button>
+      </div>
+      <div class="theme-preview">
+        <div class="theme-preview-card"><b><span class="theme-preview-dot"></span>Pratinjau kartu</b><small>Contoh permukaan dan teks aplikasi.</small></div>
+        <div class="theme-preview-card"><b>Uwais Food</b><small>${mode === 'light' ? 'Tema terang dipilih' : mode === 'dark' ? 'Tema gelap dipilih' : 'Mengikuti pengaturan perangkat'}</small></div>
+      </div>
+      <div class="settings-tip">Mode “Ikuti perangkat” akan otomatis menyesuaikan dengan pengaturan tampilan Windows, Android, atau sistem operasi yang digunakan.</div>
+    </div>`;
+  }
+  if (section === 'aplikasi') {
+    const sheetLink = D.sheetUrl ? `<a class="btn o" href="${esc(D.sheetUrl)}" target="_blank" rel="noopener">📄 Buka Spreadsheet</a>` : '';
+    return settingDetailHead('Aplikasi','Kelola instalasi, pembaruan, dan koneksi ke Spreadsheet.') + `<div class="card col settings-detail-card">${IN_GAS ? `<div class="mut">Aplikasi sedang dibuka langsung melalui Google Apps Script.</div>${sheetLink}` : `<div><label class="mut">Alamat Web App /exec</label><div class="api-address"><code>${esc(getApi().slice(0, 80))}${getApi().length > 80 ? '…' : ''}</code></div></div><div class="acts">${installEv ? '<button onclick="pasang()">⬇️ Pasang aplikasi</button>' : ''}<button class="o" onclick="segarkan()">🔄 Perbarui aplikasi</button><button class="o" onclick="gantiApi()">Ganti URL Spreadsheet</button>${sheetLink}</div><div class="settings-tip">PWA menyimpan shell aplikasi agar halaman dapat dibuka saat offline. Data pesanan yang belum tersinkron akan menunggu koneksi internet.</div>`}</div>`;
+  }
+  if (section === 'keamanan') return settingDetailHead('Keamanan','Kelola akses dan sesi aplikasi Uwais Food.') + `<div class="card col settings-detail-card"><div class="security-summary"><span class="setting-icon">🛡️</span><span><b>Perlindungan PIN aktif</b><small>Akses aplikasi memerlukan PIN yang dikonfigurasi pada Code.gs.</small></span><span class="status-pill good">Aktif</span></div><div class="note">Untuk mengganti PIN, ubah nilai <code>PIN</code> pada Code.gs, simpan, lalu terapkan deployment dengan versi baru. Semua token sesi lama otomatis tidak berlaku setelah PIN diganti.</div><button class="r" onclick="keluar()">🔒 Keluar dari aplikasi</button></div>`;
+  window._settingSection = 'home';
+  return vPengaturan();
 }
 function simpanMenu() {
   D.menu = D.menu.filter(m => m.nama && m.nama.trim()); cart = {};
@@ -942,7 +1539,7 @@ function buildStruk(g, st) {
     r.l('Pengiriman: Via Kurir');
     if (g.daerahKirim) r.l('Daerah: ' + g.daerahKirim);
     if (g.alamatKirim) r.l('Alamat: ' + g.alamatKirim);
-    if (g.jarakKm) r.lr('Jarak', String(g.jarakKm) + ' km');
+    if (g.jarakKm) r.lr('Jarak Maps', String(g.jarakKm) + ' km');
   } else r.l('Pengiriman: Pickup');
   if (c.kasir) r.l('Kasir: ' + c.kasir);
   r.hr('-');
@@ -961,7 +1558,7 @@ function buildStruk(g, st) {
   const m = (st && st.metode) || 'Tunai', bayar = Number(st && st.bayar) || 0;
   const lunas = m !== 'Belum Bayar' && !(m === 'Tunai' && bayar > 0 && bayar < tagihan);
   if (m !== 'Belum Bayar') {
-    if (m === 'Tunai' && bayar > 0 && bayar !== g.total) {
+    if (m === 'Tunai' && bayar > 0 && bayar !== tagihan) {
       r.lr('Tunai', 'Rp' + num(bayar));
       if (bayar > tagihan) r.lr('Kembali', 'Rp' + num(bayar - tagihan), {bold: true});
       else r.lr('Kurang', 'Rp' + num(tagihan - bayar), {bold: true});
@@ -1046,7 +1643,7 @@ function strukForm() {
   if (!window._cfg) window._cfg = cfg();
   const c = window._cfg;
   const f = (l, k, ph) => `<label class="mut">${l}</label><input placeholder="${ph}" value="${esc(c[k])}" oninput="window._cfg.${k}=this.value">`;
-  return `<h3>Pengaturan struk</h3><div class="card col">
+  return `<div class="card col settings-detail-card">
     ${f('Nama toko', 'toko', 'UWAIS FOOD')}${f('Alamat', 'alamat', 'Jl. Contoh No. 1, Kota')}${f('Telepon / WhatsApp', 'telp', '08xxxxxxxxxx')}${f('Nama kasir (opsional)', 'kasir', '')}${f('Pesan di bawah struk', 'footer', 'Terima kasih sudah berbelanja!')}
     <label class="mut">Lebar kertas printer</label>
     <div class="seg">${[58, 80].map(x => `<button class="${+c.lebar === x ? 'on' : ''}" onclick="window._cfg.lebar=${x};render()">${x} mm</button>`).join('')}</div>
@@ -1181,7 +1778,7 @@ if (!IN_GAS) {
       r.update();
     }).catch(() => {});
   }
-  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEv = e; if (tab === 'menu') render(); });
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEv = e; if (tab === 'pengaturan') render(); });
 }
 
 load();
