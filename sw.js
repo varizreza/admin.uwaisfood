@@ -1,6 +1,6 @@
-/* UWAIS FOOD PWA v10.8.1 — Android install/start URL fix */
+/* UWAIS FOOD PWA v10.8.2 — stable root launch URL */
 const CACHE_PREFIX = 'uwais-food-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v10-8-1-install-fix';
+const CACHE_NAME = CACHE_PREFIX + 'v10-8-2-root-launch';
 const SHELL_FILES = [
   './',
   './index.html',

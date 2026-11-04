@@ -170,7 +170,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 .bottom button.on:before{content:"";width:24px;height:3px;border-radius:9px;background:var(--pr);position:absolute;top:-7px;left:50%;transform:translateX(-50%)}
 #msg{border:1px solid #ffffff25;box-shadow:0 10px 30px #0002;font-weight:600}
 #msg{display:none!important}
-/* ===== NOTIFIKASI POPUP TERPUSAT v10.7 ===== */
+/* ===== NOTIFIKASI POPUP TERPUSAT v10.8.2 ===== */
 #notifyRoot{position:fixed;inset:0;z-index:180;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(20,16,13,.48);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
 #notifyRoot.on{display:flex;animation:notifyFade .16s ease-out both}
 .noti-dialog{position:relative;width:min(100%,420px);padding:26px 24px 22px;border:1px solid var(--ln);border-radius:22px;background:var(--surface);color:var(--tx);box-shadow:0 24px 80px #0003;text-align:center;animation:notifyPop .2s cubic-bezier(.2,.8,.2,1) both}
@@ -389,7 +389,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.7)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.8.2)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -403,7 +403,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 /* Penjaga: jika program utama gagal jalan, tampilkan penyebabnya di layar (bukan "Memuat…" selamanya) */
 window.__boot = false;
 window.__errs = [];
-window.__len = 110321;
+window.__len = 119452;;
 (function () {
   var box = null;
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
@@ -412,10 +412,10 @@ window.__len = 110321;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v10.7)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v10.8.2)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v10.7)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v10.8.2)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -439,7 +439,7 @@ window.__len = 110321;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v10.8.1 · Perbaikan Instalasi PWA';
+var APP_VER = 'v10.8.2 · Perbaikan Pembukaan PWA Android';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -2033,7 +2033,7 @@ if (!IN_GAS) {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'update') { showPwaUpdatePrompt(); } });
     navigator.serviceWorker.addEventListener('controllerchange', () => { if (pwaReloading) location.reload(); });
-    navigator.serviceWorker.register('./sw.js', {scope: './', updateViaCache: 'none'}).then(r => {
+    navigator.serviceWorker.register(new URL('sw.js', document.baseURI), {scope: new URL('./', document.baseURI).pathname, updateViaCache: 'none'}).then(r => {
       pwaReg = r;
       const cekMenunggu = () => { if (r.waiting && navigator.serviceWorker.controller) { showPwaUpdatePrompt(); } };
       cekMenunggu();
