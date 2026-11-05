@@ -1,6 +1,6 @@
-/* UWAIS FOOD PWA v10.9.5 — customizable WhatsApp invoice message */
+/* UWAIS FOOD PWA v10.9.6 — customizable WhatsApp invoice message */
 const CACHE_PREFIX = 'uwais-food-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v10-9-5-receipt-settings';
+const CACHE_NAME = CACHE_PREFIX + 'v10-9-6-cross-device-config';
 const SHELL_FILES = [
   './',
   './index.html',
