@@ -380,7 +380,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 @media(max-width:640px){.menu-admin-grid{grid-template-columns:1fr;gap:12px}.menu-admin-photo{min-height:155px}.menu-admin-toolbar{align-items:stretch}.menu-admin-search{max-width:none;min-width:100%}.menu-admin-footer{align-items:stretch}.menu-admin-footer button{flex:1}}
 
 
-/* ===== v10.9.0: Orderan rapi, pembayaran, adonan ===== */
+/* ===== v10.9.2: Orderan rapi, pembayaran, adonan ===== */
 .pos{color:var(--ok)}.neg{color:var(--bad)}
 .tag.neg{background:var(--bad-l);color:var(--bad);font-weight:600}
 .note.bad{background:var(--bad-l);color:var(--bad)}
@@ -437,6 +437,9 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 input.switch{appearance:none;-webkit-appearance:none;width:46px;height:26px;flex:0 0 46px;padding:0;border-radius:99px;background:var(--ln);border:0;position:relative;cursor:pointer;transition:.2s}
 input.switch:before{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px #0004}
 input.switch:checked{background:var(--ok)}input.switch:checked:before{left:23px}
+label.qris-pick{cursor:pointer}
+.qris-prev{display:flex;justify-content:center;background:#fff;border:1px solid var(--ln);border-radius:14px;padding:10px}
+.qris-prev img{max-width:260px;width:100%;height:auto;border-radius:6px}
 textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--ln);border-radius:12px;background:var(--surface);color:var(--tx);font:inherit;font-size:14px}
 @media(max-width:380px){.oc-tools button{font-size:10px}.filter-row>label{flex-basis:44px}}
 </style>
@@ -446,7 +449,7 @@ textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--l
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.9.0)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.9.2)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -469,10 +472,10 @@ window.__len = 155042;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v10.9.0)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v10.9.2)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v10.9.0)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v10.9.2)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -496,7 +499,7 @@ window.__len = 155042;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v10.9.0 · Tagihan, Adonan PO';
+var APP_VER = 'v10.9.2 · Tagihan, Adonan PO';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -1489,24 +1492,52 @@ function setBayar(id, bayar, metode) {
 }
 function rekeningText() {
   const list = (cfg().rekening || []).filter(r => r && String(r.noRek || '').trim());
-  if (!list.length) return '(nomor rekening belum diatur)';
+  if (!list.length) return cfg().qrisImage ? '(gunakan QRIS pada gambar terlampir)' : '(nomor rekening belum diatur)';
   return list.map(r => '• ' + [r.bank, r.noRek].filter(Boolean).join(' ') + (r.atasNama ? '\n  a.n. ' + r.atasNama : '')).join('\n');
 }
 function buildTagihanMessage(g) {
   const c = cfg();
   const template = String(c.tagihanTemplate || '').trim() || TAGIHAN_TEMPLATE_DEFAULT;
-  return applyWhatsAppTemplate(template, whatsappTemplateValues(g, {metode: 'Belum Bayar', bayar: ''}));
+  const vals = whatsappTemplateValues(g, {metode: 'Belum Bayar', bayar: ''});
+  let msg = applyWhatsAppTemplate(template, vals);
+  if (c.qrisImage && !/\{info_qris\}/.test(template)) msg += '\n\n' + vals.info_qris;
+  return msg;
+}
+function dataUrlToFile(dataUrl, name) {       // sinkron, agar navigator.share tetap di dalam gesture klik
+  const m = String(dataUrl).match(/^data:([^;]+);base64,(.*)$/); if (!m) return null;
+  const bin = atob(m[2]), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new File([arr], name, {type: m[1]});
 }
 async function kirimTagihan(id) {
   const g = groups().find(x => x.id === id);
   if (!g) return toast('Pesanan tidak ditemukan', 'error');
   if (g.bayar === 'Lunas') return toast('Pesanan ini sudah lunas — gunakan Kirim Struk');
-  if (!(cfg().rekening || []).some(r => r && String(r.noRek || '').trim())) {
-    const ok = await popupConfirm('Nomor rekening belum diatur di Pengaturan → Pembayaran & Tagihan. Kirim tagihan tanpa nomor rekening?', {title: 'Rekening belum diatur', confirmText: 'Kirim tanpa rekening', danger: false});
+  if (!cfg().qrisImage && !(cfg().rekening || []).some(r => r && String(r.noRek || '').trim())) {
+    const ok = await popupConfirm('Nomor rekening dan QRIS belum diatur di Pengaturan → Pembayaran & Tagihan. Kirim tagihan tanpa info pembayaran?', {title: 'Info pembayaran belum diatur', confirmText: 'Kirim tanpa info', danger: false});
     if (!ok) return;
   }
   const customer = findPel(g.nama) || {};
-  const url = (customer.hp ? waLink(customer.hp) : 'https://wa.me/') + '?text=' + encodeURIComponent(buildTagihanMessage(g));
+  const msg = buildTagihanMessage(g), qris = cfg().qrisImage;
+  const url = (customer.hp ? waLink(customer.hp) : 'https://wa.me/') + '?text=' + encodeURIComponent(msg);
+  if (qris) {
+    // Android/iOS: kirim teks + gambar QRIS sekaligus lewat menu berbagi (tanpa await sebelum share).
+    const file = dataUrlToFile(qris, 'QRIS-Uwais-Food.' + (qris.indexOf('image/jpeg') > 5 ? 'jpg' : 'png'));
+    let can = false;
+    try { can = !!(file && navigator.share && navigator.canShare && navigator.canShare({files: [file]})); } catch (_) {}
+    if (can) {   // berlaku juga di laptop (Windows/macOS/ChromeOS punya menu berbagi sistem)
+      try { await navigator.share({files: [file], title: 'Tagihan Uwais Food', text: msg}); toast('Pilih WhatsApp pada menu berbagi untuk mengirim tagihan beserta QRIS.'); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; console.error(e); }   // gagal -> lanjut ke cara cadangan
+    }
+    // Cadangan (browser tanpa berbagi file): buka chat berisi teks, salin gambar QRIS ke clipboard agar tinggal ditempel (Ctrl+V / tahan lalu Tempel).
+    let waTab = null; try { waTab = window.open('about:blank', '_blank'); } catch (_) {}
+    let copied = false;
+    try { if (file && file.type === 'image/png' && navigator.clipboard && window.ClipboardItem) { await navigator.clipboard.write([new ClipboardItem({'image/png': file})]); copied = true; } } catch (_) {}
+    if (file && !copied) downloadReceiptBlob(file, file.name);
+    if (waTab && !waTab.closed) waTab.location.href = url; else if (!window.open(url, '_blank', 'noopener')) location.href = url;
+    toast(copied ? 'Chat WhatsApp dibuka dan gambar QRIS sudah disalin. Tempel (Ctrl+V) di kolom pesan, lalu kirim.' : 'Gambar QRIS diunduh dan chat WhatsApp dibuka. Lampirkan gambar QRIS lalu kirim.');
+    return;
+  }
   if (!window.open(url, '_blank', 'noopener')) location.href = url;
   toast(customer.hp ? 'Chat WhatsApp pelanggan dibuka. Periksa pesan lalu tekan Kirim.' : 'WhatsApp dibuka. Pilih pelanggan lalu tekan Kirim.');
 }
@@ -1875,7 +1906,7 @@ function vPengaturan() {
     const settingItems = [
       ['printer','🖨️','Printer','Bluetooth, kualitas cetak, dan uji printer',IN_GAS ? 'Mode Apps Script' : (chr ? 'Terhubung' : 'Atur koneksi')],
       ['ongkir','📍','Ongkos Kirim','Google Maps, lokasi toko, tarif per kilometer, dan daerah','Google Maps'],
-      ['pembayaran','💳','Pembayaran & Tagihan','Nomor rekening dan template pesan tagihan WhatsApp',((cfg().rekening || []).filter(r => r.noRek).length || 'Belum diatur') + ((cfg().rekening || []).filter(r => r.noRek).length ? ' rekening' : '')],
+      ['pembayaran','💳','Pembayaran & Tagihan','Nomor rekening, QRIS, dan template pesan tagihan WhatsApp',((cfg().rekening || []).filter(r => r.noRek).length || 'Belum diatur') + ((cfg().rekening || []).filter(r => r.noRek).length ? ' rekening' : '')],
       ['struk','🧾','Struk','Identitas toko, format gambar, dan template chat WhatsApp',(+cfg().lebar === 80 ? '80 mm' : '58 mm')],
       ['tampilan','🎨','Tampilan','Pilih tema terang, gelap, atau mengikuti perangkat',getThemeMode() === 'light' ? 'Tema terang' : getThemeMode() === 'dark' ? 'Tema gelap' : 'Ikuti perangkat'],
       ['aplikasi','📱','Aplikasi','PWA, pembaruan, koneksi Spreadsheet, dan cache',IN_GAS ? 'Apps Script' : 'PWA'],
@@ -1931,8 +1962,8 @@ function simpanMenu() {
 var ENC = new TextEncoder();
 var num = n => Number(n || 0).toLocaleString('id-ID');
 var WA_MESSAGE_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan} 😊\nTerima kasih sudah memesan di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total pembayaran: {total}*\nPengiriman: {metode_pengiriman}\nKurir: {nama_kurir}\nAlamat tujuan: {alamat}\nStatus pembayaran: {status_pembayaran}\n\n{footer}';
-var TAGIHAN_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan} 😊\nBerikut tagihan pesanan Anda di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total tagihan: {total}*\n\n*Pembayaran via transfer:*\n{info_rekening}\n\nMohon kirimkan bukti transfer setelah melakukan pembayaran 🙏\n{footer}';
-var CFG_DEF = {rekening: [], tagihanTemplate: TAGIHAN_TEMPLATE_DEFAULT, kurirMaps: false, toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58, browserDensity: 'bold', browserFontSize: 2.4, browserLineHeight: 1.3, browserLeftMargin: 6, imageFormat: 'png', imageQuality: 'high', waMessageTemplate: WA_MESSAGE_TEMPLATE_DEFAULT};
+var TAGIHAN_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan} 😊\nBerikut tagihan pesanan Anda di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total tagihan: {total}*\n\n*Pembayaran via transfer:*\n{info_rekening}\n{info_qris}\n\nMohon kirimkan bukti transfer setelah melakukan pembayaran 🙏\n{footer}';
+var CFG_DEF = {qrisImage: '', rekening: [], tagihanTemplate: TAGIHAN_TEMPLATE_DEFAULT, kurirMaps: false, toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58, browserDensity: 'bold', browserFontSize: 2.4, browserLineHeight: 1.3, browserLeftMargin: 6, imageFormat: 'png', imageQuality: 'high', waMessageTemplate: WA_MESSAGE_TEMPLATE_DEFAULT};
 function cfg() {
   let c;
   try { c = Object.assign({}, CFG_DEF, JSON.parse(LS.get('uf_cfg') || '{}')); } catch (e) { c = Object.assign({}, CFG_DEF); }
@@ -1951,6 +1982,7 @@ function simpanCfg(silent) {
   c.rekening = (Array.isArray(c.rekening) ? c.rekening : []).map(r => ({bank: String(r.bank || '').trim().slice(0, 40), noRek: String(r.noRek || '').trim().slice(0, 40), atasNama: String(r.atasNama || '').trim().slice(0, 60)})).filter(r => r.bank || r.noRek || r.atasNama).slice(0, 8);
   c.tagihanTemplate = String(c.tagihanTemplate == null ? TAGIHAN_TEMPLATE_DEFAULT : c.tagihanTemplate).slice(0, 4000);
   c.kurirMaps = !!c.kurirMaps;
+  c.qrisImage = /^data:image\/(png|jpeg|webp);base64,/.test(String(c.qrisImage || '')) ? c.qrisImage : '';
   window._cfg = c; LS.set('uf_cfg', JSON.stringify(c)); if (!silent) toast('Pengaturan tersimpan ✔');
 }
 function setBrowserPrintOption(key, value) {
@@ -2128,6 +2160,7 @@ function whatsappTemplateValues(g, state) {
     metode_pembayaran: method,
     whatsapp_toko: c.telp || '-',
     info_rekening: rekeningText(),
+    info_qris: c.qrisImage ? 'Atau bayar dengan scan *QRIS* pada gambar yang dikirim bersama pesan ini.' : '',
     bank: ((c.rekening || [])[0] || {}).bank || '',
     nomor_rekening: ((c.rekening || [])[0] || {}).noRek || '',
     atas_nama: ((c.rekening || [])[0] || {}).atasNama || '',
@@ -2147,7 +2180,7 @@ function sampleWhatsAppMessage(template) {
     tanggal: '04/11/2026 10:30', daftar_produk: '• 2 x Bolen Pisang Premium — Rp130.000\n• 1 x Banana Milk Cheese — Rp50.000',
     subtotal: 'Rp180.000', ongkir: 'Rp10.000', total: 'Rp190.000', metode_pengiriman: 'Kurir Maps',
     nama_kurir: 'Kurir Maps', daerah_tujuan: 'Tanjungpinang Barat', alamat: 'Jl. Contoh No. 10, Tanjungpinang',
-    status_pembayaran: 'BELUM LUNAS', metode_pembayaran: 'Belum Bayar', whatsapp_toko: '08xxxxxxxxxx', info_rekening: '• BCA 1234567890\n  a.n. Uwais Food', bank: 'BCA', nomor_rekening: '1234567890', atas_nama: 'Uwais Food', footer: 'Terima kasih sudah berbelanja!'
+    status_pembayaran: 'BELUM LUNAS', metode_pembayaran: 'Belum Bayar', whatsapp_toko: '08xxxxxxxxxx', info_rekening: '• BCA 1234567890\n  a.n. Uwais Food', info_qris: 'Atau bayar dengan scan *QRIS* pada gambar yang dikirim bersama pesan ini.', bank: 'BCA', nomor_rekening: '1234567890', atas_nama: 'Uwais Food', footer: 'Terima kasih sudah berbelanja!'
   };
   return applyWhatsAppTemplate(template || WA_MESSAGE_TEMPLATE_DEFAULT, sample);
 }
@@ -2571,13 +2604,41 @@ function pembayaranForm() {
     <div><b style="font-size:15px">🏦 Nomor rekening</b><div class="mut">Ditampilkan di pesan tagihan. Bisa lebih dari satu rekening.</div></div>
     ${rows || '<div class="note warn">Belum ada rekening. Tambahkan minimal satu agar pelanggan tahu tujuan transfer.</div>'}
     <div class="acts"><button class="o" onclick="tambahRekening()">＋ Tambah rekening</button></div>
+    <div class="col" style="gap:8px;margin-top:8px"><div><b style="font-size:15px">📱 QRIS</b><div class="mut">Unggah gambar QRIS statis toko. Saat Kirim Tagihan, gambar ini ikut terkirim bersama teks tagihan.</div></div>
+      ${cfg().qrisImage ? `<div class="qris-prev"><img src="${cfg().qrisImage}" alt="QRIS Uwais Food"></div>` : '<div class="note warn">Belum ada gambar QRIS.</div>'}
+      <div class="acts"><label class="btn o qris-pick">${cfg().qrisImage ? '🔄 Ganti gambar QRIS' : '⬆️ Unggah gambar QRIS'}<input type="file" accept="image/*" hidden onchange="uploadQris(this)"></label>${cfg().qrisImage ? '<button class="r" onclick="hapusQris()">🗑 Hapus QRIS</button>' : ''}</div></div>
     <div class="col" style="gap:7px;margin-top:8px"><div><b style="font-size:15px">💬 Template Pesan Tagihan</b><div class="mut">Teks yang disiapkan saat tombol <b>Kirim Tagihan</b> ditekan. Gunakan *teks* untuk huruf tebal di WhatsApp.</div></div>
       <textarea id="tagihanTemplate" rows="11" maxlength="4000" oninput="window._cfg.tagihanTemplate=this.value;updateTagihanPreview()">${esc(String(c.tagihanTemplate).replace(/\\n/g, '\n'))}</textarea>
       <div class="note"><b>Pratinjau pesan</b><pre id="tagihanPreview" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;font:inherit;font-size:13px;color:var(--tx)">${esc(sampleTagihanMessage(c.tagihanTemplate))}</pre></div>
-      <div class="mut">Variabel: <code>{nama_pelanggan}</code>, <code>{nama_toko}</code>, <code>{nomor_pesanan}</code>, <code>{tanggal}</code>, <code>{daftar_produk}</code>, <code>{subtotal}</code>, <code>{ongkir}</code>, <code>{total}</code>, <code>{info_rekening}</code> (semua rekening), <code>{bank}</code>, <code>{nomor_rekening}</code>, <code>{atas_nama}</code> (rekening pertama), <code>{footer}</code>.</div>
+      <div class="mut">Variabel: <code>{nama_pelanggan}</code>, <code>{nama_toko}</code>, <code>{nomor_pesanan}</code>, <code>{tanggal}</code>, <code>{daftar_produk}</code>, <code>{subtotal}</code>, <code>{ongkir}</code>, <code>{total}</code>, <code>{info_rekening}</code> (semua rekening), <code>{info_qris}</code> (kalimat QRIS, kosong jika belum ada gambar), <code>{bank}</code>, <code>{nomor_rekening}</code>, <code>{atas_nama}</code> (rekening pertama), <code>{footer}</code>.</div>
       <div class="acts"><button class="o" onclick="resetTagihanTemplate()">Gunakan template awal</button></div></div>
     <div class="acts"><button onclick="simpanCfg()">Simpan pengaturan</button></div>
     <div class="mut">Pengaturan ini tersimpan di perangkat ini.</div></div>`;
+}
+function saveQrisValue(v) {                   // tersimpan langsung (tidak menunggu tombol Simpan)
+  const c = cfg(); c.qrisImage = v || ''; LS.set('uf_cfg', JSON.stringify(c));
+  if (window._cfg) window._cfg.qrisImage = c.qrisImage;
+  if (v && LS.get('uf_cfg').indexOf(v.slice(-40)) < 0) toast('Gambar terlalu besar untuk disimpan di perangkat. Gunakan gambar yang lebih kecil.', 'error');
+}
+function uploadQris(input) {
+  const file = input.files && input.files[0]; input.value = '';
+  if (!file) return;
+  if (!/^image\//.test(file.type)) return toast('File harus berupa gambar (PNG/JPG)', 'error');
+  const img = new Image(), url = URL.createObjectURL(file);
+  img.onload = () => {
+    const max = 900, k = Math.min(1, max / Math.max(img.width, img.height));
+    const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+    const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(img, 0, 0, cv.width, cv.height);
+    URL.revokeObjectURL(url);
+    let out = cv.toDataURL('image/png'); if (out.length > 900000) out = cv.toDataURL('image/jpeg', 0.92);
+    saveQrisValue(out); render(); toast('Gambar QRIS tersimpan ✔');
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast('Gambar tidak dapat dibaca', 'error'); };
+  img.src = url;
+}
+async function hapusQris() {
+  if (!(await popupConfirm('Hapus gambar QRIS dari pengaturan?', {title: 'Hapus QRIS?', confirmText: 'Ya, hapus'}))) return;
+  saveQrisValue(''); render(); toast('Gambar QRIS dihapus');
 }
 function tambahRekening() { if (!window._cfg) window._cfg = cfg(); window._cfg.rekening = window._cfg.rekening || []; window._cfg.rekening.push({bank: '', noRek: '', atasNama: ''}); render(); }
 function hapusRekening(i) { window._cfg.rekening.splice(i, 1); render(); updateTagihanPreview(); }
