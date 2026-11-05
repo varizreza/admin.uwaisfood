@@ -449,7 +449,7 @@ textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--l
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.9.7)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.9.8)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -472,10 +472,10 @@ window.__len = 155042;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v10.9.7)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v10.9.8)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v10.9.7)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v10.9.8)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -499,7 +499,7 @@ window.__len = 155042;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v10.9.7 · Adonan Bolen Terpadu';
+var APP_VER = 'v10.9.8 · Pilihan QRIS Tagihan';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -1538,17 +1538,22 @@ function setBayar(id, bayar, metode) {
   $('#modal').innerHTML = ''; window._st = null; render();
   toast(lunas ? 'Pesanan ditandai lunas (' + m + ') ✔' : 'Pesanan ditandai belum bayar');
 }
-function rekeningText() {
-  const list = (cfg().rekening || []).filter(r => r && String(r.noRek || '').trim());
-  if (!list.length) return cfg().qrisImage ? '(gunakan QRIS pada gambar terlampir)' : '(nomor rekening belum diatur)';
+function rekeningText(includeQris) {
+  const c = cfg();
+  const list = (c.rekening || []).filter(r => r && String(r.noRek || '').trim());
+  if (!list.length) return includeQris && c.qrisImage ? '(gunakan QRIS pada gambar terlampir)' : '(nomor rekening belum diatur)';
   return list.map(r => '• ' + [r.bank, r.noRek].filter(Boolean).join(' ') + (r.atasNama ? '\n  a.n. ' + r.atasNama : '')).join('\n');
 }
-function buildTagihanMessage(g) {
+function buildTagihanMessage(g, includeQris) {
   const c = cfg();
+  const withQris = includeQris === true && !!c.qrisImage;
   const template = String(c.tagihanTemplate || '').trim() || TAGIHAN_TEMPLATE_DEFAULT;
   const vals = whatsappTemplateValues(g, {metode: 'Belum Bayar', bayar: ''});
+  // Pilihan QRIS mengendalikan teks dan lampiran secara bersamaan.
+  vals.info_qris = withQris ? 'Atau bayar dengan scan *QRIS* pada gambar yang dikirim bersama pesan ini.' : '';
+  vals.info_rekening = rekeningText(withQris);
   let msg = applyWhatsAppTemplate(template, vals);
-  if (c.qrisImage && !/\{info_qris\}/.test(template)) msg += '\n\n' + vals.info_qris;
+  if (withQris && !/\{info_qris\}/.test(template)) msg += '\n\n' + vals.info_qris;
   return msg;
 }
 function stripEmoji(t) {                      // teks untuk tautan wa.me: emoji sering rusak (kotak/tanda tanya) di jalur ini
@@ -1568,12 +1573,16 @@ function qrisPngBlob() {                      // QRIS sebagai PNG (clipboard han
     img.src = cfg().qrisImage;
   });
 }
-function showQrisDialog(note) {
+function showQrisDialog(note, chatAlreadyOpened) {
+  const chatText = chatAlreadyOpened
+    ? 'Chat WhatsApp sudah dibuka berisi teks tagihan. Lampirkan QRIS dengan cara <b>Salin gambar</b> di bawah, lalu tempel pada kolom pesan WhatsApp (Ctrl+V), atau unduh QRIS lalu lampirkan manual.'
+    : 'Berbagi gambar otomatis tidak berhasil. Buka chat WhatsApp melalui tombol di bawah, kemudian lampirkan QRIS yang disalin atau diunduh.';
   $('#modal').innerHTML = `<div class="ov" onclick="if(event.target===this)closeStruk()"><div class="dlg card col">
     <b style="font-size:17px">Lampirkan gambar QRIS</b>
-    <div class="mut">Chat WhatsApp sudah dibuka di tab baru berisi teks tagihan. WhatsApp Web tidak bisa menerima gambar dari tautan, jadi lampirkan QRIS dengan cara: <b>Salin gambar</b> di bawah, lalu klik kolom pesan di WhatsApp dan tekan <b>Ctrl+V</b>.${note ? '<br><small>(' + esc(note) + ')</small>' : ''}</div>
+    <div class="mut">${chatText}${note ? '<br><small>(' + esc(note) + ')</small>' : ''}</div>
     <div class="qris-prev"><img src="${cfg().qrisImage}" alt="QRIS"></div>
     <div class="pay-grid" style="grid-template-columns:1fr 1fr"><button onclick="salinQris()">📋 Salin gambar</button><button class="o" onclick="unduhQris()">⬇️ Unduh</button></div>
+    ${!chatAlreadyOpened && window._tagihanFallbackUrl ? '<button class="main wa" onclick="bukaWhatsAppFallbackTagihan()">💬 Buka WhatsApp</button>' : ''}
     <button class="o" onclick="closeStruk()">Tutup</button></div></div>`;
 }
 async function salinQris() {
@@ -1590,35 +1599,91 @@ function dataUrlToFile(dataUrl, name) {       // sinkron, agar navigator.share t
   for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
   return new File([arr], name, {type: m[1]});
 }
-async function kirimTagihan(id) {
+function kirimTagihan(id) {
   const g = groups().find(x => x.id === id);
   if (!g) return toast('Pesanan tidak ditemukan', 'error');
   if (g.bayar === 'Lunas') return toast('Pesanan ini sudah lunas — gunakan Kirim Struk');
-  if (!cfg().qrisImage && !(cfg().rekening || []).some(r => r && String(r.noRek || '').trim())) {
-    const ok = await popupConfirm('Nomor rekening dan QRIS belum diatur di Pengaturan → Pembayaran & Tagihan. Kirim tagihan tanpa info pembayaran?', {title: 'Info pembayaran belum diatur', confirmText: 'Kirim tanpa info', danger: false});
-    if (!ok) return;
-  }
+  const c = cfg();
+  const hasQris = !!c.qrisImage;
+  const hasRekening = (c.rekening || []).some(r => r && String(r.noRek || '').trim());
   const customer = findPel(g.nama) || {};
-  const msg = buildTagihanMessage(g), qris = cfg().qrisImage;
+  const phoneInfo = customer.hp ? 'Nomor WhatsApp: ' + esc(customer.hp) : 'Nomor WhatsApp pelanggan belum tersimpan; Anda dapat memilih kontak setelah WhatsApp terbuka.';
+  const paymentWarning = (!hasQris && !hasRekening)
+    ? '<div class="note" style="margin:0">⚠️ QRIS dan nomor rekening belum diatur. Tagihan tetap dapat dikirim tanpa informasi pembayaran.</div>' : '';
+  const qrisChoice = hasQris
+    ? `<button class="main wa" onclick="jalankanKirimTagihan('${String(id).replace(/'/g, '&#39;')}',true)">📲 Sertakan QRIS</button>`
+    : '<button class="main wa" disabled>QRIS belum tersedia</button>';
+  $('#modal').innerHTML = `<div class="ov" onclick="if(event.target===this)closeStruk()"><div class="dlg card col">
+    <b style="font-size:18px">Kirim Tagihan</b>
+    <div class="mut">Pilih apakah gambar QRIS ingin disertakan bersama pesan tagihan WhatsApp.</div>
+    <div class="card col" style="gap:8px;background:var(--surface-2,rgba(127,127,127,.08));padding:12px">
+      <b>Tujuan tagihan</b><div>${phoneInfo}</div>
+      ${hasQris ? `<div class="qris-prev" style="max-height:170px"><img src="${c.qrisImage}" alt="Pratinjau QRIS" style="max-height:150px;object-fit:contain"></div>` : '<div class="mut">Belum ada gambar QRIS yang tersimpan.</div>'}
+      <div class="mut">${hasRekening ? 'Nomor rekening tetap dapat dicantumkan pada kedua pilihan.' : 'Nomor rekening belum tersedia.'}</div>
+    </div>
+    ${paymentWarning}
+    <div class="col" style="gap:8px;width:100%">
+      ${qrisChoice}
+      <button class="o" onclick="jalankanKirimTagihan('${String(id).replace(/'/g, '&#39;')}',false)">💬 Kirim tanpa QRIS</button>
+      <button class="o" onclick="closeStruk()">Batal</button>
+    </div>
+    <small class="mut">Pilihan ini hanya berlaku untuk pengiriman tagihan kali ini. Pengiriman tetap harus dikonfirmasi di WhatsApp.</small>
+  </div></div>`;
+}
+function jalankanKirimTagihan(id, includeQris) {
+  const g = groups().find(x => x.id === id);
+  if (!g) { closeStruk(); return toast('Pesanan tidak ditemukan', 'error'); }
+  if (g.bayar === 'Lunas') { closeStruk(); return toast('Pesanan ini sudah lunas — gunakan Kirim Struk'); }
+  const customer = findPel(g.nama) || {};
+  const c = cfg(), qris = includeQris ? c.qrisImage : '';
+  const msg = buildTagihanMessage(g, !!qris);
   const url = (customer.hp ? waLink(customer.hp) : 'https://wa.me/') + '?text=' + encodeURIComponent(stripEmoji(msg));
-  if (qris) {
-    // Android/iOS: kirim teks + gambar QRIS sekaligus lewat menu berbagi (tanpa await sebelum share).
-    const file = dataUrlToFile(qris, 'QRIS-Uwais-Food.' + (qris.indexOf('image/jpeg') > 5 ? 'jpg' : 'png'));
-    let can = false;
-    try { can = !!(file && navigator.share && navigator.canShare && navigator.canShare({files: [file]})); } catch (_) {}
-    let shareErr = '';
-    if (can) {   // berlaku juga di laptop (Windows/macOS/ChromeOS punya menu berbagi sistem)
-      try { await navigator.share({files: [file], title: 'Tagihan Uwais Food', text: msg}); toast('Pilih WhatsApp pada menu berbagi untuk mengirim tagihan beserta QRIS.'); return; }
-      catch (e) { if (e && e.name === 'AbortError') return; console.error(e); shareErr = (e && e.name) || 'error'; }   // gagal -> lanjut ke cara cadangan
-    }
-    // Cadangan: buka chat berisi teks, lalu tampilkan dialog agar gambar QRIS bisa disalin/diunduh dan dilampirkan.
+
+  // Tanpa QRIS: buka chat dari klik pengguna yang sedang berlangsung.
+  if (!qris) {
     openNewTab(url);
-    showQrisDialog(shareErr || (can ? '' : 'Browser ini tidak mendukung berbagi gambar.'));
+    closeStruk();
+    toast(customer.hp ? 'Chat WhatsApp tagihan dibuka tanpa QRIS. Periksa pesan lalu tekan Kirim.' : 'WhatsApp dibuka tanpa QRIS. Pilih pelanggan lalu tekan Kirim.');
     return;
   }
+
+  // Panggil navigator.share langsung dari handler tombol (tanpa await/konfirmasi
+  // asinkron sebelumnya) agar tetap dianggap sebagai user gesture oleh browser.
+  const file = dataUrlToFile(qris, 'QRIS-Uwais-Food.' + (qris.indexOf('image/jpeg') > 5 ? 'jpg' : 'png'));
+  let canShareFiles = false;
+  try { canShareFiles = !!(file && navigator.share && navigator.canShare && navigator.canShare({files: [file]})); } catch (_) {}
+  if (canShareFiles) {
+    try {
+      const sharePromise = navigator.share({files: [file], title: 'Tagihan Uwais Food', text: msg});
+      closeStruk();
+      Promise.resolve(sharePromise).then(() => {
+        toast('Pilih WhatsApp pada menu berbagi untuk mengirim tagihan beserta QRIS.');
+      }).catch(e => {
+        if (e && e.name === 'AbortError') return;
+        console.error(e);
+        window._tagihanFallbackUrl = url;
+        showQrisDialog((e && e.name) || 'Berbagi gambar tidak berhasil', false);
+      });
+      return;
+    } catch (e) {
+      console.error(e);
+      window._tagihanFallbackUrl = url;
+      showQrisDialog((e && e.name) || 'Browser menolak berbagi gambar', false);
+      return;
+    }
+  }
+  // Fallback untuk browser yang tidak mendukung Web Share Files.
   openNewTab(url);
-  toast(customer.hp ? 'Chat WhatsApp pelanggan dibuka. Periksa pesan lalu tekan Kirim.' : 'WhatsApp dibuka. Pilih pelanggan lalu tekan Kirim.');
+  showQrisDialog('Browser ini tidak mendukung berbagi gambar langsung.', true);
 }
+function bukaWhatsAppFallbackTagihan() {
+  const url = window._tagihanFallbackUrl;
+  if (!url) return toast('Tautan WhatsApp tidak tersedia.', 'error');
+  openNewTab(url);
+  window._tagihanFallbackUrl = '';
+  toast('Chat WhatsApp dibuka. Lampirkan QRIS yang disalin atau diunduh.');
+}
+
 function pindahDlg(id) {
   const g = groups().find(x => x.id === id); if (!g) return;
   $('#modal').innerHTML = `<div class="ov" onclick="if(event.target===this)closeStruk()"><div class="dlg card col">
