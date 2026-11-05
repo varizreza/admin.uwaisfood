@@ -380,7 +380,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 @media(max-width:640px){.menu-admin-grid{grid-template-columns:1fr;gap:12px}.menu-admin-photo{min-height:155px}.menu-admin-toolbar{align-items:stretch}.menu-admin-search{max-width:none;min-width:100%}.menu-admin-footer{align-items:stretch}.menu-admin-footer button{flex:1}}
 
 
-/* ===== v10.9.6: Orderan rapi, pembayaran, adonan ===== */
+/* ===== v10.9.7: Orderan rapi, pembayaran, adonan ===== */
 .pos{color:var(--ok)}.neg{color:var(--bad)}
 .tag.neg{background:var(--bad-l);color:var(--bad);font-weight:600}
 .note.bad{background:var(--bad-l);color:var(--bad)}
@@ -449,7 +449,7 @@ textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--l
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.9.6)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.9.7)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -472,10 +472,10 @@ window.__len = 155042;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v10.9.6)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v10.9.7)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v10.9.6)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v10.9.7)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -499,7 +499,7 @@ window.__len = 155042;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v10.9.6 · Tagihan, Adonan PO';
+var APP_VER = 'v10.9.7 · Adonan Bolen Terpadu';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -751,27 +751,52 @@ function poStats(id) {
   return {n: new Set(o.map(x => x.id)).size, pcs: comp.reduce((s, x) => s + x.qty, 0), nilai: o.reduce((s, x) => s + x.qty * x.harga, 0)};
 }
 /* ---- Adonan per PO ---- */
-function komponenMenu() {                    // semua jenis komponen produksi yang dikenal dari menu
+// Semua varian bolen memakai satu jenis adonan yang sama.
+// Nama komponen produksi tetap dipisah di laporan; penyatuan hanya berlaku untuk stok adonan PO.
+function namaJenisAdonan(nama) {
+  const n = String(nama || '').trim();
+  return /\bbolen\b/i.test(n) ? 'Adonan Bolen' : n;
+}
+function gabungDataAdonan(list) {
+  const map = {};
+  (list || []).forEach(a => {
+    const nama = namaJenisAdonan(a.nama);
+    const k = key(nama), qty = Math.max(0, Math.floor(Number(a.qty) || 0));
+    if (!k) return;
+    if (!map[k]) map[k] = {nama, qty: 0};
+    map[k].qty += qty;
+  });
+  return Object.values(map);
+}
+function komponenMenu() {                    // komponen adonan; semua varian bolen digabung
   const seen = {}, out = [];
-  const add = nama => { const k = key(nama); if (k && !seen[k]) { seen[k] = 1; out.push(nama); } };
+  const add = nama => {
+    const label = namaJenisAdonan(nama), k = key(label);
+    if (k && !seen[k]) { seen[k] = 1; out.push(label); }
+  };
   (D.menu || []).forEach(m => { const parts = parseIsi(m.isi); if (parts.length) parts.forEach(p => add(p.nama)); else add(m.nama); });
   return out;
 }
 // Hitung sisa adonan & kapasitas box. extra = komponen tambahan (keranjang), excl = id pesanan yang diabaikan (saat edit).
 function adonanStatus(po, extra, excl) {
   if (!po || !(po.adonan || []).length) return null;
+  const adonanTersimpan = gabungDataAdonan(po.adonan);
   const orders = D.orders.filter(o => o.po === po.id && o.id !== excl);
   const used = {};
-  komponen(orders).forEach(c => { used[key(c.nama)] = c.qty; });
-  (extra || []).forEach(c => { used[key(c.nama)] = (used[key(c.nama)] || 0) + c.qty; });
-  const rows = po.adonan.map(a => { const u = used[key(a.nama)] || 0; return {nama: a.nama, total: a.qty, used: u, sisa: a.qty - u}; });
+  komponen(orders).forEach(c => { const k = key(namaJenisAdonan(c.nama)); used[k] = (used[k] || 0) + c.qty; });
+  (extra || []).forEach(c => { const k = key(namaJenisAdonan(c.nama)); used[k] = (used[k] || 0) + c.qty; });
+  const rows = adonanTersimpan.map(a => { const u = used[key(a.nama)] || 0; return {nama: a.nama, total: a.qty, used: u, sisa: a.qty - u}; });
   const by = {}; rows.forEach(r => { by[key(r.nama)] = r; });
   const pakets = (D.menu || []).filter(m => parseIsi(m.isi).length).map(m => {
     const parts = parseIsi(m.isi);
     const pesan = orders.filter(o => o.item === m.nama).reduce((s, o) => s + o.qty, 0);
-    if (parts.some(p => !by[key(p.nama)] || !p.n)) return {nama: m.nama, unknown: true, pesan};
-    const maxAwal = Math.min(...parts.map(p => Math.floor(by[key(p.nama)].total / p.n)));
-    const sisaBox = Math.min(...parts.map(p => Math.floor(Math.max(0, by[key(p.nama)].sisa) / p.n)));
+    // Beberapa varian bolen dalam satu paket memakai pool adonan yang sama, jadi kebutuhannya dijumlahkan.
+    const need = {};
+    parts.forEach(p => { const k = key(namaJenisAdonan(p.nama)); need[k] = (need[k] || 0) + (Number(p.n) || 0); });
+    const requirements = Object.entries(need);
+    if (requirements.some(([k, q]) => !by[k] || !q)) return {nama: m.nama, unknown: true, pesan};
+    const maxAwal = Math.min(...requirements.map(([k, q]) => Math.floor(by[k].total / q)));
+    const sisaBox = Math.min(...requirements.map(([k, q]) => Math.floor(Math.max(0, by[k].sisa) / q)));
     return {nama: m.nama, pesan, maxAwal, sisaBox};
   });
   return {rows, pakets};
@@ -1709,12 +1734,13 @@ function vRekap() {
 
 /* ---- PO: kelola periode pre-order ---- */
 var newPOId = () => 'P' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4);
-function poFormInit(po) {                     // siapkan state form PO beserta input adonan per jenis
+function poFormInit(po) {                     // siapkan state PO; data bolen lama digabung ke satu adonan
   const e = Object.assign({id: '', nama: '', kirim: '', status: 'Buka', adonan: []}, po || {});
+  const legacyCombined = gabungDataAdonan(e.adonan);
   const names = komponenMenu().slice();
-  (e.adonan || []).forEach(a => { if (!names.some(n => key(n) === key(a.nama))) names.push(a.nama); });
+  legacyCombined.forEach(a => { if (!names.some(n => key(n) === key(a.nama))) names.push(a.nama); });
   e.names = names; e.am = {};
-  (e.adonan || []).forEach(a => { e.am[key(a.nama)] = a.qty; });
+  legacyCombined.forEach(a => { e.am[key(a.nama)] = a.qty; });
   return e;
 }
 function bukaFormPO() { window._poe = poFormInit(); go('po'); }
@@ -1766,7 +1792,7 @@ function vPO() {
   const form = e ? `<div class="card col" style="margin-bottom:14px"><b>${e.id ? 'Edit PO' : 'PO baru'}</b>
       <label class="mut">Tanggal ambil / kirim</label><input type="date" value="${esc(e.kirim)}" oninput="window._poe.kirim=this.value">
       <label class="mut">Nama PO (opsional — otomatis dari tanggal)</label><input placeholder="mis. PO Sabtu" value="${esc(e.nama)}" oninput="window._poe.nama=this.value">
-      <div class="adn-form"><b>🥣 Jumlah adonan awal</b><div class="mut">Isi jumlah pcs yang bisa dibuat dari adonan untuk tiap jenis. Sistem menghitung sisa adonan dan berapa box yang masih bisa dibuat. Kosongkan jika tidak dipakai.</div>
+      <div class="adn-form"><b>🥣 Jumlah adonan awal</b><div class="mut">Isi kapasitas produksi dalam pcs untuk setiap adonan. Semua varian bolen digabung ke satu kolom <b>Adonan Bolen</b> karena memakai adonan dasar yang sama. Sistem menghitung sisa adonan dan kapasitas paket secara otomatis.</div>
         ${e.names.length ? `<div class="adn-grid">${e.names.map((n, i) => `<label class="adn-item"><span>${esc(n)}</span><div class="adn-input"><input type="number" min="0" inputmode="numeric" placeholder="0" value="${e.am[key(n)] ? esc(e.am[key(n)]) : ''}" oninput="setAdonan(${i},this.value)"><em>pcs</em></div></label>`).join('')}</div>` : '<div class="note">Menu belum ada. Tambahkan produk di Menu Produk.</div>'}</div>
       <div class="row"><button class="o" onclick="window._poe=null;render()">Batal</button><button onclick="simpanPOForm()">Simpan</button></div></div>` : '';
   return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Periode Pre-Order (PO)</h2><button onclick="bukaFormPO()">+ PO baru</button></div>
