@@ -299,6 +299,31 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
   .bottom button{font-size:9px}
 }
 
+/* ===== PENGATURAN STRUK / INVOICE v10.9.5 ===== */
+.receipt-settings{gap:14px}
+.receipt-set-group{border:1px solid var(--ln);border-radius:14px;background:var(--surface);overflow:hidden}
+.receipt-set-group>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 15px;font-weight:800;color:var(--tx);font-size:13px}
+.receipt-set-group>summary::-webkit-details-marker{display:none}
+.receipt-set-group>summary:after{content:'＋';margin-left:auto;color:var(--mut);font-size:18px;font-weight:500}
+.receipt-set-group[open]>summary:after{content:'−'}
+.receipt-set-body{padding:0 14px 15px;border-top:1px solid var(--ln);display:flex;flex-direction:column;gap:12px}
+.receipt-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding-top:12px}
+.receipt-field{min-width:0;display:flex;flex-direction:column;gap:5px}
+.receipt-field label{font-size:11px;color:var(--mut);font-weight:750}
+.receipt-field input,.receipt-field select{width:100%;min-width:0;padding:9px 10px;border:1.5px solid var(--ln);border-radius:10px;background:var(--surface);color:var(--tx);font:inherit;font-size:13px}
+.receipt-toggle-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.receipt-toggle{display:flex;align-items:flex-start;gap:9px;padding:10px;border:1px solid var(--ln);border-radius:11px;background:var(--soft);min-width:0;cursor:pointer}
+.receipt-toggle input{width:17px;height:17px;flex:0 0 17px;margin:1px 0 0;accent-color:var(--pr)}
+.receipt-toggle span{font-size:12px;line-height:1.35;color:var(--tx)}
+.receipt-toggle small{display:block;color:var(--mut);font-size:10px;margin-top:2px}
+.receipt-preview-card{background:var(--soft);border:1px solid var(--ln);border-radius:14px;padding:12px;min-width:0}
+.receipt-preview-card .paper-wrap{max-height:440px;overflow:auto}
+.receipt-preview-card .paper{margin:0 auto;min-width:250px;max-width:100%;box-shadow:0 3px 18px #0002}
+.receipt-preview-caption{font-size:11px;color:var(--mut);margin-top:8px;line-height:1.45}
+.receipt-inline-note{font-size:11px;color:var(--mut);line-height:1.45}
+.receipt-subhead{font-size:12px;font-weight:800;padding-top:4px}
+@media(max-width:600px){.receipt-field-grid,.receipt-toggle-grid{grid-template-columns:1fr}.receipt-set-group>summary{padding:13px}.receipt-set-body{padding:0 11px 13px}}
+
 /* ===== TEMA TERANG / GELAP / IKUTI PERANGKAT v10.5 ===== */
 :root[data-uf-theme="light"]{
   color-scheme:light;
@@ -499,7 +524,7 @@ window.__len = 155042;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v10.9.8 · Pilihan QRIS Tagihan';
+var APP_VER = 'v10.9.9 · Pengaturan Struk Lengkap + Pilihan QRIS';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -2051,7 +2076,7 @@ function vPengaturan() {
       ['printer','🖨️','Printer','Bluetooth, kualitas cetak, dan uji printer',IN_GAS ? 'Mode Apps Script' : (chr ? 'Terhubung' : 'Atur koneksi')],
       ['ongkir','📍','Ongkos Kirim','Google Maps, lokasi toko, tarif per kilometer, dan daerah','Google Maps'],
       ['pembayaran','💳','Pembayaran & Tagihan','Nomor rekening, QRIS, dan template pesan tagihan WhatsApp',((cfg().rekening || []).filter(r => r.noRek).length || 'Belum diatur') + ((cfg().rekening || []).filter(r => r.noRek).length ? ' rekening' : '')],
-      ['struk','🧾','Struk','Identitas toko, format gambar, dan template chat WhatsApp',(+cfg().lebar === 80 ? '80 mm' : '58 mm')],
+      ['struk','🧾','Struk','Identitas toko, bagian yang tampil, label, format gambar, dan template WhatsApp',(+cfg().lebar === 80 ? '80 mm' : '58 mm')],
       ['tampilan','🎨','Tampilan','Pilih tema terang, gelap, atau mengikuti perangkat',getThemeMode() === 'light' ? 'Tema terang' : getThemeMode() === 'dark' ? 'Tema gelap' : 'Ikuti perangkat'],
       ['aplikasi','📱','Aplikasi','PWA, pembaruan, koneksi Spreadsheet, dan cache',IN_GAS ? 'Apps Script' : 'PWA'],
       ['keamanan','🛡️','Keamanan','PIN akses, sesi, dan keluar dari aplikasi','PIN aktif']
@@ -2069,7 +2094,7 @@ function vPengaturan() {
   }
   if (section === 'ongkir') return settingDetailHead('Ongkos Kirim','Atur titik toko, Google Maps, tarif per kilometer, dan master daerah.') + ongkirForm();
   if (section === 'pembayaran') return settingDetailHead('Pembayaran & Tagihan','Atur nomor rekening dan pesan tagihan untuk pesanan yang belum dibayar.') + pembayaranForm();
-  if (section === 'struk') return settingDetailHead('Struk','Atur identitas Uwais Food dan format kertas thermal.') + strukForm();
+  if (section === 'struk') return settingDetailHead('Struk / Invoice','Sesuaikan identitas, bagian yang tampil, label, format gambar, dan template WhatsApp.') + strukForm();
   if (section === 'tampilan') {
     const mode = getThemeMode();
     return settingDetailHead('Tampilan','Sesuaikan tampilan aplikasi dengan kenyamanan mata Anda.') + `<div class="card col settings-detail-card">
@@ -2107,7 +2132,24 @@ var ENC = new TextEncoder();
 var num = n => Number(n || 0).toLocaleString('id-ID');
 var WA_MESSAGE_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan},\nTerima kasih sudah memesan di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total pembayaran: {total}*\nPengiriman: {metode_pengiriman}\nKurir: {nama_kurir}\nAlamat tujuan: {alamat}\nStatus pembayaran: {status_pembayaran}\n\n{footer}';
 var TAGIHAN_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan},\nBerikut tagihan pesanan Anda di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total tagihan: {total}*\n\n*Pembayaran via transfer:*\n{info_rekening}\n{info_qris}\n\nMohon kirimkan bukti transfer setelah melakukan pembayaran. Terima kasih.\n{footer}';
-var CFG_DEF = {qrisImage: '', rekening: [], tagihanTemplate: TAGIHAN_TEMPLATE_DEFAULT, kurirMaps: false, toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58, browserDensity: 'bold', browserFontSize: 2.4, browserLineHeight: 1.3, browserLeftMargin: 6, imageFormat: 'png', imageQuality: 'high', waMessageTemplate: WA_MESSAGE_TEMPLATE_DEFAULT};
+var RECEIPT_BOOL_DEFAULTS = {
+  receiptShowStoreName: true, receiptShowTitle: false, receiptShowAddress: true, receiptShowPhone: true, receiptShowCashier: true,
+  receiptShowOrderNo: true, receiptShowDate: true, receiptShowPO: true, receiptShowPickupDate: true, receiptShowCustomer: true,
+  receiptShowShipping: true, receiptShowCourier: true, receiptShowArea: true, receiptShowDestinationAddress: true, receiptShowDistance: true,
+  receiptShowUnitPrice: true, receiptShowItemDetails: true, receiptShowItemCount: true, receiptShowSubtotal: true,
+  receiptShowOngkir: true, receiptShowGrandTotal: true, receiptShowPaymentMethod: true, receiptShowPaymentStatus: true,
+  receiptShowCashDetails: true, receiptShowFooter: true, receiptShowPrintDate: true
+};
+var RECEIPT_TEXT_DEFAULTS = {
+  receiptTitle: 'STRUK PEMBELIAN', receiptLabelOrderNo: 'No.', receiptLabelDate: 'Tanggal', receiptLabelPO: 'PO',
+  receiptLabelPickupDate: 'Ambil/Kirim', receiptLabelCustomer: 'Pelanggan', receiptLabelShipping: 'Pengiriman',
+  receiptLabelCourier: 'Jasa kurir', receiptLabelArea: 'Daerah', receiptLabelAddress: 'Alamat', receiptLabelDistance: 'Jarak Maps',
+  receiptLabelCashier: 'Kasir', receiptLabelItemCount: 'Jumlah item', receiptLabelSubtotal: 'Subtotal produk',
+  receiptLabelOngkir: 'Ongkos kirim', receiptLabelGrandTotal: 'TOTAL TAGIHAN', receiptLabelPayment: 'Pembayaran',
+  receiptLabelCash: 'Tunai', receiptLabelChange: 'Kembali', receiptLabelShort: 'Kurang',
+  receiptPaidText: '*** LUNAS ***', receiptUnpaidText: '*** BELUM LUNAS ***', receiptPrintPrefix: 'Dicetak'
+};
+var CFG_DEF = Object.assign({qrisImage: '', rekening: [], tagihanTemplate: TAGIHAN_TEMPLATE_DEFAULT, kurirMaps: false, toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58, browserDensity: 'bold', browserFontSize: 2.4, browserLineHeight: 1.3, browserLeftMargin: 6, imageFormat: 'png', imageQuality: 'high', waMessageTemplate: WA_MESSAGE_TEMPLATE_DEFAULT, receiptHeaderSeparator: '=', receiptSectionSeparator: '-'}, RECEIPT_BOOL_DEFAULTS, RECEIPT_TEXT_DEFAULTS);
 function cfg() {
   let c;
   try { c = Object.assign({}, CFG_DEF, JSON.parse(LS.get('uf_cfg') || '{}')); } catch (e) { c = Object.assign({}, CFG_DEF); }
@@ -2123,6 +2165,10 @@ function simpanCfg(silent) {
   c.imageFormat = ['png','jpeg'].includes(String(c.imageFormat).toLowerCase()) ? String(c.imageFormat).toLowerCase() : 'png';
   c.imageQuality = ['standard','high','maximum'].includes(String(c.imageQuality).toLowerCase()) ? String(c.imageQuality).toLowerCase() : 'high';
   c.waMessageTemplate = String(c.waMessageTemplate == null ? WA_MESSAGE_TEMPLATE_DEFAULT : c.waMessageTemplate).slice(0, 4000);
+  Object.keys(RECEIPT_BOOL_DEFAULTS).forEach(k => { c[k] = c[k] !== false; });
+  Object.keys(RECEIPT_TEXT_DEFAULTS).forEach(k => { c[k] = String(c[k] == null || c[k] === '' ? RECEIPT_TEXT_DEFAULTS[k] : c[k]).trim().slice(0, 80); });
+  c.receiptHeaderSeparator = ['=', '-', '*', '.'].includes(String(c.receiptHeaderSeparator)) ? String(c.receiptHeaderSeparator) : '=';
+  c.receiptSectionSeparator = ['-', '=', '*', '.'].includes(String(c.receiptSectionSeparator)) ? String(c.receiptSectionSeparator) : '-';
   c.rekening = (Array.isArray(c.rekening) ? c.rekening : []).map(r => ({bank: String(r.bank || '').trim().slice(0, 40), noRek: String(r.noRek || '').trim().slice(0, 40), atasNama: String(r.atasNama || '').trim().slice(0, 60)})).filter(r => r.bank || r.noRek || r.atasNama).slice(0, 8);
   c.tagihanTemplate = String(c.tagihanTemplate == null ? TAGIHAN_TEMPLATE_DEFAULT : c.tagihanTemplate).slice(0, 4000);
   c.kurirMaps = !!c.kurirMaps;
@@ -2147,8 +2193,8 @@ function wrap(s, w) {                                  // bungkus teks per kata,
   return out.map(x => ind + x);
 }
 // Satu model struk -> dipakai untuk pratinjau layar, ESC/POS, dan cetak browser (hasilnya selalu sama)
-function R() {
-  const w = cols(), half = Math.floor(w / 2), o = [];
+function R(widthOverride) {
+  const w = Number(widthOverride) === 80 ? 48 : Number(widthOverride) === 58 ? 32 : cols(), half = Math.floor(w / 2), o = [];
   const api = {
     w, o,
     c(t, opt = {}) { String(t == null ? '' : t).split('\n').forEach(part => wrap(part, opt.big ? half : w).forEach(x => o.push(Object.assign({k: 'c', t: x, ww: opt.big ? half : w}, opt)))); return api; },
@@ -2448,50 +2494,88 @@ async function shareStrukWhatsApp(id) {
 var two = n => String(n).padStart(2, '0');
 function nowStr() { const d = new Date(); return `${two(d.getDate())}/${two(d.getMonth() + 1)}/${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`; }
 
-function buildStruk(g, st) {
-  const c = cfg(), r = R();
-  r.c(c.toko || 'TOKO', {big: true, bold: true});
-  if (c.alamat) r.c(c.alamat);
-  if (c.telp) r.c('Telp/WA: ' + c.telp);
-  r.hr('=');
-  r.lr('No.', g.id).lr('Tanggal', g.waktu);
+function receiptEnabled(c, key) { return c[key] !== false; }
+function receiptText(c, key, fallback) { const v = String(c[key] == null ? '' : c[key]).trim(); return v || fallback; }
+function setReceiptSetting(key, value) {
+  if (!window._cfg) window._cfg = cfg();
+  window._cfg[key] = Object.prototype.hasOwnProperty.call(RECEIPT_BOOL_DEFAULTS, key) ? !!value : value;
+  updateReceiptSettingsPreview();
+}
+function receiptSettingsPreviewHtml() {
+  const c = window._cfg || cfg();
+  const samplePO = (D.pos || [])[0];
+  const g = {
+    id: 'O261105120544am', nama: 'Dinda', waktu: '05/11/2026 12:05', po: samplePO ? samplePO.id : '',
+    items: [{item: 'All In', qty: 1, harga: 85000, isi: '3 Bolen Pisang Cokelat Keju + 3 Bolen Cheesy Beef + 4 Banana Milk Cheese'}],
+    total: 85000, grandTotal: 97000, metodeKirim: 'Kurir', jenisKurir: 'Pihak Ketiga', namaKurir: 'Kurir Contoh',
+    daerahKirim: 'Sei Jang', alamatKirim: 'Jl. Lingga No. 33, Perumnas Sei Jang', jarakKm: 4.2, ongkir: 12000
+  };
+  const receipt = buildStruk(g, {metode: 'Transfer', bayar: 97000}, c);
+  return `<div class="paper-wrap"><div class="paper" style="width:${Number(c.lebar) === 80 ? 48 : 32}ch">${toHtml(receipt)}</div></div>`;
+}
+function updateReceiptSettingsPreview() {
+  const el = document.getElementById('receiptSettingsPreview');
+  if (el) el.innerHTML = receiptSettingsPreviewHtml();
+}
+function buildStruk(g, st, configOverride) {
+  const c = configOverride || cfg(), r = R(c.lebar);
+  const show = key => receiptEnabled(c, key);
+  const label = (key, fallback) => receiptText(c, key, fallback);
+  const headerSep = c.receiptHeaderSeparator || '=';
+  const sectionSep = c.receiptSectionSeparator || '-';
+
+  if (show('receiptShowStoreName') && c.toko) r.c(c.toko, {big: true, bold: true});
+  if (show('receiptShowTitle') && c.receiptTitle) r.c(c.receiptTitle, {bold: true});
+  if (show('receiptShowAddress') && c.alamat) r.c(c.alamat);
+  if (show('receiptShowPhone') && c.telp) r.c('Telp/WA: ' + c.telp);
+  r.hr(headerSep);
+
+  if (show('receiptShowOrderNo')) r.lr(label('receiptLabelOrderNo', 'No.'), g.id || '-');
+  if (show('receiptShowDate')) r.lr(label('receiptLabelDate', 'Tanggal'), g.waktu || '-');
   const po = findPO(g.po);
-  if (po) { r.l('PO: ' + po.nama); if (po.kirim) r.lr('Ambil/Kirim', fmtTgl(po.kirim)); }
-  r.l('Pelanggan: ' + g.nama);
-  if (g.metodeKirim === 'Kurir') {
-    r.l(isKurirMaps(g) ? 'Pengiriman: Kurir Maps' : 'Pengiriman: Kurir');
-    if (g.namaKurir) r.l('Jasa kurir: ' + g.namaKurir);
-    if (g.daerahKirim) r.l('Daerah: ' + g.daerahKirim);
-    if (g.alamatKirim) r.l('Alamat: ' + g.alamatKirim);
-    if (g.jarakKm) r.lr('Jarak Maps', String(g.jarakKm) + ' km');
-  } else r.l('Pengiriman: Pickup');
-  if (c.kasir) r.l('Kasir: ' + c.kasir);
-  r.hr('-');
-  g.items.forEach(it => {
+  if (show('receiptShowPO') && po) r.l(label('receiptLabelPO', 'PO') + ': ' + po.nama);
+  if (show('receiptShowPickupDate') && po && po.kirim) r.lr(label('receiptLabelPickupDate', 'Ambil/Kirim'), fmtTgl(po.kirim));
+  if (show('receiptShowCustomer')) r.l(label('receiptLabelCustomer', 'Pelanggan') + ': ' + (g.nama || '-'));
+  if (show('receiptShowShipping')) {
+    if (g.metodeKirim === 'Kurir') {
+      r.l(label('receiptLabelShipping', 'Pengiriman') + ': ' + (isKurirMaps(g) ? 'Kurir Maps' : 'Kurir'));
+      if (show('receiptShowCourier') && g.namaKurir) r.l(label('receiptLabelCourier', 'Jasa kurir') + ': ' + g.namaKurir);
+      if (show('receiptShowArea') && g.daerahKirim) r.l(label('receiptLabelArea', 'Daerah') + ': ' + g.daerahKirim);
+      if (show('receiptShowDestinationAddress') && g.alamatKirim) r.l(label('receiptLabelAddress', 'Alamat') + ': ' + g.alamatKirim);
+      if (show('receiptShowDistance') && g.jarakKm) r.lr(label('receiptLabelDistance', 'Jarak Maps'), String(g.jarakKm) + ' km');
+    } else r.l(label('receiptLabelShipping', 'Pengiriman') + ': Pickup');
+  }
+  if (show('receiptShowCashier') && c.kasir) r.l(label('receiptLabelCashier', 'Kasir') + ': ' + c.kasir);
+  r.hr(sectionSep);
+
+  (g.items || []).forEach(it => {
     r.l(it.item, {bold: true});
-    r.lr('  ' + it.qty + ' x ' + num(it.harga), num(it.qty * it.harga));
-    parseIsi(it.isi).forEach(p => r.l('   - ' + (p.n * it.qty) + ' ' + p.nama));
+    if (show('receiptShowUnitPrice')) r.lr('  ' + it.qty + ' x ' + num(it.harga), num(it.qty * it.harga));
+    else r.lr('  Qty: ' + it.qty, num(it.qty * it.harga));
+    if (show('receiptShowItemDetails')) parseIsi(it.isi).forEach(p => r.l('   - ' + (p.n * it.qty) + ' ' + p.nama));
   });
-  r.hr('-');
-  const tagihan = Number(g.grandTotal == null ? g.total + (g.metodeKirim === 'Kurir' ? Number(g.ongkir) || 0 : 0) : g.grandTotal);
-  r.lr('Jumlah item', String(g.items.reduce((s, x) => s + x.qty, 0)));
-  r.lr('Subtotal produk', 'Rp' + num(g.total));
-  if (g.metodeKirim === 'Kurir') r.lr('Ongkos kirim', 'Rp' + num(g.ongkir));
-  r.hr('-');
-  r.lr('TOTAL TAGIHAN', 'Rp' + num(tagihan), {big: true, bold: true});
+  r.hr(sectionSep);
+  const tagihan = Number(g.grandTotal == null ? Number(g.total || 0) + (g.metodeKirim === 'Kurir' ? Number(g.ongkir) || 0 : 0) : g.grandTotal);
+  if (show('receiptShowItemCount')) r.lr(label('receiptLabelItemCount', 'Jumlah item'), String((g.items || []).reduce((s, x) => s + (Number(x.qty) || 0), 0)));
+  if (show('receiptShowSubtotal')) r.lr(label('receiptLabelSubtotal', 'Subtotal produk'), 'Rp' + num(g.total));
+  if (show('receiptShowOngkir') && g.metodeKirim === 'Kurir') r.lr(label('receiptLabelOngkir', 'Ongkos kirim'), 'Rp' + num(g.ongkir));
+  if (show('receiptShowGrandTotal')) {
+    r.hr(sectionSep);
+    r.lr(label('receiptLabelGrandTotal', 'TOTAL TAGIHAN'), 'Rp' + num(tagihan), {big: true, bold: true});
+  }
   const m = (st && st.metode) || 'Tunai', bayar = Number(st && st.bayar) || 0;
   const lunas = m !== 'Belum Bayar' && !(m === 'Tunai' && bayar > 0 && bayar < tagihan);
-  if (m !== 'Belum Bayar') {
-    if (m === 'Tunai' && bayar > 0 && bayar !== tagihan) {
-      r.lr('Tunai', 'Rp' + num(bayar));
-      if (bayar > tagihan) r.lr('Kembali', 'Rp' + num(bayar - tagihan), {bold: true});
-      else r.lr('Kurang', 'Rp' + num(tagihan - bayar), {bold: true});
-    } else r.lr('Pembayaran', m);
+  if (show('receiptShowPaymentMethod') && m !== 'Belum Bayar') {
+    if (show('receiptShowCashDetails') && m === 'Tunai' && bayar > 0 && bayar !== tagihan) {
+      r.lr(label('receiptLabelCash', 'Tunai'), 'Rp' + num(bayar));
+      if (bayar > tagihan) r.lr(label('receiptLabelChange', 'Kembali'), 'Rp' + num(bayar - tagihan), {bold: true});
+      else r.lr(label('receiptLabelShort', 'Kurang'), 'Rp' + num(tagihan - bayar), {bold: true});
+    } else r.lr(label('receiptLabelPayment', 'Pembayaran'), m);
   }
-  r.c(lunas ? '*** LUNAS ***' : '*** BELUM LUNAS ***', {bold: true});
-  r.hr('=');
-  if (c.footer) r.c(c.footer);
-  r.c('Dicetak ' + nowStr());
+  if (show('receiptShowPaymentStatus')) r.c(lunas ? label('receiptPaidText', '*** LUNAS ***') : label('receiptUnpaidText', '*** BELUM LUNAS ***'), {bold: true});
+  r.hr(headerSep);
+  if (show('receiptShowFooter') && c.footer) r.c(c.footer);
+  if (show('receiptShowPrintDate')) r.c(label('receiptPrintPrefix', 'Dicetak') + ' ' + nowStr());
   r.feed(1);
   return r;
 }
@@ -2811,21 +2895,126 @@ function setKurirMaps(on) {
 function strukForm() {
   if (!window._cfg) window._cfg = cfg();
   const c = window._cfg;
-  const f = (l, k, ph) => `<label class="mut">${l}</label><input placeholder="${ph}" value="${esc(c[k])}" oninput="window._cfg.${k}=this.value">`;
-  return `<div class="card col settings-detail-card">
-    ${f('Nama toko', 'toko', 'UWAIS FOOD')}${f('Alamat', 'alamat', 'Jl. Contoh No. 1, Kota')}${f('Telepon / WhatsApp', 'telp', '08xxxxxxxxxx')}${f('Nama kasir (opsional)', 'kasir', '')}${f('Pesan di bawah struk', 'footer', 'Terima kasih sudah berbelanja!')}
-    <label class="mut">Lebar kertas printer</label>
-    <div class="seg">${[58, 80].map(x => `<button class="${+c.lebar === x ? 'on' : ''}" onclick="window._cfg.lebar=${x};render()">${x} mm</button>`).join('')}</div>
-    <div class="col" style="gap:5px"><label class="mut">Format unduhan / WhatsApp</label><select class="sel" onchange="window._cfg.imageFormat=this.value"><option value="png" ${c.imageFormat!=='jpeg'?'selected':''}>PNG — tanpa kompresi, lebih tajam</option><option value="jpeg" ${c.imageFormat==='jpeg'?'selected':''}>JPEG — ukuran file lebih kecil</option></select></div>
-    <div class="col" style="gap:5px"><label class="mut">Kualitas gambar</label><select class="sel" onchange="window._cfg.imageQuality=this.value"><option value="standard" ${c.imageQuality==='standard'?'selected':''}>Standar — file lebih ringan</option><option value="high" ${!c.imageQuality || c.imageQuality==='high'?'selected':''}>Tinggi — disarankan</option><option value="maximum" ${c.imageQuality==='maximum'?'selected':''}>Maksimal — resolusi tertinggi</option></select><small class="mut">Pilihan ini berlaku untuk Unduh Gambar dan Bagikan WhatsApp. PNG bersifat lossless; kualitas mengatur resolusi gambar. JPEG memakai kompresi sesuai pilihan.</small></div>
-    <div class="col" style="gap:7px;margin-top:8px"><div><b style="font-size:15px">💬 Template Pesan WhatsApp</b><div class="mut">Atur teks yang otomatis disiapkan saat invoice dibagikan. Gunakan tanda *teks* untuk huruf tebal di WhatsApp.</div></div>
-      <div class="menu-admin-field"><label>Isi pesan WhatsApp</label><textarea id="waMessageTemplate" rows="10" maxlength="4000" oninput="setWhatsAppTemplate(this.value)">${esc(String(c.waMessageTemplate == null ? WA_MESSAGE_TEMPLATE_DEFAULT : c.waMessageTemplate).replace(/\\n/g, '\n'))}</textarea></div>
-      <div class="note"><b>Pratinjau pesan</b><pre id="waTemplatePreview" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;font:inherit;font-size:13px;color:var(--tx)">${esc(sampleWhatsAppMessage(c.waMessageTemplate))}</pre></div>
-      <div class="mut">Variabel yang bisa dipakai: <code>{nama_toko}</code>, <code>{nama_pelanggan}</code>, <code>{nomor_pesanan}</code>, <code>{tanggal}</code>, <code>{daftar_produk}</code>, <code>{subtotal}</code>, <code>{ongkir}</code>, <code>{total}</code>, <code>{metode_pengiriman}</code>, <code>{nama_kurir}</code>, <code>{daerah_tujuan}</code>, <code>{alamat}</code>, <code>{status_pembayaran}</code>, <code>{metode_pembayaran}</code>, <code>{whatsapp_toko}</code>, <code>{info_rekening}</code>, dan <code>{footer}</code>.</div>
-      <div class="acts"><button class="o" onclick="resetWhatsAppTemplate()">Gunakan template awal</button></div>
+  const field = (label, key, placeholder) => `<div class="receipt-field"><label>${label}</label><input value="${esc(c[key] == null ? '' : c[key])}" placeholder="${esc(placeholder || '')}" maxlength="80" oninput="setReceiptSetting('${key}',this.value)"></div>`;
+  const toggle = (label, key, hint) => `<label class="receipt-toggle"><input type="checkbox" ${c[key] !== false ? 'checked' : ''} onchange="setReceiptSetting('${key}',this.checked)"><span>${label}${hint ? `<small>${hint}</small>` : ''}</span></label>`;
+  const labelFields = [
+    ['Label nomor pesanan','receiptLabelOrderNo','No.'], ['Label tanggal','receiptLabelDate','Tanggal'],
+    ['Label PO','receiptLabelPO','PO'], ['Label tanggal ambil/kirim','receiptLabelPickupDate','Ambil/Kirim'],
+    ['Label pelanggan','receiptLabelCustomer','Pelanggan'], ['Label pengiriman','receiptLabelShipping','Pengiriman'],
+    ['Label jasa kurir','receiptLabelCourier','Jasa kurir'], ['Label daerah','receiptLabelArea','Daerah'],
+    ['Label alamat','receiptLabelAddress','Alamat'], ['Label jarak','receiptLabelDistance','Jarak Maps'],
+    ['Label jumlah item','receiptLabelItemCount','Jumlah item'], ['Label subtotal','receiptLabelSubtotal','Subtotal produk'],
+    ['Label ongkir','receiptLabelOngkir','Ongkos kirim'], ['Label total','receiptLabelGrandTotal','TOTAL TAGIHAN'],
+    ['Label pembayaran','receiptLabelPayment','Pembayaran'], ['Label tanggal cetak','receiptPrintPrefix','Dicetak']
+  ].map(x => field(x[0], x[1], x[2]));
+  return `<div class="col receipt-settings" style="max-width:940px">
+    <div class="note">Atur bagian struk/invoice sesuai kebutuhan toko. Perubahan akan terlihat pada pratinjau. Tekan <b>Simpan pengaturan</b> agar diterapkan pada cetak thermal, cetak browser, unduhan PNG/JPEG, dan invoice WhatsApp.</div>
+
+    <details class="receipt-set-group" open>
+      <summary>🏪 Identitas toko & judul struk</summary>
+      <div class="receipt-set-body">
+        <div class="receipt-field-grid">
+          ${field('Nama toko','toko','UWAIS FOOD')}
+          ${field('Judul dokumen (opsional)','receiptTitle','STRUK PEMBELIAN')}
+          ${field('Alamat toko','alamat','Alamat lengkap toko')}
+          ${field('Telepon / WhatsApp','telp','Nomor WhatsApp toko')}
+          ${field('Nama kasir','kasir','Opsional')}
+          ${field('Pesan penutup','footer','Terima kasih sudah berbelanja!')}
+        </div>
+        <div class="receipt-subhead">Tampilkan pada struk</div>
+        <div class="receipt-toggle-grid">
+          ${toggle('Nama toko','receiptShowStoreName')}
+          ${toggle('Judul dokumen','receiptShowTitle')}
+          ${toggle('Alamat toko','receiptShowAddress')}
+          ${toggle('Telepon / WhatsApp','receiptShowPhone')}
+          ${toggle('Nama kasir','receiptShowCashier')}
+          ${toggle('Pesan penutup','receiptShowFooter')}
+        </div>
+      </div>
+    </details>
+
+    <details class="receipt-set-group">
+      <summary>🧾 Informasi pesanan & pengiriman</summary>
+      <div class="receipt-set-body">
+        <div class="receipt-toggle-grid">
+          ${toggle('Nomor pesanan','receiptShowOrderNo')}
+          ${toggle('Tanggal transaksi','receiptShowDate')}
+          ${toggle('Nama periode PO','receiptShowPO')}
+          ${toggle('Tanggal ambil / kirim','receiptShowPickupDate')}
+          ${toggle('Nama pelanggan','receiptShowCustomer')}
+          ${toggle('Metode pengiriman','receiptShowShipping')}
+          ${toggle('Nama jasa kurir','receiptShowCourier')}
+          ${toggle('Daerah tujuan','receiptShowArea')}
+          ${toggle('Alamat pelanggan','receiptShowDestinationAddress')}
+          ${toggle('Jarak Google Maps','receiptShowDistance')}
+        </div>
+        <div class="receipt-subhead">Ubah nama label yang tercetak</div>
+        <div class="receipt-field-grid">
+          ${labelFields.slice(0,10).join('')}
+        </div>
+      </div>
+    </details>
+
+    <details class="receipt-set-group">
+      <summary>🥐 Rincian produk & total pembayaran</summary>
+      <div class="receipt-set-body">
+        <div class="receipt-toggle-grid">
+          ${toggle('Tampilkan jumlah item','receiptShowItemCount')}
+          ${toggle('Tampilkan harga satuan','receiptShowUnitPrice')}
+          ${toggle('Tampilkan komposisi paket','receiptShowItemDetails')}
+          ${toggle('Tampilkan subtotal produk','receiptShowSubtotal')}
+          ${toggle('Tampilkan ongkos kirim','receiptShowOngkir')}
+          ${toggle('Tampilkan total tagihan','receiptShowGrandTotal')}
+          ${toggle('Tampilkan metode pembayaran','receiptShowPaymentMethod')}
+          ${toggle('Tampilkan status Lunas/Belum Lunas','receiptShowPaymentStatus')}
+          ${toggle('Tampilkan rincian uang tunai/kembalian','receiptShowCashDetails')}
+          ${toggle('Tampilkan waktu cetak','receiptShowPrintDate')}
+        </div>
+        <div class="receipt-subhead">Label rincian pembayaran</div>
+        <div class="receipt-field-grid">
+          ${labelFields.slice(10).join('')}
+          ${field('Teks status lunas','receiptPaidText','*** LUNAS ***')}
+          ${field('Teks status belum lunas','receiptUnpaidText','*** BELUM LUNAS ***')}
+          ${field('Label uang tunai','receiptLabelCash','Tunai')}
+          ${field('Label kembalian','receiptLabelChange','Kembali')}
+          ${field('Label kekurangan','receiptLabelShort','Kurang')}
+        </div>
+      </div>
+    </details>
+
+    <details class="receipt-set-group">
+      <summary>🎨 Ukuran kertas & tampilan</summary>
+      <div class="receipt-set-body">
+        <div class="receipt-field-grid">
+          <div class="receipt-field"><label>Lebar kertas printer</label><select onchange="setReceiptSetting('lebar',Number(this.value))"><option value="58" ${+c.lebar===58?'selected':''}>58 mm</option><option value="80" ${+c.lebar===80?'selected':''}>80 mm</option></select></div>
+          <div class="receipt-field"><label>Garis pemisah utama</label><select onchange="setReceiptSetting('receiptHeaderSeparator',this.value)">${['=','-','*','.'].map(v=>`<option value="${v}" ${(c.receiptHeaderSeparator||'=')===v?'selected':''}>${v.repeat(8)}</option>`).join('')}</select></div>
+          <div class="receipt-field"><label>Garis pemisah bagian</label><select onchange="setReceiptSetting('receiptSectionSeparator',this.value)">${['-','=','*','.'].map(v=>`<option value="${v}" ${(c.receiptSectionSeparator||'-')===v?'selected':''}>${v.repeat(8)}</option>`).join('')}</select></div>
+          <div class="receipt-field"><label>Format gambar unduhan / WhatsApp</label><select onchange="setReceiptSetting('imageFormat',this.value)"><option value="png" ${c.imageFormat!=='jpeg'?'selected':''}>PNG — lebih tajam</option><option value="jpeg" ${c.imageFormat==='jpeg'?'selected':''}>JPEG — file lebih kecil</option></select></div>
+          <div class="receipt-field"><label>Kualitas gambar</label><select onchange="setReceiptSetting('imageQuality',this.value)"><option value="standard" ${c.imageQuality==='standard'?'selected':''}>Standar</option><option value="high" ${!c.imageQuality||c.imageQuality==='high'?'selected':''}>Tinggi</option><option value="maximum" ${c.imageQuality==='maximum'?'selected':''}>Maksimal</option></select></div>
+        </div>
+        <div class="receipt-inline-note">Pengaturan lebar kertas berlaku untuk cetak thermal, pratinjau struk, dan gambar invoice. Kualitas gambar mengatur resolusi raster; PNG tetap lossless, sedangkan JPEG menggunakan kompresi.</div>
+      </div>
+    </details>
+
+    <details class="receipt-set-group">
+      <summary>💬 Template pesan WhatsApp</summary>
+      <div class="receipt-set-body" style="padding-top:12px">
+        <div class="mut">Teks yang disiapkan saat invoice dibagikan. Gunakan tanda *teks* untuk huruf tebal di WhatsApp.</div>
+        <textarea id="waMessageTemplate" rows="10" maxlength="4000" oninput="setWhatsAppTemplate(this.value)">${esc(String(c.waMessageTemplate == null ? WA_MESSAGE_TEMPLATE_DEFAULT : c.waMessageTemplate).replace(/\\n/g, '\n'))}</textarea>
+        <div class="note"><b>Pratinjau pesan</b><pre id="waTemplatePreview" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;font:inherit;font-size:13px;color:var(--tx)">${esc(sampleWhatsAppMessage(c.waMessageTemplate))}</pre></div>
+        <div class="receipt-inline-note">Variabel: <code>{nama_toko}</code>, <code>{nama_pelanggan}</code>, <code>{nomor_pesanan}</code>, <code>{tanggal}</code>, <code>{daftar_produk}</code>, <code>{subtotal}</code>, <code>{ongkir}</code>, <code>{total}</code>, <code>{metode_pengiriman}</code>, <code>{nama_kurir}</code>, <code>{daerah_tujuan}</code>, <code>{alamat}</code>, <code>{status_pembayaran}</code>, <code>{metode_pembayaran}</code>, <code>{whatsapp_toko}</code>, <code>{info_rekening}</code>, dan <code>{footer}</code>.</div>
+        <div class="acts"><button class="o" onclick="resetWhatsAppTemplate()">Gunakan template awal</button></div>
+      </div>
+    </details>
+
+    <div class="receipt-preview-card">
+      <div class="row"><b>👁️ Pratinjau struk langsung</b><span class="tag ok">Live preview</span></div>
+      <div id="receiptSettingsPreview">${receiptSettingsPreviewHtml()}</div>
+      <div class="receipt-preview-caption">Contoh ini menggunakan data simulasi. Setelah pengaturan disimpan, tampilan yang sama digunakan pada struk pesanan sebenarnya.</div>
     </div>
-    <div class="acts"><button onclick="simpanCfg()">Simpan pengaturan</button><button class="o" onclick="simpanCfg(true);cetakTes()">Tes cetak</button></div>
-    <div class="mut">Pengaturan struk tersimpan di perangkat ini.</div></div>`;
+    <div class="acts"><button onclick="simpanCfg()">💾 Simpan pengaturan struk</button><button class="o" onclick="simpanCfg(true);cetakTes()">🖨️ Tes cetak</button></div>
+    <div class="mut">Pengaturan struk tersimpan di perangkat ini dan berlaku untuk Apps Script maupun PWA pada perangkat yang sama.</div>
+  </div>`;
 }
 
 var SVC = ['000018f0-0000-1000-8000-00805f9b34fb', 0xff00, '49535343-fe7d-4ae5-8fa9-9fafd205e455', 0xffe0, 0xfee7];
