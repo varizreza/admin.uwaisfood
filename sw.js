@@ -1,6 +1,6 @@
 /* UWAIS FOOD PWA v10.9.9 — complete receipt settings and QRIS choice */
 const CACHE_PREFIX = 'uwais-food-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v10-9-9-po-time-mobile-notifications';
+const CACHE_NAME = CACHE_PREFIX + 'v10-9-9-po-time-mobile-notifications-shipping-wa';
 const SHELL_FILES = [
   './',
   './index.html',

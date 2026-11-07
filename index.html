@@ -566,7 +566,7 @@ var getApi = () => LS.get('uf_api') || DEFAULT_API;
 var getTok = () => window._tok || LS.get('uf_tok');
 var setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
 
-var D = {menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0}}, cart = {}, tab = 'pesan', filt = 'Semua', rfilt = 'Semua', curPO = LS.get('uf_po'), editing = null, dev = null, chr = null, installEv = null;
+var D = {menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0, autoByArea: false}}, cart = {}, tab = 'pesan', filt = 'Semua', rfilt = 'Semua', curPO = LS.get('uf_po'), editing = null, dev = null, chr = null, installEv = null;
 var shippingMode = 'Pickup';
 var ofilt = 'Semua', bfilt = 'Semua';   // filter pembayaran: ofilt = Orderan, bfilt = Rekap
 var mapsLoading = null, mapsPlaces = null, mapsRoutes = null, destMapObj = null, destMapEl = null, destPolylines = [], originMapObj = null, originPolylines = [];
@@ -711,7 +711,7 @@ async function kirimPengaturanKeServer(c) {
 async function load() {
   if (needSetup() || !getTok()) return render();
   const c = J.get('uf_data', null);
-  if (c) D = Object.assign({menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0}}, c);
+  if (c) D = Object.assign({menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0, autoByArea: false}}, c);
   window._loading = !c;
   render(); updSync();
   await syncNow();
@@ -746,7 +746,7 @@ function perPaket(items) {
 function groups() {
   const g = {};
   D.orders.forEach(o => {
-    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, po: o.po || '', items: [], total: 0, metodeKirim: o.metodeKirim || 'Pickup', jenisKurir: o.jenisKurir || (o.metodeKirim === 'Kurir' ? 'Maps' : ''), bayar: o.bayar === 'Lunas' ? 'Lunas' : 'Belum Bayar', metodeBayar: o.metodeBayar || '', namaKurir: o.namaKurir || '', daerahKirim: o.daerahKirim || '', alamatKirim: o.alamatKirim || '', jarakKm: Number(o.jarakKm) || 0, ongkir: Number(o.ongkir) || 0, placeId: o.placeId || '', lat: o.lat == null ? null : Number(o.lat), lng: o.lng == null ? null : Number(o.lng)};
+    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, po: o.po || '', items: [], total: 0, metodeKirim: o.metodeKirim || 'Pickup', jenisKurir: o.jenisKurir || (o.metodeKirim === 'Kurir' ? 'Maps' : ''), bayar: o.bayar === 'Lunas' ? 'Lunas' : 'Belum Bayar', metodeBayar: o.metodeBayar || '', namaKurir: o.namaKurir || '', daerahKirim: o.daerahKirim || '', alamatKirim: o.alamatKirim || '', jarakKm: Number(o.jarakKm) || 0, ongkir: Number(o.ongkir) || 0, ongkirStatus: o.ongkirStatus || '', ongkirPending: !!o.ongkirPending, placeId: o.placeId || '', lat: o.lat == null ? null : Number(o.lat), lng: o.lng == null ? null : Number(o.lng)};
     g[o.id].items.push(o); g[o.id].total += o.qty * o.harga;
   });
   return Object.values(g).map(x => { x.grandTotal = x.total + (x.metodeKirim === 'Kurir' ? Number(x.ongkir) || 0 : 0); return x; }).reverse();
@@ -1561,11 +1561,13 @@ async function simpan() {
 function orderCard(g) {
   const p = findPel(g.nama), lunas = g.bayar === 'Lunas', selesai = g.status === 'Selesai';
   const shipLine = g.metodeKirim === 'Kurir'
-    ? `<div class="oc-ship"><b>${isKurirMaps(g) ? '📍 Kurir Maps' : '🚚 Kurir' + (g.namaKurir ? ' · ' + esc(g.namaKurir) : '')}${g.daerahKirim ? ' · ' + esc(g.daerahKirim) : ''}</b>${g.alamatKirim ? `<div class="mut">📍 ${esc(g.alamatKirim)}</div>` : ''}${g.jarakKm ? `<div class="mut">Jarak dari toko: ${g.jarakKm} km</div>` : ''}</div>`
+    ? `<div class="oc-ship"><b>${isKurirMaps(g) ? '📍 Kurir Maps' : '🚚 Kurir' + (g.namaKurir ? ' · ' + esc(g.namaKurir) : '')}${g.daerahKirim ? ' · ' + esc(g.daerahKirim) : ''}</b>${g.alamatKirim ? `<div class="mut">📍 ${esc(g.alamatKirim)}</div>` : ''}${g.jarakKm ? `<div class="mut">Jarak dari toko: ${g.jarakKm} km</div>` : ''}${g.ongkirPending ? '<div class="mut" style="color:#b35a20;font-weight:700">⏳ Ongkir menunggu konfirmasi melalui WhatsApp</div>' : ''}</div>`
     : `<div class="oc-ship"><b>📦 Pickup</b><div class="mut">Tanpa ongkos kirim</div></div>`;
   const main = lunas
     ? `<button class="main wa" onclick="shareStrukWhatsApp('${g.id}')">📲 Kirim Struk</button>`
-    : `<button class="main wa" onclick="kirimTagihan('${g.id}')">💸 Kirim Tagihan</button>`;
+    : g.ongkirPending
+      ? `<button class="main" onclick="editOrder('${g.id}')">📍 Tentukan Ongkir</button>`
+      : `<button class="main wa" onclick="kirimTagihan('${g.id}')">💸 Kirim Tagihan</button>`;
   const second = lunas
     ? `<button class="o" onclick="downloadStrukImage('${g.id}')">⬇️ Unduh Struk</button>`
     : `<button class="g" onclick="bayarDlg('${g.id}')">✓ Tandai Lunas</button>`;
@@ -1574,8 +1576,8 @@ function orderCard(g) {
       <div class="oc-badges"><button class="paytag ${lunas ? 'lunas' : 'belum'}" onclick="bayarDlg('${g.id}')" title="Ubah status pembayaran">${lunas ? '✅ Lunas' + (g.metodeBayar ? ' · ' + esc(g.metodeBayar) : '') : '⏳ Belum bayar'}</button><span class="tag ${selesai ? 'ok' : 'pr'}">${selesai ? '✔ Selesai' : 'Baru'}</span></div></div>
     ${shipLine}
     <div class="oc-items">${g.items.map(o => `<div class="line"><span>${o.qty}× ${esc(o.item)}${o.isi ? `<div class="mut">${parseIsi(o.isi).map(x => (x.n * o.qty) + ' ' + esc(x.nama)).join(' · ')}</div>` : ''}</span><span>${rp(o.qty * o.harga)}</span></div>`).join('')}</div>
-    <div class="oc-sum"><div class="line"><span class="mut">Subtotal produk</span><b>${rp(g.total)}</b></div>${g.metodeKirim === 'Kurir' ? `<div class="line"><span class="mut">Ongkos kirim</span><b>${rp(g.ongkir)}</b></div>` : ''}</div>
-    <div class="oc-total"><span>Total</span><strong>${rp(g.grandTotal)}</strong></div>
+    <div class="oc-sum"><div class="line"><span class="mut">Subtotal produk</span><b>${rp(g.total)}</b></div>${g.metodeKirim === 'Kurir' ? `<div class="line"><span class="mut">Ongkos kirim</span><b>${g.ongkirPending ? 'Akan diinformasikan via WhatsApp' : rp(g.ongkir)}</b></div>` : ''}</div>
+    <div class="oc-total"><span>${g.ongkirPending ? 'Total sementara (belum termasuk ongkir)' : 'Total'}</span><strong>${rp(g.grandTotal)}</strong></div>
     <div class="oc-actions">${main}${second}<button class="o" onclick="status('${g.id}','${selesai ? 'Baru' : 'Selesai'}')">${selesai ? '↺ Buka lagi' : '✓ Selesai'}</button></div>
     <div class="oc-tools"><button class="o" onclick="cetakOrder('${g.id}')" title="Lihat struk dan cetak"><span>🧾</span>Struk</button><button class="o" onclick="editOrder('${g.id}')" title="Edit pesanan"><span>✏️</span>Edit</button><button class="o" onclick="pindahDlg('${g.id}')" title="Pindah PO"><span>📅</span>Pindah</button><button class="r" onclick="hapus('${g.id}')" title="Hapus"><span>🗑</span>Hapus</button></div>
   </div>`;
@@ -1966,7 +1968,7 @@ function vPO() {
 /* ---- Pengaturan ongkir ---- */
 function ongkirForm() {
   D.tarifOngkir = D.tarifOngkir || [];
-  D.ongkirConfig = Object.assign({origin:'', placeId:'', lat:null, lng:null, ratePerKm:0, minFee:0}, D.ongkirConfig || {});
+  D.ongkirConfig = Object.assign({origin:'', placeId:'', lat:null, lng:null, ratePerKm:0, minFee:0, autoByArea:false}, D.ongkirConfig || {});
   const e = window._te, c = D.ongkirConfig;
   const form = e ? `<div class="card col" style="margin-bottom:12px"><b>${e.id ? 'Edit tarif ongkir' : 'Tarif daerah baru'}</b>
       <label class="mut">Cari alamat/daerah tarif melalui Maps</label><div id="tarifPlaceHost" class="maps-place-host"></div>
@@ -1975,7 +1977,8 @@ function ongkirForm() {
       <label class="mut">Ongkos kirim (Rp)</label><input id="tarifFee" type="number" min="0" step="500" placeholder="Contoh: 10000" value="${esc(e.ongkir == null ? '' : e.ongkir)}" oninput="window._te.ongkir=this.value">
       <div class="row"><button class="o" onclick="window._te=null;render()">Batal</button><button onclick="simpanTarifForm()">Simpan tarif</button></div></div>` : '';
   const rows = D.tarifOngkir.filter(t => t.aktif !== false).slice().sort((a,b) => a.area.localeCompare(b.area));
-  return `<div class="card settings-detail-card"><label class="switch-row"><span><b>Aktifkan pilihan Kurir Maps</b><small>Jika mati, form pesanan hanya menampilkan Pickup dan Kurir (cukup isi nominal ongkir). Nyalakan bila ingin ongkir dihitung dari jarak Google Maps.</small></span><input type="checkbox" class="switch" ${cfg().kurirMaps ? 'checked' : ''} onchange="setKurirMaps(this.checked)"></label></div>
+  return `<div class="card settings-detail-card"><label class="switch-row"><span><b>Hitung ongkir otomatis berdasarkan daerah</b><small>Aktif: Customer PWA memakai tarif yang tersimpan jika daerah cocok. Nonaktif: semua ongkir Via Kurir dikonfirmasi melalui WhatsApp. Daerah yang belum ada di daftar tetap boleh melanjutkan pesanan.</small></span><input type="checkbox" class="switch" ${c.autoByArea === true ? 'checked' : ''} onchange="setAutoTarifDaerah(this.checked)"></label><div class="maps-hint">${c.autoByArea ? 'Mode aktif: tarif akan dihitung otomatis jika daerah cocok dengan daftar tarif.' : 'Mode nonaktif: ongkir Via Kurir dikonfirmasi melalui WhatsApp setelah jenis kurir dan tujuan dipastikan.'}</div></div>
+  <div class="card settings-detail-card"><label class="switch-row"><span><b>Aktifkan pilihan Kurir Maps</b><small>Jika mati, form pesanan hanya menampilkan Pickup dan Kurir (cukup isi nominal ongkir). Nyalakan bila ingin ongkir dihitung dari jarak Google Maps.</small></span><input type="checkbox" class="switch" ${cfg().kurirMaps ? 'checked' : ''} onchange="setKurirMaps(this.checked)"></label></div>
   <h3>Ongkos Kirim &amp; Google Maps</h3><div class="card col">
     <div class="mut">Pilih lokasi rumah/toko dan alamat tujuan melalui Google Maps. Jarak dihitung mengikuti rute jalan berkendara. Tarif per daerah dapat disimpan untuk digunakan kembali.</div>
     <label class="mut">Google Maps API Key (disimpan hanya di perangkat ini)</label>
@@ -2018,6 +2021,14 @@ async function hapusTarif(id) {
   const t = (D.tarifOngkir || []).find(x => x.id === id); if (!t || !(await popupConfirm('Hapus tarif ' + t.area + '?', {title:'Hapus tarif ongkir?', confirmText:'Ya, hapus'}))) return;
   D.tarifOngkir = D.tarifOngkir.filter(x => x.id !== id); enqueue('deleteTarif', id); render();
 }
+function setAutoTarifDaerah(enabled) {
+  const c = Object.assign({origin:'', placeId:'', lat:null, lng:null, ratePerKm:0, minFee:0, autoByArea:false}, D.ongkirConfig || {});
+  c.autoByArea = enabled === true;
+  D.ongkirConfig = c;
+  enqueue('saveOngkirConfig', c);
+  toast(c.autoByArea ? 'Penghitungan otomatis tarif daerah diaktifkan ✔' : 'Ongkir akan dikonfirmasi melalui WhatsApp ✔');
+  render();
+}
 function simpanAsalOngkir() {
   const el = $('#asalOngkir'), rate = $('#ratePerKm'), min = $('#minFee');
   const selected = window._selectedOrigin;
@@ -2027,7 +2038,7 @@ function simpanAsalOngkir() {
   const useSelected = !!(selected && selected.address === origin);
   const config = {origin, placeId: useSelected ? selected.placeId : (sameSavedOrigin ? (D.ongkirConfig.placeId || '') : ''),
     lat: useSelected ? selected.lat : (sameSavedOrigin ? D.ongkirConfig.lat : null), lng: useSelected ? selected.lng : (sameSavedOrigin ? D.ongkirConfig.lng : null),
-    ratePerKm: rate ? Math.max(0, Number(rate.value) || 0) : 0, minFee: min ? Math.max(0, Number(min.value) || 0) : 0};
+    ratePerKm: rate ? Math.max(0, Number(rate.value) || 0) : 0, minFee: min ? Math.max(0, Number(min.value) || 0) : 0, autoByArea: D.ongkirConfig.autoByArea === true};
   if (!config.placeId && (config.lat == null || config.lng == null)) return toast('Untuk menghitung rute Maps, pilih titik toko pada hasil pencarian Google Maps.');
   D.ongkirConfig = config; enqueue('saveOngkirConfig', config); toast('Lokasi toko dan tarif per km tersimpan ✔');
 }
