@@ -473,7 +473,7 @@ textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--l
 <div class="app">
   <aside class="side" id="side"></aside>
   <div>
-    <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
+    <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
     <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.9.8)</small></div></main>
   </div>
 </div>
@@ -561,7 +561,7 @@ try {
   else if (colorPref.addListener) colorPref.addListener(onColorPref);
 } catch (e) {}
 // Opsional: isi URL /exec di sini agar tidak perlu mengisi lewat layar setup
-var DEFAULT_API = 'https://script.google.com/macros/s/AKfycbwWcnvTcBJzY4SXIxKY30sPXj31oNapu-nIYPnQWDplQOOb5Xvb8WvT3vcZwGDhVOBpFw/exec';
+var DEFAULT_API = '';
 var getApi = () => LS.get('uf_api') || DEFAULT_API;
 var getTok = () => window._tok || LS.get('uf_tok');
 var setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
@@ -1179,6 +1179,7 @@ function render() {
 }
 function go(t) {
   tab = t;
+  if (t === 'order') { ufAlertCount = 0; updateOrderAlertBadge(); }
   if (t === 'pengaturan') window._settingSection = 'home';
   render(); window.scrollTo(0, 0);
 }
@@ -1211,6 +1212,62 @@ function vLainnya() {
 }
 var chips = isi => parseIsi(isi).map(p => `<span class="tag pr">${p.n} ${esc(p.nama)}</span>`).join('');
 
+/* ================= NOTIFIKASI PESANAN ONLINE ================= */
+var ufAlertSince = Number(LS.get('uf_online_alert_since') || 0);
+var ufAlertCount = 0, ufAlertBusy = false;
+function updateOrderAlertBadge() {
+  const badge = $('#orderAlertBadge'), btn = $('#orderAlertBtn');
+  if (badge) badge.textContent = ufAlertCount > 99 ? '99+' : String(ufAlertCount);
+  if (btn) btn.title = ufAlertCount ? ufAlertCount + ' pesanan online baru' : 'Aktifkan notifikasi pesanan baru';
+}
+async function enableOrderNotifications() {
+  if (!getTok()) return toast('Masuk sebagai admin terlebih dahulu.', 'warning');
+  if (!('Notification' in window)) return toast('Browser ini belum mendukung notifikasi sistem. Notifikasi dalam aplikasi tetap aktif.', 'warning');
+  try {
+    let permission = Notification.permission;
+    if (permission === 'default') permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      LS.set('uf_order_notice_enabled', '1');
+      toast('Notifikasi pesanan baru diaktifkan pada perangkat ini.', 'success');
+    } else {
+      LS.set('uf_order_notice_enabled', '0');
+      toast('Izin notifikasi belum diberikan. Pesanan baru tetap akan muncul sebagai popup saat aplikasi dibuka.', 'warning');
+    }
+    ufAlertCount = 0; updateOrderAlertBadge();
+    await pollCustomerOrderAlerts();
+  } catch (e) { toast('Tidak dapat mengaktifkan notifikasi: ' + msgOf(e), 'error'); }
+}
+async function notifyNewCustomerOrder(order) {
+  const title = 'Pesanan online baru';
+  const body = (order.nama || 'Pelanggan') + ' · ' + (order.items || 'Pesanan baru') + ' · ' + rp(order.total || 0);
+  if (LS.get('uf_order_notice_enabled') === '1' && 'Notification' in window && Notification.permission === 'granted') {
+    try {
+      let registration = pwaReg;
+      if (!registration && 'serviceWorker' in navigator) { try { registration = await navigator.serviceWorker.ready; } catch (_) {} }
+      if (registration && registration.showNotification) await registration.showNotification(title, {body:body, icon:'icon-192.png', badge:'icon-192.png', tag:'uwais-order-' + order.id, renotify:true, data:{url:'./'}});
+      else new Notification(title, {body:body, icon:'icon-192.png', tag:'uwais-order-' + order.id});
+    } catch (e) { console.warn('Notifikasi sistem gagal:', e); }
+  }
+}
+async function pollCustomerOrderAlerts() {
+  if (ufAlertBusy || !getTok() || needSetup()) return;
+  ufAlertBusy = true;
+  try {
+    if (!ufAlertSince) { ufAlertSince = Date.now(); LS.set('uf_online_alert_since', String(ufAlertSince)); }
+    const list = await run('customer_adminOrderAlerts', ufAlertSince);
+    if (Array.isArray(list) && list.length) {
+      list.forEach(o => { ufAlertSince = Math.max(ufAlertSince, Number(o.created) || 0); });
+      LS.set('uf_online_alert_since', String(ufAlertSince));
+      ufAlertCount += list.length; updateOrderAlertBadge();
+      list.forEach(notifyNewCustomerOrder);
+      const latest = list[list.length - 1];
+      toast((list.length > 1 ? list.length + ' pesanan online baru masuk. Terbaru: ' : 'Pesanan online baru dari ') + (latest.nama || 'pelanggan') + ' (' + latest.id + ')', 'info');
+      if (tab === 'order') syncNow();
+    }
+  } catch (e) {
+    if (!/Sesi berakhir/.test(msgOf(e))) console.warn('Pemeriksaan pesanan online:', msgOf(e));
+  } finally { ufAlertBusy = false; }
+}
 /* ================= OFFLINE: cache lokal + antrean sinkron ================= */
 var MEM = {};
 var J = {
@@ -1288,6 +1345,7 @@ async function refresh() {
 }
 function syncNow() { return Q.length ? flush() : refresh(); }
 window.addEventListener('online', () => { setOnline(true); syncNow(); });
+setInterval(() => { if (getTok()) pollCustomerOrderAlerts(); }, 25000);
 window.addEventListener('offline', () => setOnline(false));
 document.addEventListener('visibilitychange', () => { if (!document.hidden) syncNow(); });
 setInterval(() => {
@@ -1308,7 +1366,7 @@ async function masuk() {
   const el = $('#pin'), pin = (el.value || '').trim();
   if (!pin) return toast('Masukkan PIN');
   const b = $('#btnMasuk'); b.disabled = true; b.textContent = 'Memeriksa…';
-  try { setTok(await run('login', pin)); await load(); }
+  try { setTok(await run('login', pin)); if (!LS.get('uf_online_alert_since')) LS.set('uf_online_alert_since', String(Date.now())); await load(); await pollCustomerOrderAlerts(); }
   catch (e) { b.disabled = false; b.textContent = 'Masuk'; el.value = ''; $('#loginErr').textContent = ''; toast(msgOf(e), 'error'); }
 }
 async function keluar() {
@@ -1825,7 +1883,7 @@ function vRekap() {
 /* ---- PO: kelola periode pre-order ---- */
 var newPOId = () => 'P' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4);
 function poFormInit(po) {                     // siapkan state PO; data bolen lama digabung ke satu adonan
-  const e = Object.assign({id: '', nama: '', kirim: '', status: 'Buka', adonan: []}, po || {});
+  const e = Object.assign({id: '', nama: '', kirim: '', status: 'Buka', mulai: '', tutup: '', adonan: []}, po || {});
   const legacyCombined = gabungDataAdonan(e.adonan);
   const names = komponenMenu().slice();
   legacyCombined.forEach(a => { if (!names.some(n => key(n) === key(a.nama))) names.push(a.nama); });
@@ -1839,8 +1897,10 @@ function setAdonan(i, v) { const e = window._poe, n = e.names[i]; e.am[key(n)] =
 function simpanPOForm() {
   const e = window._poe;
   if (!e.kirim && !e.nama.trim()) return toast('Isi tanggal ambil/kirim atau nama PO');
+  if (!e.mulai || !e.tutup) return toast('Atur tanggal dan jam mulai serta tutup PO agar pemesanan online bisa dibuka.', 'warning');
+  if (e.mulai >= e.tutup) return toast('Waktu tutup PO harus setelah waktu mulai.', 'error');
   const adonan = e.names.map(n => ({nama: n, qty: Math.max(0, Math.floor(Number(e.am[key(n)]) || 0))})).filter(x => x.qty > 0);
-  const po = {id: e.id || newPOId(), nama: e.nama.trim() || ('PO ' + fmtTgl(e.kirim)), kirim: e.kirim || '', status: e.status || 'Buka', adonan};
+  const po = {id: e.id || newPOId(), nama: e.nama.trim() || ('PO ' + fmtTgl(e.kirim)), kirim: e.kirim || '', status: e.status || 'Buka', mulai: e.mulai, tutup: e.tutup, adonan};
   D.pos = D.pos || [];
   const i = D.pos.findIndex(x => x.id === po.id);
   if (i >= 0) D.pos[i] = po; else { D.pos.push(po); curPO = po.id; LS.set('uf_po', po.id); }
@@ -1864,11 +1924,17 @@ async function pindahLama() {
   D.orders.forEach(o => { if (!o.po) o.po = t.id; });
   enqueue('pindahPO', ids, t.id); render(); toast('Pesanan lama dimasukkan ke ' + t.nama);
 }
+function fmtPODateTime(value) {
+  if (!value) return 'Belum diatur';
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? String(value).replace('T', ' ') : d.toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+}
 function poCard(p) {
   const s = poStats(p.id), aktif = viewPO() === p.id, selesai = p.status === 'Selesai';
   return `<div class="card col" style="${aktif ? 'border-color:var(--pr);box-shadow:0 0 0 2px var(--pr-l)' : ''}">
     <div class="row"><b style="font-size:16px">${esc(p.nama)}</b><span class="tag ${selesai ? '' : 'ok'}">${selesai ? 'Selesai' : 'Buka'}</span></div>
-    <div class="mut">${p.kirim ? '📅 ' + fmtTgl(p.kirim) : 'Tanggal belum diisi'}</div>
+    <div class="mut">${p.kirim ? '📅 ' + fmtTgl(p.kirim) : 'Tanggal ambil/kirim belum diisi'}</div>
+    <div class="mut" style="font-size:12px">🕒 Online: ${fmtPODateTime(p.mulai)} – ${fmtPODateTime(p.tutup)}</div>
     <div class="tags"><span class="tag pr">${s.n} pesanan</span><span class="tag pr">${s.pcs} pcs</span><span class="tag pr">${rp(s.nilai)}</span></div>
     ${adonanHtml(p)}
     <div class="oc-actions"><button onclick="pilihPO('${p.id}');go('order')">📋 Orderan</button><button class="o" onclick="pilihPO('${p.id}');go('rekap')">🧮 Rekap</button>
@@ -1882,6 +1948,11 @@ function vPO() {
   const form = e ? `<div class="card col" style="margin-bottom:14px"><b>${e.id ? 'Edit PO' : 'PO baru'}</b>
       <label class="mut">Tanggal ambil / kirim</label><input type="date" value="${esc(e.kirim)}" oninput="window._poe.kirim=this.value">
       <label class="mut">Nama PO (opsional — otomatis dari tanggal)</label><input placeholder="mis. PO Sabtu" value="${esc(e.nama)}" oninput="window._poe.nama=this.value">
+      <div class="grid w" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
+        <div><label class="mut">Mulai pemesanan (hari &amp; jam)</label><input type="datetime-local" value="${esc(e.mulai || '')}" oninput="window._poe.mulai=this.value"></div>
+        <div><label class="mut">Tutup pemesanan (hari &amp; jam)</label><input type="datetime-local" value="${esc(e.tutup || '')}" oninput="window._poe.tutup=this.value"></div>
+      </div>
+      <div class="note">Pelanggan hanya bisa memesan saat status PO <b>Buka</b> dan waktu sekarang berada di antara jadwal mulai–tutup. Isi kedua waktu ini untuk mengaktifkan PO online.</div>
       <div class="adn-form"><b>🥣 Jumlah adonan awal</b><div class="mut">Isi kapasitas produksi dalam pcs untuk setiap adonan. Semua varian bolen digabung ke satu kolom <b>Adonan Bolen</b> karena memakai adonan dasar yang sama. Sistem menghitung sisa adonan dan kapasitas paket secara otomatis.</div>
         ${e.names.length ? `<div class="adn-grid">${e.names.map((n, i) => `<label class="adn-item"><span>${esc(n)}</span><div class="adn-input"><input type="number" min="0" inputmode="numeric" placeholder="0" value="${e.am[key(n)] ? esc(e.am[key(n)]) : ''}" oninput="setAdonan(${i},this.value)"><em>pcs</em></div></label>`).join('')}</div>` : '<div class="note">Menu belum ada. Tambahkan produk di Menu Produk.</div>'}</div>
       <div class="row"><button class="o" onclick="window._poe=null;render()">Batal</button><button onclick="simpanPOForm()">Simpan</button></div></div>` : '';
@@ -3128,7 +3199,7 @@ if (!IN_GAS) {
     const l = document.createElement('link'); l.rel = rel; l.href = href; document.head.appendChild(l);
   });
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'update') { showPwaUpdatePrompt(); } });
+    navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'update') { showPwaUpdatePrompt(); } if (e.data && e.data.type === 'customer-order-notification') { go('order'); syncNow(); } });
     navigator.serviceWorker.addEventListener('controllerchange', () => { if (pwaReloading) location.reload(); });
     navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).then(r => {
       pwaReg = r;

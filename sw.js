@@ -1,6 +1,6 @@
 /* UWAIS FOOD PWA v10.9.9 — complete receipt settings and QRIS choice */
 const CACHE_PREFIX = 'uwais-food-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v10-9-9-receipt-settings-qris';
+const CACHE_NAME = CACHE_PREFIX + 'v10-9-9-po-time-mobile-notifications';
 const SHELL_FILES = [
   './',
   './index.html',
@@ -80,5 +80,21 @@ self.addEventListener('fetch', event => {
     } catch (_) {
       return new Response('', { status: 504, statusText: 'Offline' });
     }
+  })());
+});
+
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({type:'window', includeUncontrolled:true});
+    for (const client of windows) {
+      if ('focus' in client) {
+        await client.focus();
+        try { client.postMessage({type:'customer-order-notification'}); } catch (_) {}
+        return;
+      }
+    }
+    if (self.clients.openWindow) return self.clients.openWindow(new URL('./', self.registration.scope).toString());
   })());
 });
