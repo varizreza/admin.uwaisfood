@@ -417,7 +417,7 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 .oc-badges{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
 .paytag{padding:5px 11px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap}
 .paytag.lunas{background:var(--ok-l);color:var(--ok)}
-.paytag.belum{background:var(--bad-l);color:var(--bad)}
+.paytag.pending{background:#fff2d6;color:#9a5b00;border-color:#f0d39a}.paytag.belum{background:var(--bad-l);color:var(--bad)}
 .oc-ship{background:var(--soft);border-radius:12px;padding:9px 12px;font-size:13px}
 .oc-ship b{font-size:13px}
 .oc-sum .line{padding:4px 0}
@@ -474,7 +474,7 @@ textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--l
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v10.9.8)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.0.0)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -497,10 +497,10 @@ window.__len = 155042;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v10.9.8)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v11.0.0)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v10.9.8)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v11.0.0)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -524,7 +524,7 @@ window.__len = 155042;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v10.9.9 · Pengaturan Struk Lengkap + Pilihan QRIS';
+var APP_VER = 'v11.0.0 · Order Management Tahap 1–2';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -746,7 +746,7 @@ function perPaket(items) {
 function groups() {
   const g = {};
   D.orders.forEach(o => {
-    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, po: o.po || '', items: [], total: 0, metodeKirim: o.metodeKirim || 'Pickup', jenisKurir: o.jenisKurir || (o.metodeKirim === 'Kurir' ? 'Maps' : ''), bayar: o.bayar === 'Lunas' ? 'Lunas' : 'Belum Bayar', metodeBayar: o.metodeBayar || '', namaKurir: o.namaKurir || '', daerahKirim: o.daerahKirim || '', alamatKirim: o.alamatKirim || '', jarakKm: Number(o.jarakKm) || 0, ongkir: Number(o.ongkir) || 0, ongkirStatus: o.ongkirStatus || '', ongkirPending: !!o.ongkirPending, placeId: o.placeId || '', lat: o.lat == null ? null : Number(o.lat), lng: o.lng == null ? null : Number(o.lng)};
+    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, po: o.po || '', items: [], total: 0, metodeKirim: o.metodeKirim || 'Pickup', jenisKurir: o.jenisKurir || (o.metodeKirim === 'Kurir' ? 'Maps' : ''), bayar: String(o.bayar || 'Belum Bayar'), metodeBayar: o.metodeBayar || '', buktiFileId: o.buktiFileId || '', namaKurir: o.namaKurir || '', kontakKurir: o.kontakKurir || '', catatanPengiriman: o.catatanPengiriman || '', daerahKirim: o.daerahKirim || '', alamatKirim: o.alamatKirim || '', jarakKm: Number(o.jarakKm) || 0, ongkir: Number(o.ongkir) || 0, ongkirStatus: o.ongkirStatus || '', ongkirPending: !!o.ongkirPending, placeId: o.placeId || '', lat: o.lat == null ? null : Number(o.lat), lng: o.lng == null ? null : Number(o.lng)};
     g[o.id].items.push(o); g[o.id].total += o.qty * o.harga;
   });
   return Object.values(g).map(x => { x.grandTotal = x.total + (x.metodeKirim === 'Kurir' ? Number(x.ongkir) || 0 : 0); return x; }).reverse();
@@ -868,6 +868,8 @@ function currentShipping() {
   if (shippingMode === 'Pickup') return {valid: true, metode: 'Pickup', jenisKurir: '', namaKurir: '', area: '', alamat: '', jarakKm: 0, ongkir: 0, placeId: '', lat: null, lng: null};
   const area = String(window._area || '').trim();
   const customer = findPel(window._n || '');
+  const kontakKurir = String(window._courierContact || '').trim();
+  const catatanPengiriman = String(window._deliveryNote || '').trim();
   const alamat = String(window._al == null ? (customer && customer.alamat || '') : window._al).trim();
 
   // Kurir (manual): hanya nominal ongkir yang wajib. Nama kurir, daerah, dan alamat opsional.
@@ -875,7 +877,7 @@ function currentShipping() {
     const feeText = String(window._ongkir == null ? '' : window._ongkir).trim();
     const fee = Number(feeText);
     if (!feeText || !Number.isFinite(fee) || fee < 0) return {valid: false, error: 'Isi nominal ongkos kirim'};
-    return {valid: true, metode: 'Kurir', jenisKurir: 'Kurir', namaKurir: String(window._courierName || '').trim(), area, alamat, jarakKm: 0, ongkir: Math.round(fee), placeId: '', lat: null, lng: null, saved: false, manual: true};
+    return {valid: true, metode: 'Kurir', jenisKurir: editing && editing.jenisKurir === 'Pihak Ketiga' ? 'Pihak Ketiga' : 'Kurir', namaKurir: String(window._courierName || '').trim(), kontakKurir, catatanPengiriman, area, alamat, jarakKm: 0, ongkir: Math.round(fee), placeId: '', lat: null, lng: null, saved: false, manual: true};
   }
 
   // Kurir Maps (opsional, diaktifkan di Pengaturan): daerah & alamat wajib.
@@ -884,14 +886,14 @@ function currentShipping() {
 
   const selected = window._selectedDestination || (customer && customer.placeId ? {placeId: customer.placeId, lat: customer.lat, lng: customer.lng, address: customer.alamat} : null);
   const saved = findTarifPlace(selected && selected.placeId) || findTarifArea(area);
-  if (saved) return {valid: true, metode: 'Kurir', jenisKurir: 'Maps', namaKurir: '', area: saved.area, alamat, jarakKm: Number(saved.jarakKm) || 0, ongkir: Number(saved.ongkir) || 0, placeId: (selected && selected.placeId) || saved.placeId || '', lat: selected && selected.lat != null ? Number(selected.lat) : (saved.lat == null ? null : Number(saved.lat)), lng: selected && selected.lng != null ? Number(selected.lng) : (saved.lng == null ? null : Number(saved.lng)), saved: true};
+  if (saved) return {valid: true, metode: 'Kurir', jenisKurir: 'Maps', namaKurir: '', kontakKurir, catatanPengiriman, area: saved.area, alamat, jarakKm: Number(saved.jarakKm) || 0, ongkir: Number(saved.ongkir) || 0, placeId: (selected && selected.placeId) || saved.placeId || '', lat: selected && selected.lat != null ? Number(selected.lat) : (saved.lat == null ? null : Number(saved.lat)), lng: selected && selected.lng != null ? Number(selected.lng) : (saved.lng == null ? null : Number(saved.lng)), saved: true};
   const kmText = String(window._km == null ? '' : window._km).trim();
   const km = Number(kmText);
   if (!kmText || !Number.isFinite(km) || km < 0) return {valid: false, error: 'Pilih alamat di Maps agar jarak rute dapat dihitung, atau isi jarak manual'};
   let ongkirText = String(window._ongkir == null ? '' : window._ongkir).trim();
   let ongkir = ongkirText === '' ? feeFromDistance(km) : Number(ongkirText);
   if (ongkir == null || !Number.isFinite(ongkir) || ongkir < 0) return {valid: false, error: 'Isi nominal ongkos kirim atau atur tarif per km di Pengaturan Ongkos Kirim'};
-  return {valid: true, metode: 'Kurir', jenisKurir: 'Maps', namaKurir: '', area, alamat, jarakKm: km, ongkir: Math.round(ongkir), placeId: selected && selected.placeId || '', lat: selected && selected.lat != null ? Number(selected.lat) : null, lng: selected && selected.lng != null ? Number(selected.lng) : null, saved: false};
+  return {valid: true, metode: 'Kurir', jenisKurir: 'Maps', namaKurir: '', kontakKurir, catatanPengiriman, area, alamat, jarakKm: km, ongkir: Math.round(ongkir), placeId: selected && selected.placeId || '', lat: selected && selected.lat != null ? Number(selected.lat) : null, lng: selected && selected.lng != null ? Number(selected.lng) : null, saved: false};
 }
 function tarifInfo() {
   const area = String(window._area || '').trim();
@@ -911,6 +913,8 @@ function kirimBox() {
     <input id="feeOngkirManual" type="number" min="0" step="500" inputmode="numeric" placeholder="Contoh: 10000" value="${esc(window._ongkir == null ? '' : window._ongkir)}" oninput="window._ongkir=this.value;updateTarifInfo(false)">
     <label class="mut" for="namaKurirManual">Nama kurir (opsional)</label>
     <input id="namaKurirManual" list="kurirList" placeholder="Contoh: Pak Budi, GoSend, J&T" value="${esc(window._courierName || '')}" oninput="window._courierName=this.value">
+    <label class="mut" for="kontakKurirManual">Nomor kontak kurir (opsional)</label><input id="kontakKurirManual" inputmode="tel" placeholder="08xxxxxxxxxx" value="${esc(window._courierContact || '')}" oninput="window._courierContact=this.value">
+    <label class="mut" for="catatanPengirimanManual">Catatan pengiriman (opsional)</label><input id="catatanPengirimanManual" placeholder="Contoh: hubungi sebelum tiba" value="${esc(window._deliveryNote || '')}" oninput="window._deliveryNote=this.value">
     <datalist id="kurirList"><option value="GoSend"><option value="GrabExpress"><option value="J&T Express"><option value="JNE"><option value="SiCepat"><option value="Lalamove"></datalist>
     <label class="mut" for="shippingArea">Daerah tujuan (opsional)</label>
     <input id="shippingArea" placeholder="Contoh: Tanjungpinang Barat" value="${esc(window._area || '')}" oninput="window._area=this.value" autocomplete="off">
@@ -927,6 +931,8 @@ function kirimBox() {
     <input id="shippingArea" list="tarifAreaList" placeholder="Otomatis dari alamat Maps atau isi nama daerah" value="${esc(window._area || '')}" oninput="window._area=this.value;updateTarifInfo(true)" autocomplete="off">
     <datalist id="tarifAreaList">${areas}</datalist>
     <div id="tarifInfo">${tarifInfo()}</div>
+    <label class="mut" for="kontakKurirMaps">Nomor kontak kurir (opsional)</label><input id="kontakKurirMaps" inputmode="tel" placeholder="08xxxxxxxxxx" value="${esc(window._courierContact || '')}" oninput="window._courierContact=this.value">
+    <label class="mut" for="catatanPengirimanMaps">Catatan pengiriman (opsional)</label><input id="catatanPengirimanMaps" placeholder="Contoh: hubungi sebelum tiba" value="${esc(window._deliveryNote || '')}" oninput="window._deliveryNote=this.value">
   </div>`;
 }
 function updateTarifInfo(rebuild) {
@@ -939,11 +945,11 @@ function setMetodeKirim(mode) {
   const next = mode === 'Kurir3' ? 'Kurir3' : (mode === 'Kurir' ? 'Kurir' : 'Pickup');
   if (next !== shippingMode) {
     window._ongkir = '';
-    window._courierName = '';
+    window._courierName = ''; window._courierContact = ''; window._deliveryNote = '';
     if (next !== 'Kurir') { window._selectedDestination = null; window._km = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; }
   }
   shippingMode = next;
-  if (next === 'Pickup') { window._selectedDestination = null; window._km = ''; window._ongkir = ''; window._courierName = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; }
+  if (next === 'Pickup') { window._selectedDestination = null; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; }
   render();
 }
 
@@ -1214,7 +1220,14 @@ var chips = isi => parseIsi(isi).map(p => `<span class="tag pr">${p.n} ${esc(p.n
 
 /* ================= NOTIFIKASI PESANAN ONLINE ================= */
 var ufAlertSince = Number(LS.get('uf_online_alert_since') || 0);
+var ufAlertSeen = new Set();
+try { JSON.parse(LS.get('uf_online_alert_seen') || '[]').forEach(x => ufAlertSeen.add(String(x))); } catch (_) {}
 var ufAlertCount = 0, ufAlertBusy = false;
+function rememberOrderAlert(key) {
+  ufAlertSeen.add(key);
+  if (ufAlertSeen.size > 300) ufAlertSeen = new Set(Array.from(ufAlertSeen).slice(-200));
+  LS.set('uf_online_alert_seen', JSON.stringify(Array.from(ufAlertSeen)));
+}
 function updateOrderAlertBadge() {
   const badge = $('#orderAlertBadge'), btn = $('#orderAlertBtn');
   if (badge) badge.textContent = ufAlertCount > 99 ? '99+' : String(ufAlertCount);
@@ -1238,14 +1251,15 @@ async function enableOrderNotifications() {
   } catch (e) { toast('Tidak dapat mengaktifkan notifikasi: ' + msgOf(e), 'error'); }
 }
 async function notifyNewCustomerOrder(order) {
-  const title = 'Pesanan online baru';
-  const body = (order.nama || 'Pelanggan') + ' · ' + (order.items || 'Pesanan baru') + ' · ' + rp(order.total || 0);
+  const isProof = order.type === 'proof';
+  const title = isProof ? 'Bukti pembayaran baru' : 'Pesanan online baru';
+  const body = (order.nama || 'Pelanggan') + ' · ' + (order.items || 'Pesanan') + (isProof ? ' · Menunggu verifikasi' : (order.ongkirPending ? ' · ongkir menunggu konfirmasi' : ' · ' + rp(order.total || 0)));
   if (LS.get('uf_order_notice_enabled') === '1' && 'Notification' in window && Notification.permission === 'granted') {
     try {
       let registration = pwaReg;
       if (!registration && 'serviceWorker' in navigator) { try { registration = await navigator.serviceWorker.ready; } catch (_) {} }
-      if (registration && registration.showNotification) await registration.showNotification(title, {body:body, icon:'icon-192.png', badge:'icon-192.png', tag:'uwais-order-' + order.id, renotify:true, data:{url:'./'}});
-      else new Notification(title, {body:body, icon:'icon-192.png', tag:'uwais-order-' + order.id});
+      if (registration && registration.showNotification) await registration.showNotification(title, {body:body, icon:'icon-192.png', badge:'icon-192.png', tag:'uwais-' + (isProof ? 'proof-' : 'order-') + order.id, renotify:true, data:{url:'./'}});
+      else new Notification(title, {body:body, icon:'icon-192.png', tag:'uwais-' + (isProof ? 'proof-' : 'order-') + order.id});
     } catch (e) { console.warn('Notifikasi sistem gagal:', e); }
   }
 }
@@ -1254,14 +1268,23 @@ async function pollCustomerOrderAlerts() {
   ufAlertBusy = true;
   try {
     if (!ufAlertSince) { ufAlertSince = Date.now(); LS.set('uf_online_alert_since', String(ufAlertSince)); }
-    const list = await run('customer_adminOrderAlerts', ufAlertSince);
+    // Ambil overlap 2 detik agar event berwaktu sama tidak terlewat; deduplikasi lokal mencegah notifikasi ganda.
+    const list = await run('customer_adminOrderAlerts', Math.max(0, ufAlertSince - 2000));
     if (Array.isArray(list) && list.length) {
       list.forEach(o => { ufAlertSince = Math.max(ufAlertSince, Number(o.created) || 0); });
       LS.set('uf_online_alert_since', String(ufAlertSince));
-      ufAlertCount += list.length; updateOrderAlertBadge();
-      list.forEach(notifyNewCustomerOrder);
-      const latest = list[list.length - 1];
-      toast((list.length > 1 ? list.length + ' pesanan online baru masuk. Terbaru: ' : 'Pesanan online baru dari ') + (latest.nama || 'pelanggan') + ' (' + latest.id + ')', 'info');
+      const fresh = list.filter(o => {
+        const key = [o.type || 'event', o.id || '', Number(o.created) || 0].join('|');
+        if (ufAlertSeen.has(key)) return false;
+        rememberOrderAlert(key); return true;
+      });
+      if (!fresh.length) return;
+      ufAlertCount += fresh.length; updateOrderAlertBadge();
+      fresh.forEach(notifyNewCustomerOrder);
+      const latest = fresh[fresh.length - 1];
+      const proofCount = fresh.filter(x => x.type === 'proof').length, orderCount = fresh.length - proofCount;
+      const summary = [orderCount ? orderCount + ' pesanan baru' : '', proofCount ? proofCount + ' bukti pembayaran baru' : ''].filter(Boolean).join(' · ');
+      toast(summary + '. Terbaru: ' + (latest.nama || 'pelanggan') + ' (' + latest.id + ')', 'info');
       if (tab === 'order') syncNow();
     }
   } catch (e) {
@@ -1347,7 +1370,7 @@ function syncNow() { return Q.length ? flush() : refresh(); }
 window.addEventListener('online', () => { setOnline(true); syncNow(); });
 setInterval(() => { if (getTok()) pollCustomerOrderAlerts(); }, 25000);
 window.addEventListener('offline', () => setOnline(false));
-document.addEventListener('visibilitychange', () => { if (!document.hidden) syncNow(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { syncNow(); pollCustomerOrderAlerts(); } });
 setInterval(() => {
   if (document.hidden || flushing || !getTok()) return;
   if (Q.length) flush(); else if (Date.now() - (window._lastRef || 0) > 120000) refresh();
@@ -1502,13 +1525,13 @@ function editOrder(id) {
     if (i >= 0) cart[i] = (cart[i] || 0) + it.qty;
     else extra.push({nama: it.item, harga: it.harga, isi: it.isi || '', qty: it.qty});   // menu sudah dihapus/diganti nama
   });
-  editing = {id, nama0: g.nama, po: g.po, waktu: g.waktu, status: g.status, bayar: g.bayar, metodeBayar: g.metodeBayar, orig, extra, metodeKirim: g.metodeKirim || 'Pickup', jenisKurir: g.jenisKurir || (g.metodeKirim === 'Kurir' ? 'Maps' : ''), namaKurir: g.namaKurir || '', daerahKirim: g.daerahKirim || '', alamatKirim: g.alamatKirim || '', jarakKm: g.jarakKm || 0, ongkir: g.ongkir || 0, placeId: g.placeId || '', lat: g.lat, lng: g.lng};
-  shippingMode = editing.metodeKirim === 'Kurir' ? (editing.jenisKurir === 'Maps' ? 'Kurir' : 'Kurir3') : 'Pickup'; window._area = editing.daerahKirim; window._km = String(editing.jarakKm || ''); window._ongkir = String(editing.ongkir || ''); window._courierName = editing.namaKurir || '';
+  editing = {id, nama0: g.nama, po: g.po, waktu: g.waktu, status: g.status, bayar: g.bayar, metodeBayar: g.metodeBayar, orig, extra, metodeKirim: g.metodeKirim || 'Pickup', jenisKurir: g.jenisKurir || (g.metodeKirim === 'Kurir' ? 'Maps' : ''), namaKurir: g.namaKurir || '', kontakKurir: g.kontakKurir || '', catatanPengiriman: g.catatanPengiriman || '', daerahKirim: g.daerahKirim || '', alamatKirim: g.alamatKirim || '', jarakKm: g.jarakKm || 0, ongkir: g.ongkir || 0, placeId: g.placeId || '', lat: g.lat, lng: g.lng};
+  shippingMode = editing.metodeKirim === 'Kurir' ? (editing.jenisKurir === 'Maps' ? 'Kurir' : 'Kurir3') : 'Pickup'; window._area = editing.daerahKirim; window._km = String(editing.jarakKm || ''); window._ongkir = String(editing.ongkir || ''); window._courierName = editing.namaKurir || ''; window._courierContact = editing.kontakKurir || ''; window._deliveryNote = editing.catatanPengiriman || '';
   window._n = g.nama; window._hp = ''; window._al = g.alamatKirim || ''; window._selectedDestination = g.placeId ? {address:g.alamatKirim,placeId:g.placeId,lat:g.lat,lng:g.lng} : null;
   _routePlaceId = ''; _routePath = []; _routeDestination = g.lat != null && g.lng != null ? {lat:Number(g.lat),lng:Number(g.lng)} : null; destMapObj = null; destMapEl = null; destPolylines = [];
   go('pesan');
 }
-function batalEdit() { editing = null; cart = {}; shippingMode = 'Pickup'; window._courierName = ''; window._ongkir = ''; window._n = ''; go('order'); }
+function batalEdit() { editing = null; cart = {}; shippingMode = 'Pickup'; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; window._ongkir = ''; window._n = ''; go('order'); }
 function simpanEdit() {
   const e = editing, nama = (window._n || '').trim();
   if (!nama) { toast('Isi nama pemesan dulu'); const el = $('#nama'); if (el) el.focus(); return; }
@@ -1525,10 +1548,10 @@ function simpanEdit() {
   const at = Math.max(0, D.orders.findIndex(o => o.id === e.id));
   D.orders = D.orders.filter(o => o.id !== e.id);
   D.orders.splice(at, 0, ...items.map(i => ({id: e.id, waktu: e.waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: e.status, bayar: e.bayar, metodeBayar: e.metodeBayar, isi: i.isi || '', po: e.po,
-    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || ''})));
+    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || ''})));
   upsertPelLocal(nama, pel);
   enqueue('editOrder', e.id, nama, items, shipping);
-  editing = null; cart = {}; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
+  editing = null; cart = {}; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
   go('order'); toast(ONLINE ? 'Pesanan diperbarui ✔' : 'Perubahan tersimpan di perangkat — akan dikirim saat online');
 }
 function chg(i, d) { cart[i] = Math.max(0, (cart[i] || 0) + d); const y = window.scrollY; render(); window.scrollTo(0, y); }
@@ -1550,46 +1573,51 @@ async function simpan() {
     enqueue('saveTarif', t);
   }
   items.forEach(i => D.orders.push({id, waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: 'Baru', bayar: 'Belum Bayar', metodeBayar: '', isi: i.isi || '', po: tgt.id,
-    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || pel.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || ''}));
+    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || pel.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || ''}));
   upsertPelLocal(nama, pel);
   enqueue('addOrder', nama, items, pel, id, Date.now(), tgt.id, shipping);
-  cart = {}; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
+  cart = {}; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
   go('order'); toast(ONLINE ? 'Tersimpan ✔' : 'Tersimpan di perangkat — akan dikirim saat online'); cetakOrder(id);
 }
 
 /* ---- Orderan ---- */
 function orderCard(g) {
-  const p = findPel(g.nama), lunas = g.bayar === 'Lunas', selesai = g.status === 'Selesai';
+  const p = findPel(g.nama), lunas = g.bayar === 'Lunas', pendingPay = g.bayar === 'Menunggu Verifikasi', rejectedPay = g.bayar === 'Pembayaran Ditolak', selesai = g.status === 'Selesai';
   const shipLine = g.metodeKirim === 'Kurir'
-    ? `<div class="oc-ship"><b>${isKurirMaps(g) ? '📍 Kurir Maps' : '🚚 Kurir' + (g.namaKurir ? ' · ' + esc(g.namaKurir) : '')}${g.daerahKirim ? ' · ' + esc(g.daerahKirim) : ''}</b>${g.alamatKirim ? `<div class="mut">📍 ${esc(g.alamatKirim)}</div>` : ''}${g.jarakKm ? `<div class="mut">Jarak dari toko: ${g.jarakKm} km</div>` : ''}${g.ongkirPending ? '<div class="mut" style="color:#b35a20;font-weight:700">⏳ Ongkir menunggu konfirmasi melalui WhatsApp</div>' : ''}</div>`
+    ? `<div class="oc-ship"><b>${isKurirMaps(g) ? '📍 Kurir Maps' : '🚚 Kurir' + (g.namaKurir ? ' · ' + esc(g.namaKurir) : '')}${g.daerahKirim ? ' · ' + esc(g.daerahKirim) : ''}</b>${g.alamatKirim ? `<div class="mut">📍 ${esc(g.alamatKirim)}</div>` : ''}${g.kontakKurir ? `<div class="mut">☎️ Kontak kurir: ${esc(g.kontakKurir)}</div>` : ''}${g.catatanPengiriman ? `<div class="mut">📝 ${esc(g.catatanPengiriman)}</div>` : ''}${g.jarakKm ? `<div class="mut">Jarak dari toko: ${g.jarakKm} km</div>` : ''}${g.ongkirPending ? '<div class="mut" style="color:#b35a20;font-weight:700">⏳ Ongkir menunggu konfirmasi melalui WhatsApp</div>' : ''}</div>`
     : `<div class="oc-ship"><b>📦 Pickup</b><div class="mut">Tanpa ongkos kirim</div></div>`;
   const main = lunas
     ? `<button class="main wa" onclick="shareStrukWhatsApp('${g.id}')">📲 Kirim Struk</button>`
-    : g.ongkirPending
-      ? `<button class="main" onclick="editOrder('${g.id}')">📍 Tentukan Ongkir</button>`
-      : `<button class="main wa" onclick="kirimTagihan('${g.id}')">💸 Kirim Tagihan</button>`;
+    : (pendingPay || rejectedPay)
+      ? `<button class="main" onclick="bayarDlg('${g.id}')">🧾 Periksa Pembayaran</button>`
+      : g.ongkirPending
+        ? `<button class="main" onclick="editOrder('${g.id}')">📍 Tentukan Ongkir</button>`
+        : `<button class="main wa" onclick="kirimTagihan('${g.id}')">💸 Kirim Tagihan</button>`;
   const second = lunas
     ? `<button class="o" onclick="downloadStrukImage('${g.id}')">⬇️ Unduh Struk</button>`
-    : `<button class="g" onclick="bayarDlg('${g.id}')">✓ Tandai Lunas</button>`;
+    : pendingPay
+      ? `<button class="g" onclick="bayarDlg('${g.id}')">🖼️ Periksa Bukti</button>`
+      : `<button class="g" onclick="bayarDlg('${g.id}')">✓ Tandai Lunas</button>`;
   return `<div class="card oc">
     <div class="oc-head"><div><div class="nm">${esc(g.nama)}</div><div class="mut">${g.waktu}${viewPO() === '*' ? ' · ' + esc(poNama(g.po)) : ''}${p && p.hp ? ' · ' + esc(p.hp) : ''}</div></div>
-      <div class="oc-badges"><button class="paytag ${lunas ? 'lunas' : 'belum'}" onclick="bayarDlg('${g.id}')" title="Ubah status pembayaran">${lunas ? '✅ Lunas' + (g.metodeBayar ? ' · ' + esc(g.metodeBayar) : '') : '⏳ Belum bayar'}</button><span class="tag ${selesai ? 'ok' : 'pr'}">${selesai ? '✔ Selesai' : 'Baru'}</span></div></div>
+      <div class="oc-badges"><button class="paytag ${lunas ? 'lunas' : ((pendingPay || rejectedPay) ? 'pending' : 'belum')}" onclick="bayarDlg('${g.id}')" title="Ubah status pembayaran">${lunas ? '✅ Lunas' + (g.metodeBayar ? ' · ' + esc(g.metodeBayar) : '') : (pendingPay ? '🧾 Menunggu verifikasi' : (rejectedPay ? '⚠️ Pembayaran ditolak' : '⏳ Belum bayar'))}</button><span class="tag ${selesai ? 'ok' : 'pr'}">${esc(g.status || 'Baru')}</span></div></div>
     ${shipLine}
     <div class="oc-items">${g.items.map(o => `<div class="line"><span>${o.qty}× ${esc(o.item)}${o.isi ? `<div class="mut">${parseIsi(o.isi).map(x => (x.n * o.qty) + ' ' + esc(x.nama)).join(' · ')}</div>` : ''}</span><span>${rp(o.qty * o.harga)}</span></div>`).join('')}</div>
     <div class="oc-sum"><div class="line"><span class="mut">Subtotal produk</span><b>${rp(g.total)}</b></div>${g.metodeKirim === 'Kurir' ? `<div class="line"><span class="mut">Ongkos kirim</span><b>${g.ongkirPending ? 'Akan diinformasikan via WhatsApp' : rp(g.ongkir)}</b></div>` : ''}</div>
     <div class="oc-total"><span>${g.ongkirPending ? 'Total sementara (belum termasuk ongkir)' : 'Total'}</span><strong>${rp(g.grandTotal)}</strong></div>
     <div class="oc-actions">${main}${second}<button class="o" onclick="status('${g.id}','${selesai ? 'Baru' : 'Selesai'}')">${selesai ? '↺ Buka lagi' : '✓ Selesai'}</button></div>
-    <div class="oc-tools"><button class="o" onclick="cetakOrder('${g.id}')" title="Lihat struk dan cetak"><span>🧾</span>Struk</button><button class="o" onclick="editOrder('${g.id}')" title="Edit pesanan"><span>✏️</span>Edit</button><button class="o" onclick="pindahDlg('${g.id}')" title="Pindah PO"><span>📅</span>Pindah</button><button class="r" onclick="hapus('${g.id}')" title="Hapus"><span>🗑</span>Hapus</button></div>
+    <div class="oc-tools"><button class="o" onclick="cetakOrder('${g.id}')" title="Lihat struk dan cetak"><span>🧾</span>Struk</button><button class="o" onclick="statusDlg('${g.id}')" title="Ubah status proses"><span>🔄</span>Status</button>${g.buktiFileId ? `<button class="o" onclick="window.open('https://drive.google.com/open?id=${encodeURIComponent(g.buktiFileId)}','_blank','noopener')" title="Lihat bukti transfer"><span>🖼️</span>Bukti</button>` : ''}<button class="o" onclick="editOrder('${g.id}')" title="Edit pesanan"><span>✏️</span>Edit</button><button class="o" onclick="pindahDlg('${g.id}')" title="Pindah PO"><span>📅</span>Pindah</button><button class="r" onclick="hapus('${g.id}')" title="Hapus"><span>🗑</span>Hapus</button></div>
   </div>`;
 }
 function olist() {
   const q = (window._q || '').toLowerCase(), sel = viewPO();
-  const l = groups().filter(g => inPO(g, sel) && (filt === 'Semua' || g.status === filt) && (ofilt === 'Semua' || g.bayar === ofilt) && g.nama.toLowerCase().includes(q));
+  const l = groups().filter(g => inPO(g, sel) && (filt === 'Semua' || g.status === filt) && (ofilt === 'Semua' || (ofilt === 'Belum Bayar' ? g.bayar !== 'Lunas' : g.bayar === ofilt)) && g.nama.toLowerCase().includes(q));
   return l.length ? `<div class="grid w">${l.map(orderCard).join('')}</div>` : '<div class="empty">Tidak ada orderan.</div>';
 }
 function segFilter(v) {
   const cur = v === 'rfilt' ? rfilt : filt;
-  return `<div class="seg">${['Semua', 'Baru', 'Selesai'].map(f => `<button class="${cur === f ? 'on' : ''}" onclick="${v}='${f}';render()">${f}</button>`).join('')}</div>`;
+  const states = ['Semua','Baru','Diterima','Diproses','Siap Diambil','Dalam Pengiriman','Selesai','Dibatalkan'];
+  return `<div class="seg">${states.map(f => `<button class="${cur === f ? 'on' : ''}" onclick="${v}='${f}';render()">${f}</button>`).join('')}</div>`;
 }
 function payFilter(v) {                       // v = 'ofilt' (Orderan) atau 'bfilt' (Rekap)
   const cur = v === 'bfilt' ? bfilt : ofilt, sel = viewPO();
@@ -1607,21 +1635,23 @@ function vOrder() {
 /* ---- Pembayaran & tagihan ---- */
 function bayarDlg(id) {
   const g = groups().find(x => x.id === id); if (!g) return;
-  const lunas = g.bayar === 'Lunas';
+  const lunas = g.bayar === 'Lunas', pending = g.bayar === 'Menunggu Verifikasi';
   $('#modal').innerHTML = `<div class="ov" onclick="if(event.target===this)closeStruk()"><div class="dlg card col">
     <b style="font-size:17px">Pembayaran · ${esc(g.nama)}</b>
-    <div class="mut">Total tagihan <b>${rp(g.grandTotal)}</b> · saat ini: <b>${lunas ? 'Lunas' + (g.metodeBayar ? ' (' + esc(g.metodeBayar) + ')' : '') : 'Belum bayar'}</b></div>
-    <div class="mut">Tandai lunas dengan metode:</div>
-    <div class="pay-grid">${['Tunai', 'Transfer', 'QRIS'].map(m => `<button class="${lunas && g.metodeBayar === m ? '' : 'o'}" onclick="setBayar('${id}','Lunas','${m}')">${m}</button>`).join('')}</div>
-    ${lunas ? `<button class="r" onclick="setBayar('${id}','Belum Bayar','')">⏳ Tandai belum bayar</button>` : ''}
+    <div class="mut">${g.ongkirPending ? 'Subtotal produk (ongkir belum ditentukan)' : 'Total tagihan'} <b>${rp(g.grandTotal)}</b> · status: <b>${esc(g.bayar || 'Belum Bayar')}</b></div>${g.ongkirPending ? '<div class="note warn">Ongkir belum dikonfirmasi. Pastikan nilai pembayaran yang diterima sudah sesuai kesepakatan dengan customer sebelum menandai lunas.</div>' : ''}
+    ${pending ? `<div class="note warn">Customer telah mengunggah bukti pembayaran. Periksa bukti terlebih dahulu sebelum menandai lunas.</div>` : ''}
+    ${g.buktiFileId ? `<button class="o" onclick="window.open('https://drive.google.com/open?id=${encodeURIComponent(g.buktiFileId)}','_blank','noopener')">🖼️ Buka bukti pembayaran</button>` : ''}
+    <div class="mut">Konfirmasi pembayaran dengan metode:</div>
+    <div class="pay-grid">${(String(g.metodeBayar || '').toUpperCase() === 'COD' ? [{value:'COD',label:'COD / Tunai saat diterima'}] : [{value:'Tunai',label:'Tunai'},{value:'Transfer',label:'Transfer'},{value:'QRIS',label:'QRIS'}]).map(m => `<button class="${lunas && g.metodeBayar === m.value ? '' : 'o'}" onclick="setBayar('${id}','Lunas','${m.value}')">${m.label}</button>`).join('')}</div>
+    ${pending ? `<button class="r" onclick="setBayar('${id}','Pembayaran Ditolak','')">✕ Tolak bukti pembayaran</button>` : ''}${lunas || pending || g.bayar === 'Pembayaran Ditolak' ? `<button class="r" onclick="setBayar('${id}','Belum Bayar','')">⏳ Kembalikan ke belum bayar</button>` : ''}
     <button class="o" onclick="closeStruk()">Tutup</button></div></div>`;
 }
 function setBayar(id, bayar, metode) {
   const lunas = bayar === 'Lunas', m = lunas ? (metode || 'Tunai') : '';
-  D.orders.forEach(o => { if (o.id === id) { o.bayar = lunas ? 'Lunas' : 'Belum Bayar'; o.metodeBayar = m; } });
-  enqueue('setBayar', id, lunas ? 'Lunas' : 'Belum Bayar', m);
+  D.orders.forEach(o => { if (o.id === id) { o.bayar = bayar; if (lunas) o.metodeBayar = m; } });
+  enqueue('setBayar', id, bayar, m);
   $('#modal').innerHTML = ''; window._st = null; render();
-  toast(lunas ? 'Pesanan ditandai lunas (' + m + ') ✔' : 'Pesanan ditandai belum bayar');
+  toast(lunas ? 'Pesanan ditandai lunas (' + m + ') ✔' : (bayar === 'Pembayaran Ditolak' ? 'Bukti pembayaran ditolak.' : 'Pesanan ditandai belum bayar'));
 }
 function rekeningText(includeQris) {
   const c = cfg();
@@ -1782,6 +1812,8 @@ function pindahOK(id) {
   enqueue('pindahPO', [id], v); closeStruk(); render(); toast('Pesanan dipindahkan ke ' + poNama(v));
 }
 function status(id, s) { D.orders.forEach(o => { if (o.id === id) o.status = s; }); enqueue('setStatus', id, s); render(); }
+const UF_ORDER_STATUSES = ['Baru','Diterima','Diproses','Siap Diambil','Dalam Pengiriman','Selesai','Dibatalkan'];
+function statusDlg(id) { const g=groups().find(x=>x.id===id); if(!g)return; $('#modal').innerHTML=`<div class="ov" onclick="if(event.target===this)closeStruk()"><div class="dlg card col"><b style="font-size:17px">Status pesanan · ${esc(g.nama)}</b><div class="mut">Status saat ini: <b>${esc(g.status||'Baru')}</b></div>${UF_ORDER_STATUSES.map(x=>`<button class="${x===g.status?'':'o'}" onclick="status('${id}','${x}');closeStruk()">${x===g.status?'✓ ':''}${x}</button>`).join('')}<button class="o" onclick="closeStruk()">Tutup</button></div></div>`; }
 async function hapus(id) { if (!(await popupConfirm('Hapus pesanan ini?', {title:'Hapus pesanan?', confirmText:'Ya, hapus'}))) return; D.orders = D.orders.filter(o => o.id !== id); enqueue('deleteOrder', id); render(); }
 
 /* ---- Pelanggan ---- */
