@@ -4,7 +4,7 @@
 <base target="_top">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#e8590c">
+<meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Uwais Food</title>
@@ -12,10 +12,17 @@
 /* Terapkan preferensi tema sebelum CSS digambar agar tidak berkedip. */
 (function(){
   try {
-    var mode = localStorage.getItem('uf_theme') || 'system';
-    if (!['light','dark','system'].includes(mode)) mode = 'system';
+    var savedMode = localStorage.getItem('uf_theme');
+    /* v11.3: Dark AMOLED menjadi default untuk instalasi baru dan default sistem lama. */
+    if (localStorage.getItem('uf_m3e_amoled_v11_3') !== '1') {
+      if (!savedMode || savedMode === 'system') localStorage.setItem('uf_theme', 'dark');
+      localStorage.setItem('uf_m3e_amoled_v11_3', '1');
+      savedMode = localStorage.getItem('uf_theme');
+    }
+    var mode = savedMode || 'dark';
+    if (!['light','dark','system'].includes(mode)) mode = 'dark';
     document.documentElement.setAttribute('data-uf-theme', mode);
-  } catch (e) { document.documentElement.setAttribute('data-uf-theme', 'system'); }
+  } catch (e) { document.documentElement.setAttribute('data-uf-theme', 'dark'); }
 })();
 </script>
 <style>
@@ -333,9 +340,9 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 }
 :root[data-uf-theme="dark"]{
   color-scheme:dark;
-  --bg:#151210;--surface:#211c18;--soft:#2c241e;--tx:#f6eee6;--mut:#b5a89c;--ln:#40362e;
-  --pr:#ff9558;--pr-d:#ffb17c;--pr-l:#472719;--ok:#63d486;--ok-l:#1e3829;--bad:#ff7777;--bad-l:#482525;
-  --sh:0 1px 2px #0008,0 9px 28px #0005;
+  --bg:#000000;--surface:#0a0a0c;--soft:#141417;--tx:#f4f0ed;--mut:#aaa4a0;--ln:#29282c;
+  --pr:#ffb57a;--pr-d:#ffd2b0;--pr-l:#352014;--ok:#9be7b4;--ok-l:#102b1b;--bad:#ffb4ab;--bad-l:#3b1717;
+  --sh:0 1px 2px #000,0 12px 34px #0009;
 }
 :root[data-uf-theme="dark"] body{background:var(--bg);color:var(--tx)}
 :root[data-uf-theme="dark"] .top{background:rgba(33,28,24,.9);color:var(--tx);border-color:var(--ln);box-shadow:0 2px 14px #0003}
@@ -473,6 +480,162 @@ textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--l
 .wa-customer-settings textarea{width:100%;min-height:170px;border:1px solid var(--ln);border-radius:14px;padding:13px;background:var(--surface);color:var(--tx);font:inherit;line-height:1.5;resize:vertical}
 .wa-customer-settings .divider{height:1px;background:var(--ln);margin:5px 0}
 
+
+/* ================= HPP CALCULATOR ================= */
+.hpp-hero{display:grid;grid-template-columns:1.35fr .65fr;gap:14px;margin-bottom:16px}
+.hpp-intro{padding:22px;background:linear-gradient(135deg,var(--pr-l),var(--surface));border:1px solid var(--ln);border-radius:20px;display:flex;align-items:center;gap:16px}
+.hpp-intro-icon{width:58px;height:58px;flex:0 0 58px;border-radius:19px;background:var(--surface);display:grid;place-items:center;font-size:29px;box-shadow:var(--sh)}
+.hpp-kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.hpp-kpi .card{padding:15px;display:flex;flex-direction:column;gap:5px;justify-content:center}
+.hpp-kpi small{color:var(--mut);font-size:11px}.hpp-kpi b{font-size:20px;letter-spacing:-.03em}
+.hpp-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:15px;align-items:start}
+.hpp-card{padding:18px;border-radius:18px}.hpp-section-title{font-size:15px;font-weight:850;letter-spacing:-.02em}.hpp-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.hpp-field{display:flex;flex-direction:column;gap:5px;min-width:0}.hpp-field label{font-size:11px;font-weight:750;color:var(--mut)}.hpp-field input,.hpp-field select,.hpp-field textarea{min-width:0;width:100%}.hpp-field select,.hpp-line select{padding:11px 12px;border:1.5px solid var(--ln);border-radius:12px;background:var(--surface);color:var(--tx)}.hpp-field.full{grid-column:1/-1}
+.hpp-unit-hint{font-size:11px;color:var(--mut);line-height:1.4}.hpp-table{width:100%;border-collapse:collapse;font-size:12px}.hpp-table th,.hpp-table td{padding:10px 8px;border-bottom:1px solid var(--ln);text-align:left;vertical-align:middle}.hpp-table th{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}.hpp-table td.num{text-align:right;white-space:nowrap}.hpp-table-wrap{overflow:auto;border:1px solid var(--ln);border-radius:13px}.hpp-lines{display:flex;flex-direction:column;gap:9px}.hpp-line{display:grid;grid-template-columns:minmax(0,1fr) 100px 34px;gap:8px;align-items:end;padding:10px;background:var(--soft);border-radius:13px}.hpp-line select,.hpp-line input{min-width:0;width:100%}.hpp-line label{font-size:10px;color:var(--mut);font-weight:750;display:block;margin-bottom:4px}.hpp-line .remove{height:42px;padding:0;border-radius:11px;background:var(--bad-l);color:var(--bad)}
+.hpp-costs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.hpp-summary{background:var(--soft);border-radius:16px;padding:15px;display:flex;flex-direction:column;gap:8px}.hpp-summary .total{font-size:28px;font-weight:900;color:var(--pr);letter-spacing:-.04em}.hpp-summary .summary-line{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding-bottom:6px;border-bottom:1px dashed var(--ln)}.hpp-summary .summary-line:last-child{border:0;padding-bottom:0}.hpp-summary .summary-line strong{text-align:right}.hpp-result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.hpp-result{padding:12px;border:1px solid var(--ln);border-radius:13px;background:var(--surface)}.hpp-result small{display:block;color:var(--mut);font-size:10px;margin-bottom:4px}.hpp-result b{font-size:16px}.hpp-actions{display:flex;gap:8px;flex-wrap:wrap}.hpp-pill{display:inline-flex;align-items:center;padding:4px 8px;border-radius:99px;background:var(--pr-l);color:var(--pr-d);font-size:10px;font-weight:800}.hpp-empty{padding:25px;text-align:center;border:1px dashed var(--ln);border-radius:14px;color:var(--mut)}
+@media(max-width:760px){.hpp-hero{grid-template-columns:1fr}.hpp-layout{grid-template-columns:1fr}.hpp-card{padding:14px}.hpp-line{grid-template-columns:minmax(0,1fr) 86px 32px}.hpp-fields{gap:9px}}
+@media(max-width:420px){.hpp-fields,.hpp-costs{grid-template-columns:1fr}.hpp-result-grid{grid-template-columns:1fr 1fr}.hpp-intro{padding:16px}.hpp-intro-icon{width:48px;height:48px;flex-basis:48px}}
+
+
+/* ==========================================================
+   UWAIS FOOD ADMIN v11.3 — MATERIAL 3 EXPRESSIVE / DARK AMOLED
+   Black OLED surfaces, expressive shape system, adaptive states
+   ========================================================== */
+:root[data-uf-theme="dark"]{
+  color-scheme:dark;
+  --bg:#000000;
+  --surface:#0a0a0c;
+  --soft:#141417;
+  --tx:#f4f0ed;
+  --mut:#aaa4a0;
+  --ln:#29282c;
+  --pr:#ffb57a;
+  --pr-d:#ffd2b0;
+  --pr-l:#352014;
+  --ok:#9be7b4;
+  --ok-l:#102b1b;
+  --bad:#ffb4ab;
+  --bad-l:#3b1717;
+  --sh:0 1px 2px #000,0 12px 34px #0009;
+}
+:root[data-uf-theme="dark"] body{background:#000;color:var(--tx)}
+:root[data-uf-theme="dark"] .top{
+  background:rgba(0,0,0,.92);color:var(--tx);border-bottom:1px solid #242428;
+  box-shadow:0 8px 28px #0008;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)
+}
+:root[data-uf-theme="dark"] .side{background:#050506;border-right:1px solid #222226}
+:root[data-uf-theme="dark"] .bottom{background:rgba(5,5,6,.94);border-top:1px solid #242428;box-shadow:0 -10px 34px #0009}
+:root[data-uf-theme="dark"] .product-visual{background:radial-gradient(circle at 50% 28%,#29211b 0,#171311 55%,#080808 100%);border-color:#413127}
+:root[data-uf-theme="dark"] .product-visual:after{border-color:#62472f;opacity:.52}
+:root[data-uf-theme="dark"] .product-visual small{background:#090909e8;color:#ffe0c8}
+:root[data-uf-theme="dark"] .paper-wrap{background:#101012}
+:root[data-uf-theme="dark"] .paper{box-shadow:0 4px 30px #000}
+:root[data-uf-theme="dark"] .setting-card,
+:root[data-uf-theme="dark"] .more-card{box-shadow:none}
+:root[data-uf-theme="dark"] .setting-card:hover,
+:root[data-uf-theme="dark"] .more-card:hover{box-shadow:0 0 0 1px #65452f,0 12px 30px #0009}
+:root[data-uf-theme="dark"] .maps-hint{color:var(--mut)}
+
+/* M3 Expressive foundation */
+:root{--m3-ease:cubic-bezier(.2,.8,.2,1);--m3-shape:24px;--m3-shape-large:30px}
+html{scroll-behavior:smooth;scrollbar-color:#4b4038 transparent}
+body{font-family:"Google Sans",Roboto,"Segoe UI",system-ui,sans-serif;letter-spacing:0;background:var(--bg);transition:background .25s var(--m3-ease),color .25s var(--m3-ease)}
+.wrap{max-width:1520px;padding:26px clamp(16px,2.4vw,36px) 42px}
+.top{min-height:74px;padding:14px clamp(16px,2.2vw,32px);border-bottom:1px solid var(--ln);}
+.brand{font-weight:850;letter-spacing:-.045em}
+.chip-pr{min-height:42px;border-radius:999px;padding:8px 15px;background:var(--soft);border:1px solid var(--ln);color:var(--tx);transition:all .22s var(--m3-ease)}
+.chip-pr:hover{background:var(--pr-l);color:var(--pr-d);border-color:color-mix(in srgb,var(--pr) 45%,var(--ln))}
+.card,.setting-card,.more-card,.receipt-set-group,.hpp-card,.hpp-summary,.theme-preview-card{
+  border-radius:var(--m3-shape);border-color:var(--ln);box-shadow:none;transition:background .22s var(--m3-ease),border-color .22s var(--m3-ease),transform .22s var(--m3-ease),box-shadow .22s var(--m3-ease)
+}
+:root[data-uf-theme="dark"] .card,
+:root[data-uf-theme="dark"] .setting-card,
+:root[data-uf-theme="dark"] .more-card,
+:root[data-uf-theme="dark"] .receipt-set-group,
+:root[data-uf-theme="dark"] .hpp-card{background:#0a0a0c;border-color:#29282c}
+.card{padding:clamp(15px,1.5vw,22px)}
+.page-head{margin:5px 0 24px;align-items:center}
+h2{font-size:clamp(24px,2vw,31px);font-weight:850;letter-spacing:-.055em;line-height:1.13}
+h3{font-size:11px;font-weight:850;letter-spacing:.13em}
+.eyebrow{font-size:10px;letter-spacing:.17em;font-weight:900}
+.page-subtitle{font-size:13px;line-height:1.55;max-width:720px}
+button,a.btn{min-height:42px;border-radius:999px;padding:10px 18px;font-weight:750;letter-spacing:.005em;transition:transform .18s var(--m3-ease),background .18s var(--m3-ease),box-shadow .18s var(--m3-ease),filter .18s var(--m3-ease)}
+button:active,a.btn:active{transform:scale(.97)}
+button:focus-visible,a.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid color-mix(in srgb,var(--pr) 70%,transparent);outline-offset:2px}
+button.o,a.btn.o{background:var(--pr-l);color:var(--pr-d);border:1px solid color-mix(in srgb,var(--pr) 24%,var(--ln))}
+button.g{background:#197744;color:#fff}
+button.r{background:var(--bad-l);color:var(--bad)}
+input,select.sel,textarea,.receipt-field input,.receipt-field select,.hpp-field select,.hpp-field input,.hpp-line select,.hpp-line input{
+  min-height:44px;border:1px solid var(--ln);border-radius:16px;background:var(--soft);color:var(--tx);padding:11px 14px;transition:border-color .18s var(--m3-ease),box-shadow .18s var(--m3-ease),background .18s var(--m3-ease)
+}
+input:focus,select:focus,textarea:focus{border-color:var(--pr);box-shadow:0 0 0 3px var(--pr-l)}
+label,.field-label,.hpp-field label{font-weight:750;letter-spacing:.01em}
+.note,.settings-tip,.settings-tip,.api-address{border-radius:18px;background:var(--soft);border:1px solid var(--ln);padding:13px 15px}
+.note.ok{background:var(--ok-l);border-color:color-mix(in srgb,var(--ok) 20%,var(--ln));color:var(--ok)}
+.note.warn{background:var(--pr-l);border-color:color-mix(in srgb,var(--pr) 24%,var(--ln));color:var(--pr-d)}
+.tag,.status-pill,.hpp-pill{border-radius:999px;padding:5px 10px;font-weight:800}
+.tag.pr,.hpp-pill{background:var(--pr-l);color:var(--pr-d)}
+.tag.ok,.status-pill.good{background:var(--ok-l);color:var(--ok)}
+.grid{gap:14px}
+.menu-card,.product-card{border-radius:26px;overflow:hidden}
+.seg{gap:8px;padding:4px;border-radius:999px;background:var(--soft);border:1px solid var(--ln)}
+.seg button{border:0;border-radius:999px;background:transparent;color:var(--mut);min-height:40px}
+.seg button.on{background:var(--pr);color:#1b0d03;box-shadow:0 3px 12px color-mix(in srgb,var(--pr) 22%,transparent)}
+.stat{border-radius:24px;background:var(--surface);border:1px solid var(--ln)}
+.stat .big{font-size:clamp(25px,2vw,34px);letter-spacing:-.06em}
+.line{border-color:var(--ln)}
+/* Expressive navigation */
+.side{padding:24px 15px 18px;gap:7px}
+.side .logo{padding:4px 10px 26px;font-size:20px}
+.logo-mark{width:46px;height:46px;border-radius:18px;background:var(--pr-l);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pr) 22%,transparent)}
+.nav-label{padding:10px 13px 6px;font-size:9px;letter-spacing:.17em}
+.side button.nv{min-height:48px;border-radius:999px;padding:11px 16px;font-size:13px;font-weight:700}
+.side button.nv.on{background:var(--pr-l);color:var(--pr-d);box-shadow:none}
+.side button.nv.on .nv-ico{transform:scale(1.08)}
+.nv-ico{transition:transform .2s var(--m3-ease)}
+.bottom{padding:8px 10px calc(8px + env(safe-area-inset-bottom));gap:4px}
+.bottom button{min-height:56px;border-radius:19px;font-size:10px;font-weight:750;gap:5px}
+.bottom button span{width:54px;height:30px;display:grid;place-items:center;border-radius:999px;font-size:19px;transition:all .2s var(--m3-ease)}
+.bottom button.on{color:var(--pr-d)}
+.bottom button.on span{background:var(--pr-l);width:62px}
+.bottom button.on:before{display:none}
+/* Setting and HPP surfaces */
+.setting-card{padding:17px;min-height:112px;display:flex;align-items:center;gap:14px;text-align:left}
+.setting-card:hover,.more-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--pr) 48%,var(--ln))}
+.setting-icon{width:48px;height:48px;flex:0 0 48px;border-radius:18px;background:var(--pr-l);display:grid;place-items:center;font-size:22px}
+.setting-card-copy b{font-size:14px;font-weight:850}
+.setting-card-copy small{line-height:1.45}
+.setting-chevron{font-size:25px;color:var(--mut)}
+.receipt-set-group{overflow:hidden}
+.receipt-set-group>summary{padding:16px 18px;font-size:13px}
+.receipt-set-body{padding:0 16px 18px}
+.hpp-intro,.hpp-summary{border-radius:26px}
+.hpp-card{border-radius:24px}
+.hpp-line{border-radius:18px;background:var(--soft)}
+.hpp-result{border-radius:20px;background:var(--surface);border-color:var(--ln)}
+.hpp-summary .total{font-size:32px;letter-spacing:-.06em}
+.hpp-table-wrap{border-radius:18px;border-color:var(--ln)}
+.hpp-table th{background:var(--soft)}
+/* Dialogs and popup */
+.ov{background:rgba(0,0,0,.76);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:18px}
+.dlg{border:1px solid var(--ln);border-radius:30px;background:var(--surface);box-shadow:0 28px 90px #000c;padding:3px}
+.noti-dialog{border-radius:30px;background:var(--surface);border-color:var(--ln);box-shadow:0 28px 90px #000d}
+.noti-icon{border-radius:22px}
+.noti-close{border-radius:999px}
+#notifyRoot{background:rgba(0,0,0,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#msg{border-radius:999px;background:#252329;color:#fff;border:1px solid #514c55}
+.fab{border-radius:999px;min-height:54px;padding:15px 22px}
+#upd{border-radius:999px}
+/* Tables / filters / small components */
+table{border-color:var(--ln)}
+th{background:var(--soft);color:var(--mut)}
+td,th{border-color:var(--ln)}
+.filter-block,.filter-row{gap:10px}
+.product-toolbar{gap:14px}
+@media(min-width:900px){.app{grid-template-columns:272px minmax(0,1fr)}.side{width:272px}.wrap{padding:28px clamp(24px,2.4vw,40px) 44px}}
+@media(max-width:899px){.top{min-height:62px;padding:10px 16px}.wrap{padding:19px 15px 30px}.page-head{gap:11px}.bottom{padding-left:8px;padding-right:8px}}
+@media(max-width:480px){.card{padding:14px;border-radius:22px}.setting-card{border-radius:22px}.noti-dialog{padding:25px 18px 20px}.ov{padding:10px}.hpp-line{grid-template-columns:minmax(0,1fr) 82px 34px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
 </style>
 </head>
 <body>
@@ -480,7 +643,7 @@ textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--l
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.0.0)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.3.0)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -494,7 +657,7 @@ textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--l
 /* Penjaga: jika program utama gagal jalan, tampilkan penyebabnya di layar (bukan "Memuat…" selamanya) */
 window.__boot = false;
 window.__errs = [];
-window.__len = 155042;
+window.__len = 236026;
 (function () {
   var box = null;
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
@@ -503,10 +666,10 @@ window.__len = 155042;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v11.0.0)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v11.3.0)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v11.0.0)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v11.3.0)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -530,7 +693,7 @@ window.__len = 155042;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.1.0 · WhatsApp Customer & M3 Expressive';
+var APP_VER = 'v11.3.0 · M3 Expressive AMOLED';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -541,7 +704,7 @@ var LS = {
 /* Preferensi tema hanya disimpan di perangkat/browser masing-masing. */
 var THEME_MODES = ['light','dark','system'];
 function getThemeMode() {
-  const mode = LS.get('uf_theme') || 'system';
+  const mode = LS.get('uf_theme') || 'dark';
   return THEME_MODES.includes(mode) ? mode : 'system';
 }
 function effectiveTheme(mode) {
@@ -554,8 +717,8 @@ function applyThemeMode(mode, notify) {
   LS.set('uf_theme', mode);
   document.documentElement.setAttribute('data-uf-theme', mode);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', effectiveTheme(mode) === 'dark' ? '#151210' : '#e8590c');
-  if (notify) toast('Tema ' + (mode === 'light' ? 'terang' : mode === 'dark' ? 'gelap' : 'mengikuti perangkat') + ' diterapkan');
+  if (meta) meta.setAttribute('content', effectiveTheme(mode) === 'dark' ? '#000000' : '#e8590c');
+  if (notify) toast('Tema ' + (mode === 'light' ? 'terang' : mode === 'dark' ? 'Dark AMOLED' : 'mengikuti perangkat') + ' diterapkan');
   if (tab === 'pengaturan' && window._settingSection === 'tampilan') render();
 }
 function setThemeMode(mode) { applyThemeMode(mode, true); }
@@ -567,7 +730,7 @@ try {
   else if (colorPref.addListener) colorPref.addListener(onColorPref);
 } catch (e) {}
 // Opsional: isi URL /exec di sini agar tidak perlu mengisi lewat layar setup
-var DEFAULT_API = 'https://script.google.com/macros/s/AKfycbwWcnvTcBJzY4SXIxKY30sPXj31oNapu-nIYPnQWDplQOOb5Xvb8WvT3vcZwGDhVOBpFw/exec';
+var DEFAULT_API = '';
 var getApi = () => LS.get('uf_api') || DEFAULT_API;
 var getTok = () => window._tok || LS.get('uf_tok');
 var setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
@@ -1165,9 +1328,9 @@ function waLink(hp) {
 /* ================= TAMPILAN ================= */
 var MAIN_TABS = [['pesan', '🛒', 'Pesan'], ['order', '📋', 'Orderan'], ['rekap', '📊', 'Rekap'], ['lainnya', '☰', 'Lainnya']];
 var DESKTOP_TX = [['pesan', '🛒', 'Buat Pesanan'], ['order', '📋', 'Orderan'], ['rekap', '📊', 'Rekap']];
-var DESKTOP_MGMT = [['po', '📅', 'Periode PO'], ['pelanggan', '👥', 'Pelanggan'], ['menu', '🥐', 'Menu Produk']];
+var DESKTOP_MGMT = [['po', '📅', 'Periode PO'], ['pelanggan', '👥', 'Pelanggan'], ['menu', '🥐', 'Menu Produk'], ['hpp', '🧮', 'Hitung HPP']];
 function sideButton(t) {
-  const active = tab === t[0] || (t[0] === 'lainnya' && ['po','pelanggan','menu','pengaturan'].includes(tab));
+  const active = tab === t[0] || (t[0] === 'lainnya' && ['po','pelanggan','menu','hpp','pengaturan'].includes(tab));
   return `<button class="nv ${active ? 'on' : ''}" onclick="${t[0] === 'pengaturan' ? "openSetting('home')" : `go('${t[0]}')`}"><span class="nv-ico">${t[1]}</span><span>${t[2]}</span></button>`;
 }
 function render() {
@@ -1178,9 +1341,9 @@ function render() {
     <div class="nav-label nav-label-gap">PENGELOLAAN</div>${DESKTOP_MGMT.map(sideButton).join('')}
     <div class="side-spacer"></div>${sideButton(['pengaturan','⚙️','Pengaturan'])}
     <div class="side-foot"><span class="online-dot"></span> Pengelola orderan <small>${APP_VER}</small></div>`;
-  const activeBottom = ['po','pelanggan','menu','pengaturan'].includes(tab) ? 'lainnya' : tab;
+  const activeBottom = ['po','pelanggan','menu','hpp','pengaturan'].includes(tab) ? 'lainnya' : tab;
   $('#bottom').innerHTML = MAIN_TABS.map(t => `<button class="${activeBottom === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('');
-  const views = {pesan: vPesan, order: vOrder, rekap: vRekap, po: vPO, pelanggan: vPelanggan, menu: vMenu, pengaturan: vPengaturan, lainnya: vLainnya};
+  const views = {pesan: vPesan, order: vOrder, rekap: vRekap, po: vPO, pelanggan: vPelanggan, menu: vMenu, hpp: vHpp, pengaturan: vPengaturan, lainnya: vLainnya};
   $('#app').innerHTML = (views[tab] || vPesan)();
   if (tab === 'pesan' && shippingMode === 'Kurir') setTimeout(initDestinationMapsUi, 0);
   if (tab === 'pengaturan' && (window._settingSection || 'home') === 'ongkir') {
@@ -1188,6 +1351,8 @@ function render() {
     if (window._te) setTimeout(initTarifMapsUi, 0);
   }
   if (tab === 'pelanggan' && window._pe) setTimeout(initCustomerMapsUi, 0);
+  if (tab === 'hpp' && !window._hppData && !window._hppLoading) setTimeout(hppLoadData, 0);
+  if (tab === 'hpp' && window._hppData && window._hppTab === 'kalkulator') setTimeout(hppRecalc, 0);
 }
 function go(t) {
   tab = t;
@@ -1216,6 +1381,7 @@ function vLainnya() {
     ['po','📅','Periode PO','Atur periode pre-order dan tanggal pengambilan','Kelola PO'],
     ['pelanggan','👥','Pelanggan','Data pelanggan, alamat Maps, dan riwayat pesanan','Buka pelanggan'],
     ['menu','🥐','Menu Produk','Kelola nama produk, harga, dan komposisi paket','Kelola menu'],
+    ['hpp','🧮','Hitung HPP','Hitung biaya bahan, produksi, kemasan, dan harga jual','Buka kalkulator HPP'],
     ['pengaturan','⚙️','Pengaturan','Printer, ongkir, struk, aplikasi, dan keamanan','Buka pengaturan']
   ];
   return `<div class="page-head"><div><div class="eyebrow">AREA PENGELOLAAN</div><h2>Lainnya</h2><div class="page-subtitle">Akses data dan konfigurasi Uwais Food.</div></div></div>
@@ -2198,7 +2364,7 @@ function vPengaturan() {
       ['pembayaran','💳','Pembayaran & Tagihan','Nomor rekening, QRIS, dan template pesan tagihan WhatsApp',((cfg().rekening || []).filter(r => r.noRek).length || 'Belum diatur') + ((cfg().rekening || []).filter(r => r.noRek).length ? ' rekening' : '')],
       ['whatsapp','💬','WhatsApp Customer','Atur pesan konfirmasi pesanan dan detail kurir dari Customer PWA','Template pesan'],
       ['struk','🧾','Struk','Identitas toko, bagian yang tampil, label, format gambar, dan template WhatsApp',(+cfg().lebar === 80 ? '80 mm' : '58 mm')],
-      ['tampilan','🎨','Tampilan','Pilih tema terang, gelap, atau mengikuti perangkat',getThemeMode() === 'light' ? 'Tema terang' : getThemeMode() === 'dark' ? 'Tema gelap' : 'Ikuti perangkat'],
+      ['tampilan','🎨','Tampilan','Pilih tema terang, Dark AMOLED, atau mengikuti perangkat',getThemeMode() === 'light' ? 'Tema terang' : getThemeMode() === 'dark' ? 'Dark AMOLED' : 'Ikuti perangkat'],
       ['aplikasi','📱','Aplikasi','PWA, pembaruan, koneksi Spreadsheet, dan cache',IN_GAS ? 'Apps Script' : 'PWA'],
       ['keamanan','🛡️','Keamanan','PIN akses, sesi, dan keluar dari aplikasi','PIN aktif']
     ];
@@ -2224,12 +2390,12 @@ function vPengaturan() {
       <div class="mut">Pilihan tema disimpan pada perangkat ini dan akan tetap digunakan saat aplikasi dibuka kembali.</div>
       <div class="seg theme-choice">
         <button class="${mode === 'light' ? 'on' : ''}" onclick="setThemeMode('light')">☀️ Terang</button>
-        <button class="${mode === 'dark' ? 'on' : ''}" onclick="setThemeMode('dark')">🌙 Gelap</button>
+        <button class="${mode === 'dark' ? 'on' : ''}" onclick="setThemeMode('dark')">🌑 Dark AMOLED</button>
         <button class="${mode === 'system' ? 'on' : ''}" onclick="setThemeMode('system')">💻 Ikuti perangkat</button>
       </div>
       <div class="theme-preview">
         <div class="theme-preview-card"><b><span class="theme-preview-dot"></span>Pratinjau kartu</b><small>Contoh permukaan dan teks aplikasi.</small></div>
-        <div class="theme-preview-card"><b>Uwais Food</b><small>${mode === 'light' ? 'Tema terang dipilih' : mode === 'dark' ? 'Tema gelap dipilih' : 'Mengikuti pengaturan perangkat'}</small></div>
+        <div class="theme-preview-card"><b>Uwais Food</b><small>${mode === 'light' ? 'Tema terang dipilih' : mode === 'dark' ? 'Dark AMOLED dipilih' : 'Mengikuti pengaturan perangkat'}</small></div>
       </div>
       <div class="settings-tip">Mode “Ikuti perangkat” akan otomatis menyesuaikan dengan pengaturan tampilan Windows, Android, atau sistem operasi yang digunakan.</div>
     </div>`;
@@ -3279,6 +3445,117 @@ async function kirim(data) {
     toast('RawBT tidak terbuka. Pasang RawBT, pilih printer di RawBT, lalu coba cetak lagi.');
   }
   return false;
+}
+
+
+/* ================= HITUNG HPP ================= */
+window._hppData = null; window._hppLoading = false; window._hppTab = 'kalkulator';
+window._hppEditBahan = null; window._hppLines = [{id:'',qty:''}]; window._hppEditResep = null;
+const HPP_UNITS = ['g','ml','pcs'];
+const hppCurrency = v => 'Rp' + Math.round(Number(v)||0).toLocaleString('id-ID');
+async function hppLoadData(silent) {
+  if (window._hppLoading) return;
+  window._hppLoading = true;
+  try {
+    const data = await run('hpp_getData');
+    window._hppData = {bahan:Array.isArray(data.bahan)?data.bahan:[],resep:Array.isArray(data.resep)?data.resep:[]};
+  } catch(e) {
+    if (!silent) toast('Gagal memuat data HPP: ' + msgOf(e), 'error');
+    window._hppData = window._hppData || {bahan:[],resep:[]};
+  } finally {
+    window._hppLoading = false;
+    if (tab === 'hpp') { render(); if (window._hppTab === 'kalkulator') setTimeout(hppRecalc, 0); }
+  }
+}
+function hppSetTab(name) { window._hppTab = name; render(); }
+function hppResetBahan() { window._hppEditBahan = null; render(); }
+function hppEditBahan(id) { const b=(window._hppData?.bahan||[]).find(x=>x.id===id); if(!b)return; window._hppEditBahan=Object.assign({},b); window._hppTab='bahan'; render(); }
+async function hppSaveIngredient() {
+  const data={id:window._hppEditBahan?.id||'',nama:$('#hppBahanNama')?.value||'',satuan:$('#hppBahanUnit')?.value||'g',isi:$('#hppBahanIsi')?.value||'',hargaBeli:$('#hppBahanHarga')?.value||'',pemasok:$('#hppBahanSupplier')?.value||''};
+  try { await run('hpp_saveIngredient',data); toast('Bahan baku berhasil disimpan.','success'); window._hppEditBahan=null; await hppLoadData(true); }
+  catch(e){toast('Gagal menyimpan bahan: '+msgOf(e),'error');}
+}
+async function hppDeleteIngredient(id) {
+  if(!await popupConfirm('Hapus bahan baku ini dari master bahan? Bahan yang sudah digunakan pada resep tersimpan tidak dapat dihapus sebelum resep terkait dihapus atau diubah.',{title:'Hapus bahan baku',confirmText:'Hapus'}))return;
+  try { await run('hpp_deleteIngredient',id); toast('Bahan baku dihapus.','success'); await hppLoadData(true); }
+  catch(e){toast('Gagal menghapus bahan: '+msgOf(e),'error');}
+}
+function hppNewRecipe() { window._hppEditResep=null; window._hppLines=[{id:'',qty:''}]; window._hppTab='kalkulator'; render(); }
+function hppEditRecipe(id) {
+  const r=(window._hppData?.resep||[]).find(x=>x.id===id); if(!r)return;
+  window._hppEditResep=Object.assign({},r); window._hppLines=(r.bahan||[]).map(b=>({id:b.id,qty:b.qty})); if(!window._hppLines.length)window._hppLines=[{id:'',qty:''}];
+  window._hppTab='kalkulator'; render(); setTimeout(hppRecalc,0);
+}
+function hppLineAdd(){window._hppLines.push({id:'',qty:''});render();}
+function hppLineRemove(i){window._hppLines.splice(i,1);if(!window._hppLines.length)window._hppLines=[{id:'',qty:''}];render();setTimeout(hppRecalc,0);}
+function hppLineUpdate(i,keyName,value){if(!window._hppLines[i])return;window._hppLines[i][keyName]=value;hppRecalc();}
+function hppReadForm(){
+  return {id:window._hppEditResep?.id||'',nama:$('#hppNamaProduk')?.value||'',hasil:$('#hppHasil')?.value||1,
+    bahan:(window._hppLines||[]).map(x=>({id:x.id,qty:x.qty})).filter(x=>x.id&&Number(x.qty)>0),
+    tenagaKerja:$('#hppTenaga')?.value||0,gasListrik:$('#hppGas')?.value||0,kemasan:$('#hppKemasan')?.value||0,
+    overhead:$('#hppOverhead')?.value||0,targetMargin:$('#hppMargin')?.value||0,hargaAktual:$('#hppHargaAktual')?.value||0,catatan:$('#hppCatatan')?.value||''};
+}
+function hppRecalc(){
+  const out=$('#hppDynamicSummary'); if(!out)return;
+  const bahan=window._hppData?.bahan||[]; const byId={};bahan.forEach(b=>byId[b.id]=b);
+  let costBahan=0,lines=[];
+  (window._hppLines||[]).forEach(l=>{const b=byId[l.id],q=Number(l.qty)||0;if(b&&q>0){const c=q*Number(b.hargaSatuan||0);costBahan+=c;lines.push({nama:b.nama,qty:q,satuan:b.satuan,cost:c});}});
+  const val=id=>Math.max(0,Number($('#'+id)?.value)||0);
+  const hasil=Math.max(0.000001,val('hppHasil'));
+  const tenaga=val('hppTenaga'),gas=val('hppGas'),kemasan=val('hppKemasan'),overhead=val('hppOverhead');
+  const total=costBahan+tenaga+gas+kemasan+overhead, unit=total/hasil, margin=Math.min(90,val('hppMargin'));
+  const rec=Math.ceil((unit/(1-margin/100))/500)*500, actual=val('hppHargaAktual'), profit=actual-unit, actualMargin=actual>0?profit/actual*100:0;
+  out.innerHTML=`<div class="hpp-summary"><div class="mut">Total biaya produksi</div><div class="total">${hppCurrency(total)}</div><div class="summary-line"><span>Biaya bahan (${lines.length} bahan)</span><strong>${hppCurrency(costBahan)}</strong></div><div class="summary-line"><span>Tenaga kerja</span><strong>${hppCurrency(tenaga)}</strong></div><div class="summary-line"><span>Gas / listrik</span><strong>${hppCurrency(gas)}</strong></div><div class="summary-line"><span>Kemasan</span><strong>${hppCurrency(kemasan)}</strong></div><div class="summary-line"><span>Overhead lain</span><strong>${hppCurrency(overhead)}</strong></div><div class="summary-line"><b>HPP per unit (${hasil} unit)</b><strong>${hppCurrency(unit)}</strong></div></div>
+    <div class="hpp-result-grid" style="margin-top:10px"><div class="hpp-result"><small>Harga jual rekomendasi</small><b style="color:var(--pr)">${hppCurrency(rec)}</b></div><div class="hpp-result"><small>Laba / unit pada harga aktual</small><b style="color:${profit>=0?'var(--ok)':'var(--bad)'}">${actual>0?hppCurrency(profit):'—'}</b></div><div class="hpp-result"><small>Margin aktual</small><b>${actual>0?actualMargin.toFixed(1)+'%':'—'}</b></div><div class="hpp-result"><small>Estimasi laba total</small><b>${actual>0?hppCurrency(profit*hasil):'—'}</b></div></div>`;
+}
+async function hppSaveRecipe(){
+  const data=hppReadForm();
+  try { const saved=await run('hpp_saveRecipe',data); toast('Perhitungan HPP berhasil disimpan.','success'); window._hppEditResep=saved; await hppLoadData(true); window._hppTab='riwayat'; render(); }
+  catch(e){toast('Gagal menyimpan HPP: '+msgOf(e),'error');}
+}
+async function hppDeleteRecipe(id){
+  if(!await popupConfirm('Hapus perhitungan HPP ini?',{title:'Hapus perhitungan',confirmText:'Hapus'}))return;
+  try{await run('hpp_deleteRecipe',id);toast('Perhitungan HPP dihapus.','success');await hppLoadData(true);}catch(e){toast('Gagal menghapus: '+msgOf(e),'error');}
+}
+function hppBahanView(){
+  const data=window._hppData||{bahan:[],resep:[]},edit=window._hppEditBahan||{};
+  const options=HPP_UNITS.map(u=>`<option value="${u}" ${edit.satuan===u?'selected':''}>${u==='g'?'Gram (g)':u==='ml'?'Mililiter (ml)':'Pcs / unit'}</option>`).join('');
+  const rows=data.bahan.map(b=>`<tr><td><b>${esc(b.nama)}</b><div class="mut">${esc(b.pemasok||'Tanpa pemasok')}</div></td><td>${esc(b.satuan)}</td><td class="num">${Number(b.isi).toLocaleString('id-ID')}</td><td class="num">${hppCurrency(b.hargaBeli)}</td><td class="num"><b>${hppCurrency(b.hargaSatuan)}/${esc(b.satuan)}</b></td><td><div class="acts"><button class="o" onclick="hppEditBahan('${esc(b.id)}')">Edit</button><button class="r" onclick="hppDeleteIngredient('${esc(b.id)}')">Hapus</button></div></td></tr>`).join('');
+  return `<div class="hpp-layout"><section class="card col hpp-card"><div class="row"><div><div class="hpp-section-title">${edit.id?'Edit bahan baku':'Tambah bahan baku'}</div><div class="mut">Masukkan isi kemasan dalam satuan dasar.</div></div>${edit.id?'<span class="hpp-pill">Mode edit</span>':''}</div>
+    <div class="note">Contoh: tepung 1 kg → isi 1.000 g; susu 1 liter → isi 1.000 ml; telur 1 rak isi 30 pcs. Sistem menghitung harga per gram/ml/pcs secara otomatis.</div>
+    <div class="hpp-fields"><div class="hpp-field full"><label>Nama bahan</label><input id="hppBahanNama" placeholder="Contoh: Tepung terigu protein tinggi" value="${esc(edit.nama||'')}"></div>
+    <div class="hpp-field"><label>Satuan dasar</label><select id="hppBahanUnit">${options}</select></div><div class="hpp-field"><label>Isi per kemasan (g / ml / pcs)</label><input id="hppBahanIsi" type="number" min="0.001" step="any" placeholder="Contoh: 1000" value="${edit.isi??''}"></div>
+    <div class="hpp-field"><label>Harga beli per kemasan (Rp)</label><input id="hppBahanHarga" type="number" min="1" step="100" placeholder="Contoh: 18000" value="${edit.hargaBeli??''}"></div><div class="hpp-field"><label>Pemasok (opsional)</label><input id="hppBahanSupplier" placeholder="Nama toko / pemasok" value="${esc(edit.pemasok||'')}"></div></div>
+    <div class="hpp-actions"><button onclick="hppSaveIngredient()">💾 Simpan bahan</button><button class="o" onclick="hppResetBahan()">Bersihkan</button></div></section>
+    <section class="card col hpp-card"><div class="row"><div><div class="hpp-section-title">Master bahan baku</div><div class="mut">${data.bahan.length} bahan tersimpan</div></div><span class="hpp-pill">HPP</span></div>
+    ${rows?`<div class="hpp-table-wrap"><table class="hpp-table"><thead><tr><th>Bahan</th><th>Unit</th><th>Isi</th><th>Harga beli</th><th>Harga / unit</th><th>Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="hpp-empty">Belum ada bahan baku. Tambahkan bahan pertama di formulir.</div>'}</section></div>`;
+}
+function hppCalcView(){
+  const data=window._hppData||{bahan:[],resep:[]}, e=window._hppEditResep||{};
+  const options='<option value="">Pilih bahan baku</option>'+data.bahan.map(b=>`<option value="${esc(b.id)}">${esc(b.nama)} · ${hppCurrency(b.hargaSatuan)}/${esc(b.satuan)}</option>`).join('');
+  const lines=(window._hppLines||[]).map((l,i)=>`<div class="hpp-line"><div><label>Bahan baku</label><select onchange="hppLineUpdate(${i},'id',this.value)">${options.replace(`value="${esc(l.id||'')}"`,`value="${esc(l.id||'')}" selected`)}</select></div><div><label>Jumlah (${esc((data.bahan.find(b=>b.id===l.id)||{}).satuan||'unit')})</label><input type="number" min="0" step="any" placeholder="0" value="${esc(l.qty??'')}" oninput="hppLineUpdate(${i},'qty',this.value)"></div><button class="remove" title="Hapus bahan" onclick="hppLineRemove(${i})">×</button></div>`).join('');
+  return `<div class="hpp-layout"><section class="card col hpp-card"><div class="row"><div><div class="hpp-section-title">Kalkulator HPP produk</div><div class="mut">Hitung biaya satu batch dan biaya per produk.</div></div>${e.id?'<span class="hpp-pill">Edit perhitungan</span>':''}</div>
+    ${!data.bahan.length?'<div class="note warn">Tambahkan bahan baku terlebih dahulu pada tab Master Bahan. Setelah itu kembali ke kalkulator.</div>':''}
+    <div class="hpp-fields"><div class="hpp-field full"><label>Nama produk / resep</label><input id="hppNamaProduk" placeholder="Contoh: Bolen Pisang Premium" value="${esc(e.nama||'')}"></div><div class="hpp-field"><label>Hasil produksi (unit / pcs)</label><input id="hppHasil" type="number" min="0.001" step="any" value="${e.hasil??10}" oninput="hppRecalc()"></div><div class="hpp-field"><label>Target margin laba (%)</label><input id="hppMargin" type="number" min="0" max="90" step="1" value="${e.targetMargin??35}" oninput="hppRecalc()"></div></div>
+    <div class="row"><div class="hpp-section-title">Komposisi bahan</div><button class="o" onclick="hppLineAdd()">＋ Tambah bahan</button></div>
+    <div class="hpp-lines">${lines}</div>
+    <div class="hpp-section-title">Biaya produksi tambahan (untuk satu batch)</div><div class="hpp-costs"><div class="hpp-field"><label>Tenaga kerja (Rp)</label><input id="hppTenaga" type="number" min="0" step="500" value="${e.tenagaKerja??0}" oninput="hppRecalc()"></div><div class="hpp-field"><label>Gas / listrik (Rp)</label><input id="hppGas" type="number" min="0" step="500" value="${e.gasListrik??0}" oninput="hppRecalc()"></div><div class="hpp-field"><label>Kemasan (Rp)</label><input id="hppKemasan" type="number" min="0" step="500" value="${e.kemasan??0}" oninput="hppRecalc()"></div><div class="hpp-field"><label>Overhead lain (Rp)</label><input id="hppOverhead" type="number" min="0" step="500" value="${e.overhead??0}" oninput="hppRecalc()"></div></div>
+    <div class="hpp-field"><label>Harga jual aktual per unit (opsional)</label><input id="hppHargaAktual" type="number" min="0" step="500" placeholder="Untuk menghitung laba dan margin aktual" value="${e.hargaAktual??''}" oninput="hppRecalc()"></div>
+    <div class="hpp-field"><label>Catatan (opsional)</label><textarea id="hppCatatan" rows="2" placeholder="Catatan ukuran, varian, atau batch produksi">${esc(e.catatan||'')}</textarea></div>
+    <div class="hpp-actions"><button onclick="hppSaveRecipe()">💾 Simpan perhitungan</button><button class="o" onclick="hppNewRecipe()">Perhitungan baru</button></div></section>
+    <aside class="col"><div id="hppDynamicSummary"></div><div class="note">Harga rekomendasi dihitung dari HPP per unit dan target margin terhadap harga jual, lalu dibulatkan ke atas ke kelipatan Rp500. Pastikan semua biaya untuk satu batch dimasukkan.</div></aside></div>`;
+}
+function hppHistoryView(){
+  const data=window._hppData||{resep:[]};
+  const rows=data.resep.map(r=>`<tr><td><b>${esc(r.nama)}</b><div class="mut">${esc(r.diperbarui||'')}</div></td><td class="num">${Number(r.hasil).toLocaleString('id-ID')}</td><td class="num"><b>${hppCurrency(r.hppUnit)}</b></td><td class="num">${hppCurrency(r.hargaRekomendasi)}</td><td class="num">${r.hargaAktual?hppCurrency(r.hargaAktual):'—'}</td><td><div class="acts"><button class="o" onclick="hppEditRecipe('${esc(r.id)}')">Buka</button><button class="r" onclick="hppDeleteRecipe('${esc(r.id)}')">Hapus</button></div></td></tr>`).join('');
+  return `<section class="card col hpp-card"><div class="row"><div><div class="hpp-section-title">Riwayat perhitungan HPP</div><div class="mut">${data.resep.length} resep tersimpan.</div></div><button onclick="hppNewRecipe()">＋ Hitung baru</button></div>${rows?`<div class="hpp-table-wrap"><table class="hpp-table"><thead><tr><th>Produk</th><th>Hasil</th><th>HPP / unit</th><th>Harga saran</th><th>Harga aktual</th><th>Aksi</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="hpp-empty">Belum ada perhitungan tersimpan. Buat perhitungan pertama pada tab Kalkulator HPP.</div>'}</section>`;
+}
+function vHpp(){
+  const d=window._hppData||{bahan:[],resep:[]};
+  const body=window._hppLoading?'<div class="card hpp-empty">Memuat data HPP…</div>':window._hppTab==='bahan'?hppBahanView():window._hppTab==='riwayat'?hppHistoryView():hppCalcView();
+  return `<div class="page-head"><div><div class="eyebrow">BIAYA PRODUKSI & HARGA JUAL</div><h2>Hitung HPP</h2><div class="page-subtitle">Kelola harga bahan baku, hitung biaya per batch, dan tentukan harga jual yang sehat.</div></div><div class="page-head-action"><button class="o" onclick="hppLoadData()">↻ Muat ulang</button></div></div>
+    <div class="hpp-hero"><div class="hpp-intro"><div class="hpp-intro-icon">🧮</div><div><div class="hpp-section-title">Kalkulator Harga Pokok Produksi</div><div class="mut">Masukkan biaya bahan sesuai resep, biaya tenaga kerja, energi, kemasan, dan hasil produksi. Simpan resep agar dapat digunakan kembali.</div></div></div><div class="hpp-kpi"><div class="card"><small>Master bahan</small><b>${d.bahan.length}</b></div><div class="card"><small>Resep tersimpan</small><b>${d.resep.length}</b></div></div></div>
+    <div class="seg" style="margin-bottom:14px"><button class="${window._hppTab==='kalkulator'?'on':''}" onclick="hppSetTab('kalkulator')">🧮 Kalkulator</button><button class="${window._hppTab==='bahan'?'on':''}" onclick="hppSetTab('bahan')">🥣 Master Bahan</button><button class="${window._hppTab==='riwayat'?'on':''}" onclick="hppSetTab('riwayat')">📚 Riwayat</button></div>${body}`;
 }
 
 /* ================= PWA (hanya versi hosting) ================= */
