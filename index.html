@@ -467,6 +467,12 @@ label.qris-pick{cursor:pointer}
 .qris-prev img{max-width:260px;width:100%;height:auto;border-radius:6px}
 textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--ln);border-radius:12px;background:var(--surface);color:var(--tx);font:inherit;font-size:14px}
 @media(max-width:380px){.oc-tools button{font-size:10px}.filter-row>label{flex-basis:44px}}
+
+/* WhatsApp Customer template editor */
+.wa-template-preview{white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0 0;font:inherit;font-size:12px;line-height:1.55;color:var(--tx);max-height:260px;overflow:auto;background:var(--surface,#fff);padding:12px;border:1px solid var(--ln);border-radius:14px}
+.wa-customer-settings textarea{width:100%;min-height:170px;border:1px solid var(--ln);border-radius:14px;padding:13px;background:var(--surface);color:var(--tx);font:inherit;line-height:1.5;resize:vertical}
+.wa-customer-settings .divider{height:1px;background:var(--ln);margin:5px 0}
+
 </style>
 </head>
 <body>
@@ -524,7 +530,7 @@ window.__len = 155042;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.0.0 · Order Management Tahap 1–2';
+var APP_VER = 'v11.1.0 · WhatsApp Customer & M3 Expressive';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -2190,6 +2196,7 @@ function vPengaturan() {
       ['printer','🖨️','Printer','Bluetooth, kualitas cetak, dan uji printer',IN_GAS ? 'Mode Apps Script' : (chr ? 'Terhubung' : 'Atur koneksi')],
       ['ongkir','📍','Ongkos Kirim','Google Maps, lokasi toko, tarif per kilometer, dan daerah','Google Maps'],
       ['pembayaran','💳','Pembayaran & Tagihan','Nomor rekening, QRIS, dan template pesan tagihan WhatsApp',((cfg().rekening || []).filter(r => r.noRek).length || 'Belum diatur') + ((cfg().rekening || []).filter(r => r.noRek).length ? ' rekening' : '')],
+      ['whatsapp','💬','WhatsApp Customer','Atur pesan konfirmasi pesanan dan detail kurir dari Customer PWA','Template pesan'],
       ['struk','🧾','Struk','Identitas toko, bagian yang tampil, label, format gambar, dan template WhatsApp',(+cfg().lebar === 80 ? '80 mm' : '58 mm')],
       ['tampilan','🎨','Tampilan','Pilih tema terang, gelap, atau mengikuti perangkat',getThemeMode() === 'light' ? 'Tema terang' : getThemeMode() === 'dark' ? 'Tema gelap' : 'Ikuti perangkat'],
       ['aplikasi','📱','Aplikasi','PWA, pembaruan, koneksi Spreadsheet, dan cache',IN_GAS ? 'Apps Script' : 'PWA'],
@@ -2208,6 +2215,7 @@ function vPengaturan() {
   }
   if (section === 'ongkir') return settingDetailHead('Ongkos Kirim','Atur titik toko, Google Maps, tarif per kilometer, dan master daerah.') + ongkirForm();
   if (section === 'pembayaran') return settingDetailHead('Pembayaran & Tagihan','Atur nomor rekening dan pesan tagihan untuk pesanan yang belum dibayar.') + pembayaranForm();
+  if (section === 'whatsapp') return settingDetailHead('WhatsApp Customer','Atur isi pesan yang disiapkan customer saat mengonfirmasi pesanan dan menyampaikan detail kurir.') + customerWhatsAppSettingsForm();
   if (section === 'struk') return settingDetailHead('Struk / Invoice','Sesuaikan identitas, bagian yang tampil, label, format gambar, dan template WhatsApp.') + strukForm();
   if (section === 'tampilan') {
     const mode = getThemeMode();
@@ -2246,6 +2254,8 @@ var ENC = new TextEncoder();
 var num = n => Number(n || 0).toLocaleString('id-ID');
 var WA_MESSAGE_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan},\nTerima kasih sudah memesan di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total pembayaran: {total}*\nPengiriman: {metode_pengiriman}\nKurir: {nama_kurir}\nAlamat tujuan: {alamat}\nStatus pembayaran: {status_pembayaran}\n\n{footer}';
 var TAGIHAN_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan},\nBerikut tagihan pesanan Anda di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total tagihan: {total}*\n\n*Pembayaran via transfer:*\n{info_rekening}\n{info_qris}\n\nMohon kirimkan bukti transfer setelah melakukan pembayaran. Terima kasih.\n{footer}';
+var CUSTOMER_WA_CONFIRM_DEFAULT = "Assalamu’alaikum Uwais Food, saya sudah membuat pesanan melalui Customer PWA.\n\n*Konfirmasi Pesanan*\nNomor: {nomor_pesanan}\nNama: {nama_pelanggan}\nWhatsApp: {whatsapp_pelanggan}\nTanggal: {tanggal}\n\n*Pesanan*\n{daftar_produk}\nSubtotal: {subtotal}\nOngkir: {ongkir}\nTotal: {total}\n\nPengiriman: {metode_pengiriman}\nPembayaran: {metode_pembayaran} — {status_pembayaran}\nStatus pesanan: {status_pesanan}\n\nMohon konfirmasi pesanan saya. Terima kasih.";
+var CUSTOMER_WA_COURIER_DEFAULT = "*Detail Kurir / Pengiriman*\nJenis kurir: {jenis_kurir}\nNama layanan/kurir: {nama_kurir}\nKontak kurir: {kontak_kurir}\nDaerah tujuan: {daerah}\nAlamat tujuan: {alamat}\nCatatan pengiriman: {catatan_pengiriman}\nStatus ongkir: {status_ongkir}\nNominal ongkir: {ongkir}\n\nMohon bantu konfirmasi pilihan kurir dan biaya pengirimannya.";
 var RECEIPT_BOOL_DEFAULTS = {
   receiptShowStoreName: true, receiptShowTitle: false, receiptShowAddress: true, receiptShowPhone: true, receiptShowCashier: true,
   receiptShowOrderNo: true, receiptShowDate: true, receiptShowPO: true, receiptShowPickupDate: true, receiptShowCustomer: true,
@@ -2263,7 +2273,7 @@ var RECEIPT_TEXT_DEFAULTS = {
   receiptLabelCash: 'Tunai', receiptLabelChange: 'Kembali', receiptLabelShort: 'Kurang',
   receiptPaidText: '*** LUNAS ***', receiptUnpaidText: '*** BELUM LUNAS ***', receiptPrintPrefix: 'Dicetak'
 };
-var CFG_DEF = Object.assign({qrisImage: '', rekening: [], tagihanTemplate: TAGIHAN_TEMPLATE_DEFAULT, kurirMaps: false, toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58, browserDensity: 'bold', browserFontSize: 2.4, browserLineHeight: 1.3, browserLeftMargin: 6, imageFormat: 'png', imageQuality: 'high', waMessageTemplate: WA_MESSAGE_TEMPLATE_DEFAULT, receiptHeaderSeparator: '=', receiptSectionSeparator: '-'}, RECEIPT_BOOL_DEFAULTS, RECEIPT_TEXT_DEFAULTS);
+var CFG_DEF = Object.assign({qrisImage: '', rekening: [], tagihanTemplate: TAGIHAN_TEMPLATE_DEFAULT, customerWaConfirmTemplate: CUSTOMER_WA_CONFIRM_DEFAULT, customerWaCourierTemplate: CUSTOMER_WA_COURIER_DEFAULT, kurirMaps: false, toko: 'UWAIS FOOD', alamat: '', telp: '', kasir: '', footer: 'Terima kasih sudah berbelanja!', lebar: 58, browserDensity: 'bold', browserFontSize: 2.4, browserLineHeight: 1.3, browserLeftMargin: 6, imageFormat: 'png', imageQuality: 'high', waMessageTemplate: WA_MESSAGE_TEMPLATE_DEFAULT, receiptHeaderSeparator: '=', receiptSectionSeparator: '-'}, RECEIPT_BOOL_DEFAULTS, RECEIPT_TEXT_DEFAULTS);
 function cfg() {
   let c;
   try { c = Object.assign({}, CFG_DEF, JSON.parse(LS.get('uf_cfg') || '{}')); } catch (e) { c = Object.assign({}, CFG_DEF); }
@@ -2285,6 +2295,8 @@ function simpanCfg(silent) {
   c.receiptSectionSeparator = ['-', '=', '*', '.'].includes(String(c.receiptSectionSeparator)) ? String(c.receiptSectionSeparator) : '-';
   c.rekening = (Array.isArray(c.rekening) ? c.rekening : []).map(r => ({bank: String(r.bank || '').trim().slice(0, 40), noRek: String(r.noRek || '').trim().slice(0, 40), atasNama: String(r.atasNama || '').trim().slice(0, 60)})).filter(r => r.bank || r.noRek || r.atasNama).slice(0, 8);
   c.tagihanTemplate = String(c.tagihanTemplate == null ? TAGIHAN_TEMPLATE_DEFAULT : c.tagihanTemplate).slice(0, 4000);
+  c.customerWaConfirmTemplate = String(c.customerWaConfirmTemplate == null ? CUSTOMER_WA_CONFIRM_DEFAULT : c.customerWaConfirmTemplate).slice(0, 2000);
+  c.customerWaCourierTemplate = String(c.customerWaCourierTemplate == null ? CUSTOMER_WA_COURIER_DEFAULT : c.customerWaCourierTemplate).slice(0, 2000);
   c.kurirMaps = !!c.kurirMaps;
   c.qrisImage = /^data:image\/(png|jpeg|webp);base64,/.test(String(c.qrisImage || '')) ? c.qrisImage : '';
   window._cfg = c; LS.set('uf_cfg', JSON.stringify(c)); kirimPengaturanKeServer(c); if (!silent) toast('Pengaturan tersimpan ✔');
@@ -2934,6 +2946,54 @@ function browserPrintQualityForm() {
 }
 
 /* ---- Pengaturan struk (disimpan per perangkat) ---- */
+function customerWhatsAppSettingsForm() {
+  if (!window._cfg) window._cfg = cfg();
+  const c = window._cfg;
+  if (c.customerWaConfirmTemplate == null) c.customerWaConfirmTemplate = CUSTOMER_WA_CONFIRM_DEFAULT;
+  if (c.customerWaCourierTemplate == null) c.customerWaCourierTemplate = CUSTOMER_WA_COURIER_DEFAULT;
+  return `<div class="card col settings-detail-card wa-customer-settings">
+    <div class="note">Pesan ini digunakan oleh tombol <b>Beritahu kami di WhatsApp</b> pada Customer PWA. Template konfirmasi selalu digunakan. Template kurir hanya ditambahkan jika customer memilih <b>Via Kurir</b>.</div>
+    <div class="col" style="gap:8px">
+      <div class="row"><b>💬 1. Pesan konfirmasi pesanan</b><button class="o" onclick="resetCustomerWaTemplate('confirm')">Reset</button></div>
+      <textarea id="customerWaConfirmTemplate" rows="12" maxlength="2000" oninput="setCustomerWaTemplate('customerWaConfirmTemplate',this.value)">${esc(String(c.customerWaConfirmTemplate).replace(/\\n/g,'\n'))}</textarea>
+      <div class="note"><b>Pratinjau pesan konfirmasi</b><pre id="customerWaConfirmPreview" class="wa-template-preview">${esc(applyWhatsAppTemplate(c.customerWaConfirmTemplate || CUSTOMER_WA_CONFIRM_DEFAULT, customerWaSampleValues()))}</pre></div>
+    </div>
+    <div class="divider"></div>
+    <div class="col" style="gap:8px">
+      <div class="row"><b>🚚 2. Pesan detail kurir</b><button class="o" onclick="resetCustomerWaTemplate('courier')">Reset</button></div>
+      <div class="mut">Pesan tambahan ini otomatis digabungkan setelah pesan konfirmasi jika customer memilih Via Kurir. Kolom kurir customer yang belum diisi akan tetap tampil sebagai informasi opsional.</div>
+      <textarea id="customerWaCourierTemplate" rows="10" maxlength="2000" oninput="setCustomerWaTemplate('customerWaCourierTemplate',this.value)">${esc(String(c.customerWaCourierTemplate).replace(/\\n/g,'\n'))}</textarea>
+      <div class="note"><b>Pratinjau pesan kurir</b><pre id="customerWaCourierPreview" class="wa-template-preview">${esc(applyWhatsAppTemplate(c.customerWaCourierTemplate || CUSTOMER_WA_COURIER_DEFAULT, customerWaSampleValues()))}</pre></div>
+    </div>
+    <div class="note"><b>Variabel yang tersedia</b><br><code>{nama_toko}</code> <code>{nama_pelanggan}</code> <code>{whatsapp_pelanggan}</code> <code>{nomor_pesanan}</code> <code>{tanggal}</code> <code>{daftar_produk}</code> <code>{subtotal}</code> <code>{ongkir}</code> <code>{total}</code> <code>{metode_pengiriman}</code> <code>{metode_pembayaran}</code> <code>{status_pembayaran}</code> <code>{status_pesanan}</code> <code>{jenis_kurir}</code> <code>{nama_kurir}</code> <code>{kontak_kurir}</code> <code>{daerah}</code> <code>{alamat}</code> <code>{catatan_pengiriman}</code> <code>{status_ongkir}</code> <code>{footer}</code></div>
+    <div class="acts"><button onclick="simpanCfg()">Simpan pengaturan WhatsApp</button></div>
+    <div class="mut">Template disimpan di server Apps Script, sehingga berlaku untuk semua perangkat Customer PWA setelah katalog diperbarui.</div>
+  </div>`;
+}
+function customerWaSampleValues() {
+  return {nama_toko:cfg().toko||'UWAIS FOOD',nama_pelanggan:'Ibu Sari',whatsapp_pelanggan:'081234567890',nomor_pesanan:'O-UF-00125',tanggal:'08/11/2026 10:30',daftar_produk:'• 2 × Bolen Pisang Premium — Rp130.000\n• 1 × Banana Milk Cheese — Rp50.000',subtotal:'Rp180.000',ongkir:'Menunggu konfirmasi',total:'Belum termasuk ongkir',metode_pengiriman:'Via Kurir',metode_pembayaran:'QRIS / Transfer',status_pembayaran:'Belum Bayar',status_pesanan:'Baru',jenis_kurir:'Kurir pilihan customer',nama_kurir:'Kurir pribadi / GoSend',kontak_kurir:'0812xxxxxxx',daerah:'Tanjungpinang Barat',alamat:'Jl. Contoh No. 10, Tanjungpinang',catatan_pengiriman:'Hubungi sebelum tiba',status_ongkir:'Menunggu konfirmasi',footer:cfg().footer||'Terima kasih'};
+}
+function setCustomerWaTemplate(key,value) {
+  if (!window._cfg) window._cfg=cfg();
+  if (!['customerWaConfirmTemplate','customerWaCourierTemplate'].includes(key)) return;
+  window._cfg[key]=String(value==null?'':value);
+  updateCustomerWaTemplatePreview();
+}
+function updateCustomerWaTemplatePreview() {
+  const c=window._cfg||cfg(), values=customerWaSampleValues();
+  const a=document.getElementById('customerWaConfirmPreview'), b=document.getElementById('customerWaCourierPreview');
+  if(a)a.textContent=applyWhatsAppTemplate(c.customerWaConfirmTemplate||CUSTOMER_WA_CONFIRM_DEFAULT,values);
+  if(b)b.textContent=applyWhatsAppTemplate(c.customerWaCourierTemplate||CUSTOMER_WA_COURIER_DEFAULT,values);
+}
+function resetCustomerWaTemplate(which) {
+  if (!window._cfg) window._cfg=cfg();
+  const isConfirm=which==='confirm', key=isConfirm?'customerWaConfirmTemplate':'customerWaCourierTemplate', val=isConfirm?CUSTOMER_WA_CONFIRM_DEFAULT:CUSTOMER_WA_COURIER_DEFAULT;
+  window._cfg[key]=val;
+  const field=document.getElementById(key); if(field)field.value=val;
+  updateCustomerWaTemplatePreview();
+  toast('Template dikembalikan ke format awal. Tekan Simpan pengaturan WhatsApp untuk menerapkan.');
+}
+
 function pembayaranForm() {
   if (!window._cfg) window._cfg = cfg();
   const c = window._cfg; c.rekening = Array.isArray(c.rekening) ? c.rekening : [];

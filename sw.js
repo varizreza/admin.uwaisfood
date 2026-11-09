@@ -1,6 +1,6 @@
 /* UWAIS FOOD PWA v11.0.0 — Order Management Tahap 1–2 */
 const CACHE_PREFIX = 'uwais-food-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v11-stage1-stage2-order-ops';
+const CACHE_NAME = CACHE_PREFIX + 'v11-1-wa-customer-m3';
 const SHELL_FILES = [
   './',
   './index.html',
