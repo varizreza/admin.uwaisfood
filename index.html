@@ -5,7 +5,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Uwais Food</title>
@@ -498,7 +497,7 @@ textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--l
 
 
 /* ==========================================================
-   UWAIS FOOD ADMIN v11.3 — MATERIAL 3 EXPRESSIVE / DARK AMOLED
+   UWAIS FOOD ADMIN v11.3.2 — M3 EXPRESSIVE / DARK AMOLED + STOCK
    Black OLED surfaces, expressive shape system, adaptive states
    ========================================================== */
 :root[data-uf-theme="dark"]{
@@ -644,7 +643,7 @@ td,th{border-color:var(--ln)}
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.3.0)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.3.2)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -667,10 +666,10 @@ window.__len = 236026;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v11.3.0)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v11.3.2)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v11.3.0)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v11.3.2)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -694,7 +693,7 @@ window.__len = 236026;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.3.0 · M3 Expressive AMOLED';
+var APP_VER = 'v11.3.2 · M3 Expressive AMOLED';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -731,7 +730,7 @@ try {
   else if (colorPref.addListener) colorPref.addListener(onColorPref);
 } catch (e) {}
 // Opsional: isi URL /exec di sini agar tidak perlu mengisi lewat layar setup
-var DEFAULT_API = 'https://script.google.com/macros/s/AKfycbwWcnvTcBJzY4SXIxKY30sPXj31oNapu-nIYPnQWDplQOOb5Xvb8WvT3vcZwGDhVOBpFw/exec';
+var DEFAULT_API = '';
 var getApi = () => LS.get('uf_api') || DEFAULT_API;
 var getTok = () => window._tok || LS.get('uf_tok');
 var setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
@@ -2422,7 +2421,7 @@ var num = n => Number(n || 0).toLocaleString('id-ID');
 var WA_MESSAGE_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan},\nTerima kasih sudah memesan di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total pembayaran: {total}*\nPengiriman: {metode_pengiriman}\nKurir: {nama_kurir}\nAlamat tujuan: {alamat}\nStatus pembayaran: {status_pembayaran}\n\n{footer}';
 var TAGIHAN_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan},\nBerikut tagihan pesanan Anda di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total tagihan: {total}*\n\n*Pembayaran via transfer:*\n{info_rekening}\n{info_qris}\n\nMohon kirimkan bukti transfer setelah melakukan pembayaran. Terima kasih.\n{footer}';
 var CUSTOMER_WA_CONFIRM_DEFAULT = "Assalamu’alaikum Uwais Food, saya sudah membuat pesanan melalui Customer PWA.\n\n*Konfirmasi Pesanan*\nNomor: {nomor_pesanan}\nNama: {nama_pelanggan}\nWhatsApp: {whatsapp_pelanggan}\nTanggal: {tanggal}\n\n*Pesanan*\n{daftar_produk}\nSubtotal: {subtotal}\nOngkir: {ongkir}\nTotal: {total}\n\nPengiriman: {metode_pengiriman}\nPembayaran: {metode_pembayaran} — {status_pembayaran}\nStatus pesanan: {status_pesanan}\n\nMohon konfirmasi pesanan saya. Terima kasih.";
-var CUSTOMER_WA_COURIER_DEFAULT = "*Detail Kurir / Pengiriman*\nJenis kurir: {jenis_kurir}\nNama layanan/kurir: {nama_kurir}\nKontak kurir: {kontak_kurir}\nDaerah tujuan: {daerah}\nAlamat tujuan: {alamat}\nCatatan pengiriman: {catatan_pengiriman}\nStatus ongkir: {status_ongkir}\nNominal ongkir: {ongkir}\n\nMohon bantu konfirmasi pilihan kurir dan biaya pengirimannya.";
+var CUSTOMER_WA_COURIER_DEFAULT = "*Detail Pengiriman*\nNama penerima: {nama_penerima}\nNo. telepon: {no_telepon_penerima}\nAlamat tujuan: {alamat_tujuan}";
 var RECEIPT_BOOL_DEFAULTS = {
   receiptShowStoreName: true, receiptShowTitle: false, receiptShowAddress: true, receiptShowPhone: true, receiptShowCashier: true,
   receiptShowOrderNo: true, receiptShowDate: true, receiptShowPO: true, receiptShowPickupDate: true, receiptShowCustomer: true,
@@ -3117,7 +3116,7 @@ function customerWhatsAppSettingsForm() {
   if (!window._cfg) window._cfg = cfg();
   const c = window._cfg;
   if (c.customerWaConfirmTemplate == null) c.customerWaConfirmTemplate = CUSTOMER_WA_CONFIRM_DEFAULT;
-  if (c.customerWaCourierTemplate == null) c.customerWaCourierTemplate = CUSTOMER_WA_COURIER_DEFAULT;
+  if (!c.customerWaCourierTemplate || /\{(?:jenis_kurir|nama_kurir|kontak_kurir|daerah|alamat|catatan_pengiriman|status_ongkir|ongkir)\}/i.test(String(c.customerWaCourierTemplate))) c.customerWaCourierTemplate = CUSTOMER_WA_COURIER_DEFAULT;
   return `<div class="card col settings-detail-card wa-customer-settings">
     <div class="note">Pesan ini digunakan oleh tombol <b>Beritahu kami di WhatsApp</b> pada Customer PWA. Template konfirmasi selalu digunakan. Template kurir hanya ditambahkan jika customer memilih <b>Via Kurir</b>.</div>
     <div class="col" style="gap:8px">
@@ -3132,13 +3131,13 @@ function customerWhatsAppSettingsForm() {
       <textarea id="customerWaCourierTemplate" rows="10" maxlength="2000" oninput="setCustomerWaTemplate('customerWaCourierTemplate',this.value)">${esc(String(c.customerWaCourierTemplate).replace(/\\n/g,'\n'))}</textarea>
       <div class="note"><b>Pratinjau pesan kurir</b><pre id="customerWaCourierPreview" class="wa-template-preview">${esc(applyWhatsAppTemplate(c.customerWaCourierTemplate || CUSTOMER_WA_COURIER_DEFAULT, customerWaSampleValues()))}</pre></div>
     </div>
-    <div class="note"><b>Variabel yang tersedia</b><br><code>{nama_toko}</code> <code>{nama_pelanggan}</code> <code>{whatsapp_pelanggan}</code> <code>{nomor_pesanan}</code> <code>{tanggal}</code> <code>{daftar_produk}</code> <code>{subtotal}</code> <code>{ongkir}</code> <code>{total}</code> <code>{metode_pengiriman}</code> <code>{metode_pembayaran}</code> <code>{status_pembayaran}</code> <code>{status_pesanan}</code> <code>{jenis_kurir}</code> <code>{nama_kurir}</code> <code>{kontak_kurir}</code> <code>{daerah}</code> <code>{alamat}</code> <code>{catatan_pengiriman}</code> <code>{status_ongkir}</code> <code>{footer}</code></div>
+    <div class="note"><b>Variabel yang tersedia</b><br><code>{nama_toko}</code> <code>{nama_pelanggan}</code> <code>{whatsapp_pelanggan}</code> <code>{nomor_pesanan}</code> <code>{tanggal}</code> <code>{daftar_produk}</code> <code>{subtotal}</code> <code>{ongkir}</code> <code>{total}</code> <code>{metode_pengiriman}</code> <code>{metode_pembayaran}</code> <code>{status_pembayaran}</code> <code>{status_pesanan}</code> <code>{nama_penerima}</code> <code>{no_telepon_penerima}</code> <code>{alamat_tujuan}</code> <code>{footer}</code></div>
     <div class="acts"><button onclick="simpanCfg()">Simpan pengaturan WhatsApp</button></div>
     <div class="mut">Template disimpan di server Apps Script, sehingga berlaku untuk semua perangkat Customer PWA setelah katalog diperbarui.</div>
   </div>`;
 }
 function customerWaSampleValues() {
-  return {nama_toko:cfg().toko||'UWAIS FOOD',nama_pelanggan:'Ibu Sari',whatsapp_pelanggan:'081234567890',nomor_pesanan:'O-UF-00125',tanggal:'08/11/2026 10:30',daftar_produk:'• 2 × Bolen Pisang Premium — Rp130.000\n• 1 × Banana Milk Cheese — Rp50.000',subtotal:'Rp180.000',ongkir:'Menunggu konfirmasi',total:'Belum termasuk ongkir',metode_pengiriman:'Via Kurir',metode_pembayaran:'QRIS / Transfer',status_pembayaran:'Belum Bayar',status_pesanan:'Baru',jenis_kurir:'Kurir pilihan customer',nama_kurir:'Kurir pribadi / GoSend',kontak_kurir:'0812xxxxxxx',daerah:'Tanjungpinang Barat',alamat:'Jl. Contoh No. 10, Tanjungpinang',catatan_pengiriman:'Hubungi sebelum tiba',status_ongkir:'Menunggu konfirmasi',footer:cfg().footer||'Terima kasih'};
+  return {nama_toko:cfg().toko||'UWAIS FOOD',nama_pelanggan:'Ibu Sari',whatsapp_pelanggan:'081234567890',nomor_pesanan:'O-UF-00125',tanggal:'08/11/2026 10:30',daftar_produk:'• 2 × Bolen Pisang Premium — Rp130.000\n• 1 × Banana Milk Cheese — Rp50.000',subtotal:'Rp180.000',ongkir:'Menunggu konfirmasi',total:'Belum termasuk ongkir',metode_pengiriman:'Via Kurir',metode_pembayaran:'QRIS / Transfer',status_pembayaran:'Belum Bayar',status_pesanan:'Baru',nama_penerima:'Ibu Sari',no_telepon_penerima:'081234567890',alamat_tujuan:'Jl. Contoh No. 10, Tanjungpinang',footer:cfg().footer||'Terima kasih'};
 }
 function setCustomerWaTemplate(key,value) {
   if (!window._cfg) window._cfg=cfg();
