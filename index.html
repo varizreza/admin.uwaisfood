@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Uwais Food</title>
@@ -730,7 +731,7 @@ try {
   else if (colorPref.addListener) colorPref.addListener(onColorPref);
 } catch (e) {}
 // Opsional: isi URL /exec di sini agar tidak perlu mengisi lewat layar setup
-var DEFAULT_API = 'https://script.google.com/macros/s/AKfycbwWcnvTcBJzY4SXIxKY30sPXj31oNapu-nIYPnQWDplQOOb5Xvb8WvT3vcZwGDhVOBpFw/exec';
+var DEFAULT_API = '';
 var getApi = () => LS.get('uf_api') || DEFAULT_API;
 var getTok = () => window._tok || LS.get('uf_tok');
 var setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
