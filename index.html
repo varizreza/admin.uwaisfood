@@ -3,7 +3,7 @@
 <head>
 <base target="_top">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -497,7 +497,7 @@ textarea#tagihanTemplate{width:100%;padding:11px 12px;border:1.5px solid var(--l
 
 
 /* ==========================================================
-   UWAIS FOOD ADMIN v11.3.2 — M3 EXPRESSIVE / DARK AMOLED + STOCK
+   UWAIS FOOD ADMIN v11.6.0 — M3 EXPRESSIVE / DARK AMOLED + STOCK
    Black OLED surfaces, expressive shape system, adaptive states
    ========================================================== */
 :root[data-uf-theme="dark"]{
@@ -637,13 +637,44 @@ td,th{border-color:var(--ln)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
 </style>
+
+<style>
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.form-grid .field{display:flex;flex-direction:column;gap:6px;min-width:0}.form-grid .field.full{grid-column:1/-1}.form-grid label{font-size:11px;font-weight:750;color:var(--mut)}.table-wrap{width:100%;overflow-x:auto;border:1px solid var(--ln);border-radius:13px}.table-wrap table{width:100%;min-width:650px;border-collapse:collapse;font-size:12px}.table-wrap th,.table-wrap td{padding:9px 8px;border-bottom:1px solid var(--ln);text-align:left;vertical-align:middle}.table-wrap th{font-size:10px;color:var(--mut);background:var(--soft);text-transform:uppercase;white-space:nowrap}.table-wrap tr:last-child td{border-bottom:0}.form-grid input,.form-grid select,.form-grid textarea{width:100%;min-width:0;border:1px solid var(--ln);border-radius:11px;background:var(--surface);color:var(--tx);padding:10px 11px}.inv-move{display:grid;grid-template-columns:90px minmax(120px,1fr) auto auto;gap:5px;margin-top:7px;min-width:320px}
+.inv-move input{min-width:0;width:100%;padding:7px 8px;border:1px solid var(--ln);border-radius:10px;background:var(--surface);color:var(--tx)}
+.inv-move button{padding:7px 9px;min-height:34px;font-size:11px;white-space:nowrap}
+.analytics-bars{height:190px;display:flex;align-items:end;gap:5px;padding:12px 4px 0;overflow-x:auto;border-bottom:1px solid var(--ln)}
+.analytics-bar-col{height:100%;min-width:20px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:end;gap:5px}
+.analytics-bar{width:min(100%,22px);min-height:3px;background:linear-gradient(180deg,var(--pr),var(--pr-d));border-radius:8px 8px 2px 2px}
+.analytics-bar-col small{font-size:9px;color:var(--mut);padding-bottom:4px}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr}.form-grid .field.full{grid-column:auto}.inv-move{grid-template-columns:1fr 1fr}.analytics-bars{gap:3px}.analytics-bar-col{min-width:17px}}
+</style>
+
+<style id="uf-v1191-mobile-fit">
+html,body{width:100%;min-width:0;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#app,.app,.wrap,main{min-width:0;max-width:100%}
+img,svg,canvas,video{max-width:100%}
+@media(max-width:600px){
+  .wrap{width:100%;max-width:100%;padding-left:12px;padding-right:12px}
+  .grid.w{grid-template-columns:minmax(0,1fr)!important;min-width:0;width:100%}
+  .grid.w>*{min-width:0;max-width:100%}
+  .oc,.oc-head,.oc-ship,.oc-items,.oc-sum,.oc-total,.oc-actions,.oc-tools{min-width:0;max-width:100%}
+  .oc-head{flex-wrap:wrap}
+  .oc-badges{align-items:flex-start;flex-direction:row;flex-wrap:wrap;max-width:100%}
+  .oc-items .line{gap:10px;align-items:flex-start}
+  .oc-items .line>span:first-child{min-width:0;overflow-wrap:anywhere}
+  .oc-items .line>span:last-child{white-space:nowrap}
+  .oc-total{flex-wrap:wrap}
+  input,select,textarea{font-size:16px;max-width:100%;min-width:0}
+}
+@media(max-width:380px){.oc-tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
 </head>
 <body>
 <div class="app">
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.3.2)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.6.0)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -660,16 +691,16 @@ window.__errs = [];
 window.__len = 236026;
 (function () {
   var box = null;
-  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function esc(s) { return String(s).replace(/[&<>\"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]; }); }
   function paint() {
     if (window.__boot) return;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v11.3.2)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v11.10.0)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v11.3.2)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v11.10.0)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -693,7 +724,7 @@ window.__len = 236026;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.3.2 · M3 Expressive AMOLED';
+var APP_VER = 'v11.10.0 · Remember Device';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -734,6 +765,26 @@ var DEFAULT_API = 'https://script.google.com/macros/s/AKfycbwWcnvTcBJzY4SXIxKY30
 var getApi = () => LS.get('uf_api') || DEFAULT_API;
 var getTok = () => window._tok || LS.get('uf_tok');
 var setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
+function ufRememberDeviceId() {
+  var id = LS.get('uf_device_id');
+  if (/^[A-Za-z0-9_-]{16,80}$/.test(id)) return id;
+  var bytes = new Uint8Array(18);
+  if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(bytes);
+  else for (var i=0;i<bytes.length;i++) bytes[i] = Math.floor(Math.random()*256);
+  id = Array.from(bytes).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  LS.set('uf_device_id', id);
+  return id;
+}
+function ufRememberDeviceLabel() {
+  var ua = String(navigator.userAgent || '');
+  if (/Android/i.test(ua)) return 'HP Android';
+  if (/iPhone|iPad|iPod/i.test(ua)) return 'iPhone / iPad';
+  if (/Windows/i.test(ua)) return 'PC Windows';
+  if (/Macintosh|Mac OS/i.test(ua)) return 'Mac';
+  if (/Linux/i.test(ua)) return 'Perangkat Linux';
+  return 'Perangkat Admin';
+}
+function ufForgetLocalDevice() { LS.del('uf_device_token'); LS.del('uf_device_exp'); LS.del('uf_device_id'); }
 
 var D = {menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0, autoByArea: false}}, cart = {}, tab = 'pesan', filt = 'Semua', rfilt = 'Semua', curPO = LS.get('uf_po'), editing = null, dev = null, chr = null, installEv = null;
 var shippingMode = 'Pickup';
@@ -835,7 +886,7 @@ $('#pr').textContent = IN_GAS ? '🖨️ Cetak via RawBT' : '🖨️ Printer: be
 /* Satu pintu ke backend: google.script.run (Apps Script) atau fetch (hosting) */
 var retryErr = m => { const er = new Error(m); er.retry = true; return er; };
 async function run(fn, ...args0) {
-  const args = fn === 'login' ? args0 : [getTok(), ...args0];
+  const args = (fn === 'login' || fn === 'deviceLogin') ? args0 : [getTok(), ...args0];
   const fail = m => {
     if (/SESI_HABIS/.test(m)) { setTok(''); closeStruk(); render(); throw new Error('Sesi berakhir, silakan masuk lagi'); }
     throw new Error(String(m).replace(/^(Error|Exception):\s*/, ''));
@@ -898,12 +949,26 @@ function parseIsi(isi) {
 }
 var key = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
 
+// Harus sama dengan aturan konsumsi satuan di backend Code.gs.
+const aturanStokMenuAdmin = {
+  'bolen pisang cokelat keju':{nama:'Adonan Bolen',n:10},
+  'bolen cheesy beef':{nama:'Adonan Bolen',n:8},
+  // Alias nama lama
+  'bolen manis':{nama:'Adonan Bolen',n:10},
+  'bolen daging':{nama:'Adonan Bolen',n:8},
+  'banana milk cheese':{nama:'Banana Milk Cheese',n:6}
+};
 function komponen(items) {
   const r = {};
-  const add = (nama, q) => { const k = key(nama); r[k] = r[k] || {nama, qty: 0}; r[k].qty += q; };
+  const add = (nama, q) => { const label = namaJenisAdonan(nama); const k = key(label); r[k] = r[k] || {nama:label, qty:0}; r[k].qty += q; };
   items.forEach(it => {
     const parts = parseIsi(it.isi);
-    if (parts.length) parts.forEach(p => add(p.nama, p.n * it.qty)); else add(it.item, it.qty);
+    if (parts.length) parts.forEach(p => add(p.nama, p.n * it.qty));
+    else {
+      const rule = aturanStokMenuAdmin[key(it.item)];
+      if (rule) add(rule.nama, rule.n * it.qty);
+      else add(it.item, it.qty);
+    }
   });
   return Object.values(r).sort((a, b) => b.qty - a.qty);
 }
@@ -975,16 +1040,20 @@ function komponenMenu() {                    // komponen adonan; semua varian bo
 function adonanStatus(po, extra, excl) {
   if (!po || !(po.adonan || []).length) return null;
   const adonanTersimpan = gabungDataAdonan(po.adonan);
-  const orders = D.orders.filter(o => o.po === po.id && o.id !== excl);
+  const orders = D.orders.filter(o => o.po === po.id && o.id !== excl && String(o.status || '').toLowerCase() !== 'dibatalkan');
   const used = {};
   komponen(orders).forEach(c => { const k = key(namaJenisAdonan(c.nama)); used[k] = (used[k] || 0) + c.qty; });
   (extra || []).forEach(c => { const k = key(namaJenisAdonan(c.nama)); used[k] = (used[k] || 0) + c.qty; });
   const rows = adonanTersimpan.map(a => { const u = used[key(a.nama)] || 0; return {nama: a.nama, total: a.qty, used: u, sisa: a.qty - u}; });
   const by = {}; rows.forEach(r => { by[key(r.nama)] = r; });
-  const pakets = (D.menu || []).filter(m => parseIsi(m.isi).length).map(m => {
-    const parts = parseIsi(m.isi);
+  // Hitung stok semua menu: resep paket dari Isi; menu satuan dari aturan konsumsi per kotak.
+  const pakets = (D.menu || []).map(m => {
+    let parts = parseIsi(m.isi);
+    if (!parts.length) {
+      const rule = aturanStokMenuAdmin[key(m.nama)];
+      parts = [{n: rule ? rule.n : 1, nama: rule ? rule.nama : m.nama}];
+    }
     const pesan = orders.filter(o => o.item === m.nama).reduce((s, o) => s + o.qty, 0);
-    // Beberapa varian bolen dalam satu paket memakai pool adonan yang sama, jadi kebutuhannya dijumlahkan.
     const need = {};
     parts.forEach(p => { const k = key(namaJenisAdonan(p.nama)); need[k] = (need[k] || 0) + (Number(p.n) || 0); });
     const requirements = Object.entries(need);
@@ -1004,9 +1073,9 @@ function adonanHtml(po) {
       <div class="adn-meta"><span>Terpakai ${r.used} pcs</span><span>Adonan awal ${r.total} pcs</span></div></div>`;
   }).join('');
   const boxes = st.pakets.map(p => p.unknown
-    ? `<div class="adn-box"><span>${esc(p.nama)}<small>Terpesan ${p.pesan} box · adonan komponen paket belum lengkap</small></span><b class="mut">—</b></div>`
-    : `<div class="adn-box"><span>${esc(p.nama)}<small>Terpesan ${p.pesan} box · maks. ${p.maxAwal} box dari adonan awal</small></span><b class="${p.pesan > p.maxAwal ? 'neg' : 'pos'}">${p.pesan > p.maxAwal ? 'Lebih ' + (p.pesan - p.maxAwal) + ' box' : p.sisaBox + ' box lagi'}</b></div>`).join('');
-  return `<div class="adn-wrap">${rows}${boxes ? `<div class="adn-sep">Box yang masih bisa dibuat</div>${boxes}<small class="mut">Dihitung per paket dari sisa adonan; paket yang memakai bahan sama saling berbagi sisa adonan.</small>` : ''}</div>`;
+    ? `<div class="adn-box"><span>${esc(p.nama)}<small>Terpesan ${p.pesan} unit · komponen stok belum lengkap</small></span><b class="mut">—</b></div>`
+    : `<div class="adn-box"><span>${esc(p.nama)}<small>Terpesan ${p.pesan} unit · maks. ${p.maxAwal} unit dari stok awal</small></span><b class="${p.pesan > p.maxAwal ? 'neg' : 'pos'}">${p.pesan > p.maxAwal ? 'Lebih ' + (p.pesan - p.maxAwal) + ' box' : p.sisaBox + ' unit lagi'}</b></div>`).join('');
+  return `<div class="adn-wrap">${rows}${boxes ? `<div class="adn-sep">Menu yang masih bisa dipesan</div>${boxes}<small class="mut">Dihitung dari sisa kapasitas; menu dan paket yang memakai komponen sama saling berbagi stok.</small>` : ''}</div>`;
 }
 function perPemesan(o) {
   const g = {};
@@ -1041,12 +1110,18 @@ function currentShipping() {
   const catatanPengiriman = String(window._deliveryNote || '').trim();
   const alamat = String(window._al == null ? (customer && customer.alamat || '') : window._al).trim();
 
-  // Kurir (manual): hanya nominal ongkir yang wajib. Nama kurir, daerah, dan alamat opsional.
+  // Kurir non-Maps: dapat memakai tarif master atau menentukan nominal secara manual.
   if (shippingMode === 'Kurir3') {
-    const feeText = String(window._ongkir == null ? '' : window._ongkir).trim();
+    const rawIndex = String(window._kurirTarifIndex == null ? '' : window._kurirTarifIndex);
+    const idx = rawIndex === '' ? -1 : Number(rawIndex);
+    const selectedTarif = Number.isInteger(idx) && idx >= 0 ? (D.tarifOngkir || [])[idx] : null;
+    const useSaved = !!(selectedTarif && selectedTarif.aktif !== false);
+    const feeText = useSaved ? String(selectedTarif.ongkir == null ? '' : selectedTarif.ongkir) : String(window._ongkir == null ? '' : window._ongkir).trim();
     const fee = Number(feeText);
-    if (!feeText || !Number.isFinite(fee) || fee < 0) return {valid: false, error: 'Isi nominal ongkos kirim'};
-    return {valid: true, metode: 'Kurir', jenisKurir: editing && editing.jenisKurir === 'Pihak Ketiga' ? 'Pihak Ketiga' : 'Kurir', namaKurir: String(window._courierName || '').trim(), kontakKurir, catatanPengiriman, area, alamat, jarakKm: 0, ongkir: Math.round(fee), placeId: '', lat: null, lng: null, saved: false, manual: true};
+    if (!feeText || !Number.isFinite(fee) || fee < 0) return {valid: false, error: 'Pilih tarif ongkir tersimpan atau isi nominal ongkir secara manual'};
+    const finalArea = useSaved ? String(selectedTarif.area || '').trim() : area;
+    const finalKm = useSaved ? Math.max(0, Number(selectedTarif.jarakKm) || 0) : 0;
+    return {valid: true, metode: 'Kurir', jenisKurir: editing && editing.jenisKurir === 'Pihak Ketiga' ? 'Pihak Ketiga' : 'Kurir', namaKurir: String(window._courierName || '').trim(), kontakKurir, catatanPengiriman, area: finalArea, alamat, jarakKm: finalKm, ongkir: Math.round(fee), placeId: useSaved ? String(selectedTarif.placeId || '') : '', lat: useSaved && selectedTarif.lat != null ? Number(selectedTarif.lat) : null, lng: useSaved && selectedTarif.lng != null ? Number(selectedTarif.lng) : null, saved: useSaved, manual: !useSaved};
   }
 
   // Kurir Maps (opsional, diaktifkan di Pengaturan): daerah & alamat wajib.
@@ -1077,18 +1152,33 @@ function tarifInfo() {
 }
 function kirimBox() {
   if (shippingMode === 'Pickup') return '<div class="note ok">📦 Pickup dipilih — tidak ada ongkos kirim.</div>';
-  if (shippingMode === 'Kurir3') return `<div class="col">
-    <label class="field-label" for="feeOngkirManual">Ongkos kirim (Rp) <span class="req">wajib</span></label>
-    <input id="feeOngkirManual" type="number" min="0" step="500" inputmode="numeric" placeholder="Contoh: 10000" value="${esc(window._ongkir == null ? '' : window._ongkir)}" oninput="window._ongkir=this.value;updateTarifInfo(false)">
-    <label class="mut" for="namaKurirManual">Nama kurir (opsional)</label>
-    <input id="namaKurirManual" list="kurirList" placeholder="Contoh: Pak Budi, GoSend, J&T" value="${esc(window._courierName || '')}" oninput="window._courierName=this.value">
-    <label class="mut" for="kontakKurirManual">Nomor kontak kurir (opsional)</label><input id="kontakKurirManual" inputmode="tel" placeholder="08xxxxxxxxxx" value="${esc(window._courierContact || '')}" oninput="window._courierContact=this.value">
-    <label class="mut" for="catatanPengirimanManual">Catatan pengiriman (opsional)</label><input id="catatanPengirimanManual" placeholder="Contoh: hubungi sebelum tiba" value="${esc(window._deliveryNote || '')}" oninput="window._deliveryNote=this.value">
-    <datalist id="kurirList"><option value="GoSend"><option value="GrabExpress"><option value="J&T Express"><option value="JNE"><option value="SiCepat"><option value="Lalamove"></datalist>
-    <label class="mut" for="shippingArea">Daerah tujuan (opsional)</label>
-    <input id="shippingArea" placeholder="Contoh: Tanjungpinang Barat" value="${esc(window._area || '')}" oninput="window._area=this.value" autocomplete="off">
-    <div class="note">💡 Alamat lengkap (opsional) diisi pada kolom alamat di atas. Ongkir dicatat khusus pada pesanan ini.</div>
-  </div>`;
+  if (shippingMode === 'Kurir3') {
+    const activeRates = (D.tarifOngkir || []).map((t, i) => ({t, i})).filter(x => x.t && x.t.aktif !== false && String(x.t.area || '').trim());
+    const selectedIndex = String(window._kurirTarifIndex == null ? '' : window._kurirTarifIndex);
+    const selectedRate = selectedIndex !== '' && activeRates.some(x => String(x.i) === selectedIndex);
+    const rateOptions = activeRates.map(x => `<option value="${x.i}" ${String(x.i) === selectedIndex ? 'selected' : ''}>${esc(x.t.area)} · ${Number(x.t.jarakKm) || 0} km · ${rp(x.t.ongkir)}</option>`).join('');
+    const savedRate = selectedRate ? (D.tarifOngkir || [])[Number(selectedIndex)] : null;
+    return `<div class="col">
+      <label class="field-label" for="kurirTarifSelect">Pilihan ongkos kirim</label>
+      <select id="kurirTarifSelect" class="sel" onchange="pilihTarifKurir(this.value)">
+        <option value="" ${selectedRate ? '' : 'selected'}>${activeRates.length ? 'Tentukan sendiri (ketik manual)' : 'Belum ada tarif tersimpan — ketik manual'}</option>
+        ${rateOptions}
+      </select>
+      ${savedRate ? `<div class="note ok">✔ Menggunakan tarif tersimpan <b>${esc(savedRate.area)}</b><br>Jarak: <b>${Number(savedRate.jarakKm) || 0} km</b> · Ongkir: <b>${rp(savedRate.ongkir)}</b><div class="mut">Tarif ini diambil dari Pengaturan → Ongkos Kirim. Pilih opsi manual pada daftar untuk mengganti nominal sendiri.</div></div>
+        <label class="mut" for="shippingArea">Daerah tujuan</label><input id="shippingArea" value="${esc(savedRate.area || '')}" readonly>
+      ` : `<label class="field-label" for="feeOngkirManual">Ongkos kirim (Rp) <span class="req">wajib</span></label>
+        <input id="feeOngkirManual" type="number" min="0" step="500" inputmode="numeric" placeholder="Contoh: 10000" value="${esc(window._ongkir == null ? '' : window._ongkir)}" oninput="window._kurirTarifIndex='';window._ongkir=this.value;updateTarifInfo(false)">
+        <label class="mut" for="shippingArea">Daerah tujuan (opsional)</label>
+        <input id="shippingArea" placeholder="Contoh: Tanjungpinang Barat" value="${esc(window._area || '')}" oninput="window._area=this.value" autocomplete="off">
+      `}
+      <label class="mut" for="namaKurirManual">Nama kurir (opsional)</label>
+      <input id="namaKurirManual" list="kurirList" placeholder="Contoh: Pak Budi, GoSend, J&T" value="${esc(window._courierName || '')}" oninput="window._courierName=this.value">
+      <label class="mut" for="kontakKurirManual">Nomor kontak kurir (opsional)</label><input id="kontakKurirManual" inputmode="tel" placeholder="08xxxxxxxxxx" value="${esc(window._courierContact || '')}" oninput="window._courierContact=this.value">
+      <label class="mut" for="catatanPengirimanManual">Catatan pengiriman (opsional)</label><input id="catatanPengirimanManual" placeholder="Contoh: hubungi sebelum tiba" value="${esc(window._deliveryNote || '')}" oninput="window._deliveryNote=this.value">
+      <datalist id="kurirList"><option value="GoSend"><option value="GrabExpress"><option value="J&T Express"><option value="JNE"><option value="SiCepat"><option value="Lalamove"></datalist>
+      <div class="note">💡 Alamat lengkap diisi pada kolom alamat di atas. Pilih tarif tersimpan atau isi ongkir manual untuk pesanan ini.</div>
+    </div>`;
+  }
   const areas = (D.tarifOngkir || []).filter(t => t.aktif !== false).map(t => `<option value="${esc(t.area)}">`).join('');
   const hasOrigin = !!((D.ongkirConfig || {}).placeId || ((D.ongkirConfig || {}).lat != null && (D.ongkirConfig || {}).lng != null));
   return `<div class="col">
@@ -1104,6 +1194,16 @@ function kirimBox() {
     <label class="mut" for="catatanPengirimanMaps">Catatan pengiriman (opsional)</label><input id="catatanPengirimanMaps" placeholder="Contoh: hubungi sebelum tiba" value="${esc(window._deliveryNote || '')}" oninput="window._deliveryNote=this.value">
   </div>`;
 }
+function pilihTarifKurir(index) {
+  const raw = String(index == null ? '' : index);
+  window._kurirTarifIndex = raw;
+  if (raw !== '') {
+    const t = (D.tarifOngkir || [])[Number(raw)];
+    if (!t || t.aktif === false) { window._kurirTarifIndex = ''; toast('Tarif ongkir tidak tersedia. Pilih tarif lain atau isi manual.', 'error'); }
+    else { window._area = String(t.area || ''); window._km = String(Number(t.jarakKm) || 0); window._ongkir = String(Number(t.ongkir) || 0); }
+  }
+  render();
+}
 function updateTarifInfo(rebuild) {
   const el = $('#tarifInfo'); if (rebuild && el) el.innerHTML = tarifInfo();
   const ship = currentShipping(), total = $('#orderTotal'), fee = $('#orderFee');
@@ -1114,6 +1214,7 @@ function setMetodeKirim(mode) {
   const next = mode === 'Kurir3' ? 'Kurir3' : (mode === 'Kurir' ? 'Kurir' : 'Pickup');
   if (next !== shippingMode) {
     window._ongkir = '';
+    window._kurirTarifIndex = '';
     window._courierName = ''; window._courierContact = ''; window._deliveryNote = '';
     if (next !== 'Kurir') { window._selectedDestination = null; window._km = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; }
   }
@@ -1328,9 +1429,9 @@ function waLink(hp) {
 /* ================= TAMPILAN ================= */
 var MAIN_TABS = [['pesan', '🛒', 'Pesan'], ['order', '📋', 'Orderan'], ['rekap', '📊', 'Rekap'], ['lainnya', '☰', 'Lainnya']];
 var DESKTOP_TX = [['pesan', '🛒', 'Buat Pesanan'], ['order', '📋', 'Orderan'], ['rekap', '📊', 'Rekap']];
-var DESKTOP_MGMT = [['po', '📅', 'Periode PO'], ['pelanggan', '👥', 'Pelanggan'], ['menu', '🥐', 'Menu Produk'], ['hpp', '🧮', 'Hitung HPP']];
+var DESKTOP_MGMT = [['po', '📅', 'Periode PO'], ['pelanggan', '👥', 'Pelanggan'], ['menu', '🥐', 'Menu Produk'], ['hpp', '🧮', 'Hitung HPP'], ['inventory', '📦', 'Persediaan'], ['analytics', '📈', 'Analitik'], ['planning', '🏭', 'Rencana Produksi'], ['profit', '💹', 'Laba & HPP']];
 function sideButton(t) {
-  const active = tab === t[0] || (t[0] === 'lainnya' && ['po','pelanggan','menu','hpp','pengaturan'].includes(tab));
+  const active = tab === t[0] || (t[0] === 'lainnya' && ['po','pelanggan','menu','hpp','inventory','analytics','planning','profit','pengaturan'].includes(tab));
   return `<button class="nv ${active ? 'on' : ''}" onclick="${t[0] === 'pengaturan' ? "openSetting('home')" : `go('${t[0]}')`}"><span class="nv-ico">${t[1]}</span><span>${t[2]}</span></button>`;
 }
 function render() {
@@ -1341,9 +1442,9 @@ function render() {
     <div class="nav-label nav-label-gap">PENGELOLAAN</div>${DESKTOP_MGMT.map(sideButton).join('')}
     <div class="side-spacer"></div>${sideButton(['pengaturan','⚙️','Pengaturan'])}
     <div class="side-foot"><span class="online-dot"></span> Pengelola orderan <small>${APP_VER}</small></div>`;
-  const activeBottom = ['po','pelanggan','menu','hpp','pengaturan'].includes(tab) ? 'lainnya' : tab;
+  const activeBottom = ['po','pelanggan','menu','hpp','inventory','analytics','planning','profit','pengaturan'].includes(tab) ? 'lainnya' : tab;
   $('#bottom').innerHTML = MAIN_TABS.map(t => `<button class="${activeBottom === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('');
-  const views = {pesan: vPesan, order: vOrder, rekap: vRekap, po: vPO, pelanggan: vPelanggan, menu: vMenu, hpp: vHpp, pengaturan: vPengaturan, lainnya: vLainnya};
+  const views = {pesan: vPesan, order: vOrder, rekap: vRekap, po: vPO, pelanggan: vPelanggan, menu: vMenu, hpp: vHpp, inventory: vInventory, analytics: vAnalytics, planning: vPlanning, profit: vProfit, pengaturan: vPengaturan, lainnya: vLainnya};
   $('#app').innerHTML = (views[tab] || vPesan)();
   if (tab === 'pesan' && shippingMode === 'Kurir') setTimeout(initDestinationMapsUi, 0);
   if (tab === 'pengaturan' && (window._settingSection || 'home') === 'ongkir') {
@@ -1352,6 +1453,10 @@ function render() {
   }
   if (tab === 'pelanggan' && window._pe) setTimeout(initCustomerMapsUi, 0);
   if (tab === 'hpp' && !window._hppData && !window._hppLoading) setTimeout(hppLoadData, 0);
+  if (tab === 'inventory' && !window._invData && !window._invLoading) setTimeout(invLoadData, 0);
+  if (tab === 'analytics' && !window._analyticsData && !window._analyticsLoading) setTimeout(analyticsLoad, 0);
+  if (tab === 'planning' && !window._planData && !window._planLoading) setTimeout(planLoad, 0);
+  if (tab === 'profit' && !window._profitData && !window._profitLoading) setTimeout(profitLoad, 0);
   if (tab === 'hpp' && window._hppData && window._hppTab === 'kalkulator') setTimeout(hppRecalc, 0);
 }
 function go(t) {
@@ -1360,7 +1465,7 @@ function go(t) {
   if (t === 'pengaturan') window._settingSection = 'home';
   render(); window.scrollTo(0, 0);
 }
-function openSetting(section) { window._settingSection = section || 'home'; tab = 'pengaturan'; render(); window.scrollTo(0, 0); }
+function openSetting(section) { window._settingSection = section || 'home'; tab = 'pengaturan'; render(); if (window._settingSection === 'keamanan') setTimeout(function(){loadTrustedDevices(true);}, 0); window.scrollTo(0, 0); }
 function filterProducts(value) {
   const q = key(value);
   document.querySelectorAll('.product-card').forEach(el => { el.hidden = !!q && !(el.dataset.search || '').includes(q); });
@@ -1382,6 +1487,10 @@ function vLainnya() {
     ['pelanggan','👥','Pelanggan','Data pelanggan, alamat Maps, dan riwayat pesanan','Buka pelanggan'],
     ['menu','🥐','Menu Produk','Kelola nama produk, harga, dan komposisi paket','Kelola menu'],
     ['hpp','🧮','Hitung HPP','Hitung biaya bahan, produksi, kemasan, dan harga jual','Buka kalkulator HPP'],
+    ['inventory','📦','Persediaan & Produksi','Stok bahan baku, pembelian, mutasi, dan pencatatan produksi','Kelola persediaan'],
+    ['analytics','📈','Analitik Bisnis','Omzet, pesanan, produk terlaris, dan pelanggan berulang','Lihat analitik'],
+    ['planning','🏭','Rencana Produksi','Rencana kebutuhan produk dan bahan untuk setiap PO','Susun rencana'],
+    ['profit','💹','Laba & HPP','Estimasi HPP, laba kotor, margin, dan resep belum lengkap','Lihat laba'],
     ['pengaturan','⚙️','Pengaturan','Printer, ongkir, struk, aplikasi, dan keamanan','Buka pengaturan']
   ];
   return `<div class="page-head"><div><div class="eyebrow">AREA PENGELOLAAN</div><h2>Lainnya</h2><div class="page-subtitle">Akses data dan konfigurasi Uwais Food.</div></div></div>
@@ -1548,21 +1657,72 @@ setInterval(() => {
   if (Q.length) flush(); else if (Date.now() - (window._lastRef || 0) > 120000) refresh();
 }, 20000);
 
-/* ---- Login PIN ---- */
+/* ---- Login PIN + perangkat tepercaya ---- */
 function vLogin() {
-  return `<div class="card col" style="max-width:380px;margin:40px auto;text-align:center">
+  const remembered = !!LS.get('uf_device_token') && !!LS.get('uf_device_id');
+  return `<div class="card col" style="max-width:390px;margin:40px auto;text-align:center">
     <div style="font-size:42px">🥐</div><b style="font-size:20px">Uwais Food</b>
     <div class="mut">Masukkan PIN untuk masuk</div>
-    <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN" style="text-align:center;font-size:20px;letter-spacing:4px" onkeydown="if(event.key==='Enter')masuk()">
+    ${remembered ? `<button class="o full" id="btnDeviceMasuk" onclick="masukDenganPerangkat()">🔓 Masuk tanpa PIN di perangkat ini</button><div class="mut" style="font-size:12px">Perangkat ini masih dipercaya. Anda juga dapat menggunakan PIN di bawah.</div>` : ''}
+    <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN Admin 16 digit" maxlength="16" style="text-align:center;font-size:20px;letter-spacing:4px" onkeydown="if(event.key==='Enter')masuk()">
+    <label style="display:flex;gap:9px;align-items:flex-start;text-align:left;font-size:13px;color:var(--muted);line-height:1.45;margin:2px 0 8px"><input id="rememberDevice" type="checkbox" style="width:18px;height:18px;flex:0 0 auto;margin-top:1px"> <span><b style="color:var(--text)">Ingat perangkat ini selama 30 hari</b><br>Perangkat ini dapat masuk kembali tanpa PIN. Jangan aktifkan di komputer umum atau perangkat bersama.</span></label>
     <button class="full" id="btnMasuk" onclick="masuk()">Masuk</button>
     <div id="loginErr" style="color:var(--bad);min-height:20px;font-size:13px"></div></div>`;
 }
+async function ufAfterLogin() {
+  if (!LS.get('uf_online_alert_since')) LS.set('uf_online_alert_since', String(Date.now()));
+  await load(); await pollCustomerOrderAlerts();
+}
 async function masuk() {
-  const el = $('#pin'), pin = (el.value || '').trim();
+  const el = $('#pin'), pin = (el && el.value || '').trim();
   if (!pin) return toast('Masukkan PIN');
+  const remember = !!$('#rememberDevice')?.checked;
   const b = $('#btnMasuk'); b.disabled = true; b.textContent = 'Memeriksa…';
-  try { setTok(await run('login', pin)); if (!LS.get('uf_online_alert_since')) LS.set('uf_online_alert_since', String(Date.now())); await load(); await pollCustomerOrderAlerts(); }
-  catch (e) { b.disabled = false; b.textContent = 'Masuk'; el.value = ''; $('#loginErr').textContent = ''; toast(msgOf(e), 'error'); }
+  try {
+    setTok(await run('login', pin));
+    if (remember) {
+      try {
+        const deviceId = ufRememberDeviceId();
+        const grant = await run('deviceEnroll', deviceId, ufRememberDeviceLabel());
+        LS.set('uf_device_token', grant.token); LS.set('uf_device_exp', String(grant.expiresAt));
+        toast('Perangkat ini diingat selama 30 hari. Login berikutnya tidak perlu PIN.', 'success');
+      } catch (deviceError) { toast('Login berhasil, tetapi perangkat tidak dapat diingat: ' + msgOf(deviceError), 'warning'); }
+    }
+    await ufAfterLogin();
+  } catch (e) { b.disabled = false; b.textContent = 'Masuk'; el.value = ''; $('#loginErr').textContent = ''; toast(msgOf(e), 'error'); }
+}
+async function masukDenganPerangkat() {
+  const b = $('#btnDeviceMasuk'); if (b) { b.disabled = true; b.textContent = 'Memeriksa perangkat…'; }
+  try {
+    const token = await run('deviceLogin', LS.get('uf_device_token'), LS.get('uf_device_id'));
+    setTok(token); LS.set('uf_device_exp', String(Date.now() + 30 * 86400000));
+    await ufAfterLogin();
+    toast('Berhasil masuk menggunakan perangkat tepercaya.', 'success');
+  } catch (e) {
+    if (/PERANGKAT_TIDAK_DIINGAT|PERANGKAT_TIDAK_VALID/i.test(msgOf(e))) ufForgetLocalDevice();
+    if (b) { b.disabled = false; b.textContent = '🔓 Masuk tanpa PIN di perangkat ini'; }
+    toast(msgOf(e), 'error');
+    render();
+  }
+}
+async function bootstrapAuth() {
+  if (needSetup()) { render(); return; }
+  if (getTok()) {
+    try { await load(); if (getTok()) { await pollCustomerOrderAlerts(); return; } } catch (_) {}
+  }
+  const rememberedToken = LS.get('uf_device_token'), rememberedId = LS.get('uf_device_id');
+  if (rememberedToken && rememberedId) {
+    try {
+      setTok(await run('deviceLogin', rememberedToken, rememberedId));
+      LS.set('uf_device_exp', String(Date.now() + 30 * 86400000));
+      await ufAfterLogin();
+      return;
+    } catch (e) {
+      if (/PERANGKAT_TIDAK_DIINGAT|PERANGKAT_TIDAK_VALID/i.test(msgOf(e))) ufForgetLocalDevice();
+      // Network errors do not delete the stored trust credential.
+    }
+  }
+  render();
 }
 async function keluar() {
   if (Q.length && !(await popupConfirm(Q.length + ' perubahan belum terkirim ke server dan akan hilang jika keluar. Tetap keluar?', {title:'Keluar dari aplikasi?', confirmText:'Tetap keluar'}))) return;
@@ -1698,12 +1858,17 @@ function editOrder(id) {
     else extra.push({nama: it.item, harga: it.harga, isi: it.isi || '', qty: it.qty});   // menu sudah dihapus/diganti nama
   });
   editing = {id, nama0: g.nama, po: g.po, waktu: g.waktu, status: g.status, bayar: g.bayar, metodeBayar: g.metodeBayar, orig, extra, metodeKirim: g.metodeKirim || 'Pickup', jenisKurir: g.jenisKurir || (g.metodeKirim === 'Kurir' ? 'Maps' : ''), namaKurir: g.namaKurir || '', kontakKurir: g.kontakKurir || '', catatanPengiriman: g.catatanPengiriman || '', daerahKirim: g.daerahKirim || '', alamatKirim: g.alamatKirim || '', jarakKm: g.jarakKm || 0, ongkir: g.ongkir || 0, placeId: g.placeId || '', lat: g.lat, lng: g.lng};
-  shippingMode = editing.metodeKirim === 'Kurir' ? (editing.jenisKurir === 'Maps' ? 'Kurir' : 'Kurir3') : 'Pickup'; window._area = editing.daerahKirim; window._km = String(editing.jarakKm || ''); window._ongkir = String(editing.ongkir || ''); window._courierName = editing.namaKurir || ''; window._courierContact = editing.kontakKurir || ''; window._deliveryNote = editing.catatanPengiriman || '';
+  shippingMode = editing.metodeKirim === 'Kurir' ? (editing.jenisKurir === 'Maps' ? 'Kurir' : 'Kurir3') : 'Pickup'; window._area = editing.daerahKirim; window._km = String(editing.jarakKm || ''); window._ongkir = String(editing.ongkir || ''); window._kurirTarifIndex = '';
+  if (shippingMode === 'Kurir3') {
+    const matchRate = (D.tarifOngkir || []).findIndex(t => t && t.aktif !== false && normArea(t.area) === normArea(editing.daerahKirim) && Number(t.ongkir) === Number(editing.ongkir));
+    if (matchRate >= 0) window._kurirTarifIndex = String(matchRate);
+  }
+  window._courierName = editing.namaKurir || ''; window._courierContact = editing.kontakKurir || ''; window._deliveryNote = editing.catatanPengiriman || '';
   window._n = g.nama; window._hp = ''; window._al = g.alamatKirim || ''; window._selectedDestination = g.placeId ? {address:g.alamatKirim,placeId:g.placeId,lat:g.lat,lng:g.lng} : null;
   _routePlaceId = ''; _routePath = []; _routeDestination = g.lat != null && g.lng != null ? {lat:Number(g.lat),lng:Number(g.lng)} : null; destMapObj = null; destMapEl = null; destPolylines = [];
   go('pesan');
 }
-function batalEdit() { editing = null; cart = {}; shippingMode = 'Pickup'; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; window._ongkir = ''; window._n = ''; go('order'); }
+function batalEdit() { editing = null; cart = {}; shippingMode = 'Pickup'; window._kurirTarifIndex = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; window._ongkir = ''; window._n = ''; go('order'); }
 function simpanEdit() {
   const e = editing, nama = (window._n || '').trim();
   if (!nama) { toast('Isi nama pemesan dulu'); const el = $('#nama'); if (el) el.focus(); return; }
@@ -1720,10 +1885,10 @@ function simpanEdit() {
   const at = Math.max(0, D.orders.findIndex(o => o.id === e.id));
   D.orders = D.orders.filter(o => o.id !== e.id);
   D.orders.splice(at, 0, ...items.map(i => ({id: e.id, waktu: e.waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: e.status, bayar: e.bayar, metodeBayar: e.metodeBayar, isi: i.isi || '', po: e.po,
-    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || ''})));
+    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, ongkirStatus: shipping.metode === 'Kurir' ? 'Dikonfirmasi' : '', ongkirPending: false, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || ''})));
   upsertPelLocal(nama, pel);
   enqueue('editOrder', e.id, nama, items, shipping);
-  editing = null; cart = {}; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
+  editing = null; cart = {}; window._kurirTarifIndex = ''; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
   go('order'); toast(ONLINE ? 'Pesanan diperbarui ✔' : 'Perubahan tersimpan di perangkat — akan dikirim saat online');
 }
 function chg(i, d) { cart[i] = Math.max(0, (cart[i] || 0) + d); const y = window.scrollY; render(); window.scrollTo(0, y); }
@@ -2159,7 +2324,7 @@ function vPO() {
         <div><label class="mut">Tutup pemesanan (hari &amp; jam)</label><input type="datetime-local" value="${esc(e.tutup || '')}" oninput="window._poe.tutup=this.value"></div>
       </div>
       <div class="note">Pelanggan hanya bisa memesan saat status PO <b>Buka</b> dan waktu sekarang berada di antara jadwal mulai–tutup. Isi kedua waktu ini untuk mengaktifkan PO online.</div>
-      <div class="adn-form"><b>🥣 Jumlah adonan awal</b><div class="mut">Isi kapasitas produksi dalam pcs untuk setiap adonan. Semua varian bolen digabung ke satu kolom <b>Adonan Bolen</b> karena memakai adonan dasar yang sama. Sistem menghitung sisa adonan dan kapasitas paket secara otomatis.</div>
+      <div class="adn-form"><b>🥣 Kapasitas adonan / stok awal</b><div class="mut">Isi kapasitas awal untuk setiap komponen. Semua varian bolen memakai satu pool <b>Adonan Bolen</b>; produk lain seperti <b>Banana Milk Cheese</b> memiliki pool terpisah. Menu dan paket akan berbagi kapasitas komponen yang sama secara otomatis.</div>
         ${e.names.length ? `<div class="adn-grid">${e.names.map((n, i) => `<label class="adn-item"><span>${esc(n)}</span><div class="adn-input"><input type="number" min="0" inputmode="numeric" placeholder="0" value="${e.am[key(n)] ? esc(e.am[key(n)]) : ''}" oninput="setAdonan(${i},this.value)"><em>pcs</em></div></label>`).join('')}</div>` : '<div class="note">Menu belum ada. Tambahkan produk di Menu Produk.</div>'}</div>
       <div class="row"><button class="o" onclick="window._poe=null;render()">Batal</button><button onclick="simpanPOForm()">Simpan</button></div></div>` : '';
   return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Periode Pre-Order (PO)</h2><button onclick="bukaFormPO()">+ PO baru</button></div>
@@ -2355,6 +2520,30 @@ function vMenu() {
 function settingDetailHead(title, subtitle) {
   return `<div class="setting-detail-head"><button class="back-setting" onclick="openSetting('home')">← <span>Semua Pengaturan</span></button><div><div class="eyebrow">PUSAT PENGATURAN</div><h2>${title}</h2><div class="page-subtitle">${subtitle}</div></div></div>`;
 }
+window._trustedDevices = null; window._trustedDevicesLoading = false;
+async function loadTrustedDevices(silent) {
+  if (window._trustedDevicesLoading || !getTok()) return;
+  window._trustedDevicesLoading = true;
+  try { window._trustedDevices = await run('deviceList') || []; }
+  catch (e) { window._trustedDevices = window._trustedDevices || []; if (!silent) toast('Gagal memuat perangkat tepercaya: ' + msgOf(e), 'error'); }
+  finally { window._trustedDevicesLoading = false; if (tab === 'pengaturan' && window._settingSection === 'keamanan') render(); }
+}
+async function revokeTrustedDevice(id) {
+  if (!(await popupConfirm('Perangkat ini tidak dapat lagi masuk tanpa PIN. Perangkat tersebut harus login menggunakan PIN untuk dipercaya kembali.', {title:'Cabut perangkat tepercaya?', confirmText:'Cabut akses', danger:true}))) return;
+  try {
+    await run('deviceRevoke', id);
+    if (id === LS.get('uf_device_id')) ufForgetLocalDevice();
+    await loadTrustedDevices(true); toast('Akses perangkat berhasil dicabut.', 'success');
+  } catch (e) { toast(msgOf(e), 'error'); }
+}
+async function revokeAllTrustedDevices() {
+  if (!(await popupConfirm('Semua perangkat yang pernah diingat akan kehilangan akses tanpa PIN. Sesi Admin yang sedang aktif tidak dihentikan.', {title:'Cabut semua perangkat tepercaya?', confirmText:'Cabut semua', danger:true}))) return;
+  try {
+    const r = await run('deviceRevokeAll'); ufForgetLocalDevice();
+    await loadTrustedDevices(true); toast((r?.revoked || 0) + ' perangkat berhasil dicabut.', 'success');
+  } catch (e) { toast(msgOf(e), 'error'); }
+}
+function trustedDeviceDate(ms) { return ms ? new Date(ms).toLocaleString('id-ID', {dateStyle:'medium', timeStyle:'short'}) : '—'; }
 function vPengaturan() {
   const section = window._settingSection || 'home';
   if (section === 'home') {
@@ -2404,7 +2593,11 @@ function vPengaturan() {
     const sheetLink = D.sheetUrl ? `<a class="btn o" href="${esc(D.sheetUrl)}" target="_blank" rel="noopener">📄 Buka Spreadsheet</a>` : '';
     return settingDetailHead('Aplikasi','Kelola instalasi, pembaruan, dan koneksi ke Spreadsheet.') + `<div class="card col settings-detail-card">${IN_GAS ? `<div class="mut">Aplikasi sedang dibuka langsung melalui Google Apps Script.</div>${sheetLink}` : `<div><label class="mut">Alamat Web App /exec</label><div class="api-address"><code>${esc(getApi().slice(0, 80))}${getApi().length > 80 ? '…' : ''}</code></div></div><div class="acts">${installEv ? '<button onclick="pasang()">⬇️ Pasang aplikasi</button>' : ''}<button class="o" onclick="segarkan()">🔄 Perbarui aplikasi</button><button class="o" onclick="gantiApi()">Ganti URL Spreadsheet</button>${sheetLink}</div><div class="settings-tip">PWA menyimpan shell aplikasi agar halaman dapat dibuka saat offline. Data pesanan yang belum tersinkron akan menunggu koneksi internet.</div>`}</div>`;
   }
-  if (section === 'keamanan') return settingDetailHead('Keamanan','Kelola akses dan sesi aplikasi Uwais Food.') + `<div class="card col settings-detail-card"><div class="security-summary"><span class="setting-icon">🛡️</span><span><b>Perlindungan PIN aktif</b><small>Akses aplikasi memerlukan PIN yang dikonfigurasi pada Code.gs.</small></span><span class="status-pill good">Aktif</span></div><div class="note">Untuk mengganti PIN, ubah nilai <code>PIN</code> pada Code.gs, simpan, lalu terapkan deployment dengan versi baru. Semua token sesi lama otomatis tidak berlaku setelah PIN diganti.</div><button class="r" onclick="keluar()">🔒 Keluar dari aplikasi</button></div>`;
+  if (section === 'keamanan') {
+    const devices = window._trustedDevices || [];
+    const deviceRows = devices.length ? devices.map(d => `<div class="note" style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap"><div style="min-width:0;flex:1"><b>${esc(d.name)}</b> ${d.active ? '<span class="status-pill good">Aktif</span>' : '<span class="status-pill neutral">Tidak aktif</span>'}<div class="mut" style="font-size:12px">Terakhir masuk: ${trustedDeviceDate(d.lastUsedAt)}<br>${d.active ? 'Berlaku sampai: ' + trustedDeviceDate(d.expiresAt) : (d.revokedAt ? 'Dicabut: ' + trustedDeviceDate(d.revokedAt) : 'Masa berlaku habis')}</div></div>${d.active ? `<button class="r" onclick="revokeTrustedDevice('${esc(d.id)}')">Cabut</button>` : ''}</div>`).join('') : '<div class="mut">Belum ada perangkat yang diingat.</div>';
+    return settingDetailHead('Keamanan','Kelola PIN, sesi, dan perangkat yang dipercaya.') + `<div class="card col settings-detail-card"><div class="security-summary"><span class="setting-icon">🛡️</span><span><b>Perlindungan PIN aktif</b><small>PIN di-hash di server · sesi 12 jam · perangkat tepercaya 30 hari dan diperpanjang saat login.</small></span><span class="status-pill good">Aktif</span></div><div class="note">Opsi “Ingat perangkat ini” hanya menyimpan token perangkat acak, bukan PIN. Jangan gunakan pada komputer umum. Jika PIN di-reset atau semua sesi di-reset melalui Apps Script, seluruh perangkat tepercaya otomatis tidak berlaku.</div><div class="row" style="justify-content:space-between;align-items:center"><b>Perangkat tepercaya</b><button class="o" onclick="loadTrustedDevices()">↻ Muat ulang</button></div>${window._trustedDevicesLoading ? '<div class="mut">Memuat daftar perangkat…</div>' : deviceRows}<button class="r" onclick="revokeAllTrustedDevices()" ${devices.some(d=>d.active)?'':'disabled'}>Cabut semua perangkat tepercaya</button><div class="note">Untuk membuat PIN baru, jalankan <code>resetSecurityPin()</code> dari editor Apps Script. Untuk membatalkan seluruh sesi dan perangkat tepercaya, jalankan <code>resetSesi()</code>.</div><button class="r" onclick="keluar()">🔒 Keluar dari aplikasi</button></div>`;
+  }
   window._settingSection = 'home';
   return vPengaturan();
 }
@@ -3598,8 +3791,88 @@ if (!IN_GAS) {
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEv = e; if (tab === 'pengaturan') render(); });
 }
 
-load();
+bootstrapAuth();
 window.__boot = true;
+/* ================= TAHAP 3 — PERSediaan & PRODUKSI ================= */
+window._invData=null; window._invLoading=false; window._invTab='stock'; window._invPurchaseLines=[]; window._invPurchaseMeta={supplierId:'',tanggal:'',faktur:'',catatan:''}; window._invPreview=null;
+const invNum=v=>Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:2});
+function invFormatCurrency(v){return 'Rp'+Math.round(Number(v)||0).toLocaleString('id-ID');}
+async function invLoadData(silent){if(window._invLoading)return;window._invLoading=true;try{window._invData=await run('inv_getData');window._invData=window._invData||{materials:[],suppliers:[],purchases:[],movements:[],production:[],recipes:[]};}catch(e){if(!silent)toast('Gagal memuat persediaan: '+msgOf(e),'error');window._invData=window._invData||{materials:[],suppliers:[],purchases:[],movements:[],production:[],recipes:[]};}finally{window._invLoading=false;if(tab==='inventory')render();}}
+function invTab(name){window._invTab=name;render();}
+async function invSavePolicy(id){const min=Number($('#inv-min-'+id)?.value||0),lokasi=$('#inv-loc-'+id)?.value||'';try{await run('inv_setStockPolicy',{materialId:id,minimum:min,lokasi});toast('Batas minimum persediaan disimpan.','success');await invLoadData(true);}catch(e){toast(msgOf(e),'error');}}
+async function invMoveStock(id,jenis){const qty=Number($('#inv-qty-'+id)?.value||0),catatan=String($('#inv-note-'+id)?.value||'').trim();if(!(qty>0)){toast('Masukkan jumlah stok yang valid.','warning');return;}try{await run('inv_adjustStock',{materialId:id,jenis,qty,catatan});toast(jenis==='MASUK'?'Stok berhasil ditambahkan.':'Stok berhasil dikurangi.','success');await invLoadData(true);}catch(e){toast(msgOf(e),'error');}}
+function invAddPurchaseLine(){window._invPurchaseMeta={supplierId:$('#inv-buy-supplier')?.value||'',tanggal:$('#inv-buy-date')?.value||'',faktur:$('#inv-buy-invoice')?.value||'',catatan:$('#inv-buy-note')?.value||''};const id=$('#inv-buy-material')?.value, packs=Number($('#inv-buy-packs')?.value||0), price=Number($('#inv-buy-price')?.value||0);const m=(window._invData?.materials||[]).find(x=>x.id===id);if(!m){toast('Pilih bahan baku.','warning');return;}if(!(packs>0)||!(price>=0)){toast('Jumlah kemasan harus lebih dari nol dan harga tidak boleh negatif.','warning');return;}if(!m.isi){toast('Isi per kemasan belum diatur pada Master Bahan HPP.','warning');return;}window._invPurchaseLines.push({materialId:id,nama:m.nama,satuan:m.satuan,kemasan:packs,hargaKemasan:price,qtyDasar:packs*m.isi,total:packs*price});render();}
+function invRemovePurchaseLine(i){window._invPurchaseLines.splice(i,1);render();}
+async function invSavePurchase(){const items=window._invPurchaseLines||[];if(!items.length){toast('Tambahkan minimal satu bahan pada pembelian.','warning');return;}const meta=window._invPurchaseMeta||{};const data={supplierId:$('#inv-buy-supplier')?.value||meta.supplierId||'',supplierName:'',tanggal:$('#inv-buy-date')?.value||meta.tanggal||'',faktur:$('#inv-buy-invoice')?.value||meta.faktur||'',catatan:$('#inv-buy-note')?.value||meta.catatan||'',items:items,requestId:'INV'+Date.now()+Math.random().toString(36).slice(2,8)};try{const r=await run('inv_createPurchase',data);window._invPurchaseLines=[];window._invPurchaseMeta={supplierId:'',tanggal:'',faktur:'',catatan:''};toast('Pembelian tersimpan · '+invFormatCurrency(r.total),'success');await invLoadData(true);}catch(e){toast('Pembelian gagal: '+msgOf(e),'error');}}
+async function invPreviewProduction(){const recipeId=$('#inv-prod-recipe')?.value,output=Number($('#inv-prod-output')?.value||0);if(!recipeId||!(output>0)){toast('Pilih resep dan isi target output.','warning');return;}try{window._invPreview=await run('inv_previewProduction',{recipeId,output});render();}catch(e){toast(msgOf(e),'error');}}
+async function invCompleteProduction(){const p=window._invPreview;if(!p||!p.cukup){toast('Persediaan bahan belum mencukupi.','error');return;}const data={recipeId:p.recipeId,output:p.output,catatan:$('#inv-prod-note')?.value||'',requestId:'PROD'+Date.now()+Math.random().toString(36).slice(2,8)};try{const r=await run('inv_completeProduction',data);window._invPreview=null;toast('Produksi '+r.produk+' berhasil dicatat.','success');await invLoadData(true);}catch(e){toast('Produksi belum dicatat: '+msgOf(e),'error');}}
+async function invSaveSupplier(){const data={nama:$('#inv-supplier-name')?.value||'',kontak:$('#inv-supplier-contact')?.value||'',alamat:$('#inv-supplier-address')?.value||'',catatan:$('#inv-supplier-note')?.value||''};try{await run('inv_saveSupplier',data);toast('Pemasok tersimpan.','success');await invLoadData(true);}catch(e){toast(msgOf(e),'error');}}
+function vInventory(){const d=window._invData||{materials:[],suppliers:[],purchases:[],movements:[],production:[],recipes:[]};if(window._invLoading)return '<div class="card">Memuat data persediaan…</div>';
+ const low=d.materials.filter(x=>x.aktif&&x.kurang).length, total=d.materials.reduce((s,x)=>s+x.stok,0), rows=d.materials.map(m=>`<tr><td><b>${esc(m.nama)}</b><div class="mut">${esc(m.pemasok||'')}</div></td><td>${esc(m.satuan)}</td><td class="num"><b>${invNum(m.stok)}</b></td><td><input id="inv-min-${esc(m.id)}" type="number" min="0" step="any" value="${m.minimum}" style="width:86px"></td><td><input id="inv-loc-${esc(m.id)}" value="${esc(m.lokasi)}" placeholder="Rak / lokasi" style="width:115px"></td><td><span class="tag ${m.kurang?'warn':'ok'}">${m.kurang?'Perlu restock':'Aman'}</span></td><td><div class="acts"><button class="o" onclick="invSavePolicy('${esc(m.id)}')">Simpan batas</button></div><div class="inv-move"><input id="inv-qty-${esc(m.id)}" type="number" min="0.001" step="any" placeholder="Qty ${esc(m.satuan)}"><input id="inv-note-${esc(m.id)}" placeholder="Catatan / saldo awal"><button onclick="invMoveStock('${esc(m.id)}','MASUK')">+ Masuk</button><button class="r" onclick="invMoveStock('${esc(m.id)}','KELUAR')">− Keluar</button></div></td></tr>`).join('');
+ const purchaseLines=(window._invPurchaseLines||[]).map((x,i)=>`<tr><td>${esc(x.nama)}</td><td class="num">${invNum(x.kemasan)} kemasan</td><td class="num">${invNum(x.qtyDasar)} ${esc(x.satuan)}</td><td class="num">${invFormatCurrency(x.total)}</td><td><button class="r" onclick="invRemovePurchaseLine(${i})">Hapus</button></td></tr>`).join('');
+ const recentMoves=d.movements.slice(0,12).map(x=>`<tr><td>${esc(x.waktu)}</td><td>${esc(x.bahan)}</td><td>${esc(x.jenis)}</td><td class="num">${x.masuk?'+':''}${invNum(x.masuk||x.keluar)} ${esc(x.satuan)}</td><td>${invNum(x.stok)} ${esc(x.satuan)}</td><td>${esc(x.catatan)}</td></tr>`).join('');
+ const suppliers=d.suppliers.filter(x=>x.aktif).map(s=>`<option value="${esc(s.id)}">${esc(s.nama)}</option>`).join('');
+ const materialOptions=d.materials.filter(x=>x.aktif).map(m=>`<option value="${esc(m.id)}">${esc(m.nama)} · ${esc(m.isi)} ${esc(m.satuan)}/kemasan</option>`).join('');
+ const recipeOptions=d.recipes.map(r=>`<option value="${esc(r.id)}">${esc(r.nama)} · hasil ${invNum(r.hasil)}</option>`).join('');
+ const preview=window._invPreview?`<div class="note ${window._invPreview.cukup?'ok':'warn'}"><b>Pratinjau pemakaian · ${esc(window._invPreview.nama)}</b><div class="mut" style="margin:5px 0">Output ${invNum(window._invPreview.output)} unit · Faktor batch ${invNum(window._invPreview.factor)} · Estimasi bahan ${invFormatCurrency(window._invPreview.totalCost)}</div><div class="table-wrap"><table><thead><tr><th>Bahan</th><th>Butuh</th><th>Stok</th><th>Setelah produksi</th></tr></thead><tbody>${window._invPreview.lines.map(x=>`<tr><td>${esc(x.nama)}</td><td>${invNum(x.required)} ${esc(x.satuan)}</td><td>${invNum(x.stock)} ${esc(x.satuan)}</td><td><b>${invNum(x.remaining)} ${esc(x.satuan)}</b> ${x.cukup?'':'<span class="tag warn">Kurang</span>'}</td></tr>`).join('')}</tbody></table></div>${window._invPreview.cukup?'<button style="margin-top:10px" onclick="invCompleteProduction()">Catat produksi & kurangi stok bahan</button>':'<div class="mut">Stok belum mencukupi. Pembelian atau penyesuaian stok diperlukan sebelum produksi dicatat.</div>'}</div>`:'';
+ return `<div class="page-head"><div><div class="eyebrow">TAHAP 3 · INVENTORY & OPERASIONAL DAPUR</div><h2>Persediaan & Produksi</h2><div class="page-subtitle">Kelola bahan baku, pembelian, mutasi stok, dan pemakaian resep dari HPP.</div></div><div class="page-head-action"><button class="o" onclick="invLoadData()">↻ Muat ulang</button></div></div>
+ <div class="hpp-hero"><div class="hpp-intro"><div class="hpp-intro-icon">📦</div><div><div class="hpp-section-title">Kontrol Persediaan Bahan Baku</div><div class="mut">Stok dihitung dalam satuan dasar. Pembelian dikonversi dari ukuran kemasan pada Master Bahan HPP.</div></div></div><div class="hpp-kpi"><div class="card"><small>Jenis bahan</small><b>${d.materials.length}</b></div><div class="card"><small>Perlu restock</small><b>${low}</b></div><div class="card"><small>Catatan produksi</small><b>${d.production.length}</b></div></div></div>
+ <div class="seg" style="margin-bottom:14px"><button class="${window._invTab==='stock'?'on':''}" onclick="invTab('stock')">📦 Stok</button><button class="${window._invTab==='purchase'?'on':''}" onclick="invTab('purchase')">🧾 Pembelian</button><button class="${window._invTab==='production'?'on':''}" onclick="invTab('production')">🥣 Produksi</button><button class="${window._invTab==='supplier'?'on':''}" onclick="invTab('supplier')">🚚 Pemasok</button><button class="${window._invTab==='history'?'on':''}" onclick="invTab('history')">📚 Mutasi</button></div>
+ ${window._invTab==='stock'?`<section class="card col"><div class="row"><div><b>Stok bahan baku</b><div class="mut">Jumlah stok dan batas minimum per bahan.</div></div><span class="tag ${low?'warn':'ok'}">${low} perlu restock</span></div>${rows?`<div class="table-wrap"><table><thead><tr><th>Bahan</th><th>Unit</th><th>Stok</th><th>Min.</th><th>Lokasi</th><th>Status</th><th>Penyesuaian</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">Master bahan masih kosong. Tambahkan bahan melalui menu Hitung HPP → Master Bahan.</div>'}</section>`:''}
+ ${window._invTab==='purchase'?`<section class="card col"><b>Catat pembelian bahan baku</b><div class="mut">Jumlah diisi berdasarkan kemasan yang dibeli. Sistem mengonversi ke satuan dasar sesuai Master Bahan HPP.</div><div class="form-grid"><div class="field"><label>Pemasok</label><select id="inv-buy-supplier"><option value="">Pembelian langsung / lainnya</option>${d.suppliers.filter(x=>x.aktif).map(s=>`<option value="${esc(s.id)}" ${window._invPurchaseMeta?.supplierId===s.id?'selected':''}>${esc(s.nama)}</option>`).join('')}</select></div><div class="field"><label>Tanggal pembelian</label><input id="inv-buy-date" type="date" value="${esc(window._invPurchaseMeta?.tanggal||new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10))}"></div><div class="field"><label>Nomor faktur</label><input id="inv-buy-invoice" placeholder="Opsional" value="${esc(window._invPurchaseMeta?.faktur||'')}"></div><div class="field"><label>Catatan</label><input id="inv-buy-note" placeholder="Catatan pembelian" value="${esc(window._invPurchaseMeta?.catatan||'')}"></div><div class="field"><label>Bahan</label><select id="inv-buy-material">${materialOptions||'<option value="">Belum ada bahan HPP</option>'}</select></div><div class="field"><label>Jumlah kemasan</label><input id="inv-buy-packs" type="number" min="0.001" step="any" placeholder="Mis. 2"></div><div class="field"><label>Harga per kemasan (Rp)</label><input id="inv-buy-price" type="number" min="0" step="100" placeholder="Mis. 45000"></div></div><button class="o" onclick="invAddPurchaseLine()">＋ Tambahkan bahan</button>${purchaseLines?`<div class="table-wrap"><table><thead><tr><th>Bahan</th><th>Kemasan</th><th>Konversi</th><th>Total</th><th></th></tr></thead><tbody>${purchaseLines}</tbody></table></div><button onclick="invSavePurchase()">Simpan pembelian & tambah stok</button>`:'<div class="empty">Belum ada bahan yang ditambahkan ke pembelian.</div>'}</section><section class="card col"><b>Pembelian terakhir</b>${d.purchases.length?`<div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Pemasok</th><th>Bahan</th><th>Qty dasar</th><th>Total</th></tr></thead><tbody>${d.purchases.slice(0,20).map(x=>`<tr><td>${esc(x.tanggal)}</td><td>${esc(x.pemasok)}</td><td>${esc(x.bahan)}</td><td>${invNum(x.qty)} ${esc(x.satuan)}</td><td>${invFormatCurrency(x.total)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Belum ada pembelian bahan.</div>'}</section>`:''}
+ ${window._invTab==='production'?`<section class="card col"><b>Catat produksi berdasarkan resep HPP</b><div class="mut">Pilih resep, masukkan output aktual, lalu periksa kebutuhan bahan sebelum stok dikurangi.</div><div class="form-grid"><div class="field"><label>Resep / produk</label><select id="inv-prod-recipe">${recipeOptions||'<option value="">Belum ada resep HPP</option>'}</select></div><div class="field"><label>Output aktual (unit)</label><input id="inv-prod-output" type="number" min="0.001" step="any" placeholder="Jumlah hasil produksi"></div><div class="field full"><label>Catatan batch</label><textarea id="inv-prod-note" rows="2" placeholder="Tanggal produksi, shift, atau catatan kualitas"></textarea></div></div><button onclick="invPreviewProduction()">Periksa kebutuhan bahan</button>${preview}</section><section class="card col"><b>Riwayat produksi</b>${d.production.length?`<div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Produk</th><th>Output</th><th>Estimasi biaya bahan</th><th>Catatan</th></tr></thead><tbody>${d.production.map(x=>`<tr><td>${esc(x.waktu)}</td><td>${esc(x.produk)}</td><td>${invNum(x.aktual)}</td><td>${invFormatCurrency(x.biaya)}</td><td>${esc(x.catatan)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Belum ada produksi yang dicatat.</div>'}</section>`:''}
+ ${window._invTab==='supplier'?`<section class="card col"><b>Tambah pemasok</b><div class="form-grid"><div class="field"><label>Nama pemasok</label><input id="inv-supplier-name" placeholder="Nama toko / pemasok"></div><div class="field"><label>Nomor telepon</label><input id="inv-supplier-contact" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Alamat</label><input id="inv-supplier-address" placeholder="Alamat pemasok"></div><div class="field"><label>Catatan</label><input id="inv-supplier-note" placeholder="Jenis bahan / jadwal kirim"></div></div><button onclick="invSaveSupplier()">Simpan pemasok</button></section><section class="card col"><b>Daftar pemasok</b>${d.suppliers.length?`<div class="table-wrap"><table><thead><tr><th>Nama</th><th>Kontak</th><th>Alamat</th><th>Status</th></tr></thead><tbody>${d.suppliers.map(s=>`<tr><td>${esc(s.nama)}</td><td>${esc(s.kontak)}</td><td>${esc(s.alamat)}</td><td>${s.aktif?'Aktif':'Nonaktif'}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Belum ada pemasok tersimpan.</div>'}</section>`:''}
+ ${window._invTab==='history'?`<section class="card col"><b>Mutasi stok bahan</b>${recentMoves?`<div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Bahan</th><th>Jenis</th><th>Jumlah</th><th>Stok akhir</th><th>Catatan</th></tr></thead><tbody>${recentMoves}</tbody></table></div>`:'<div class="empty">Belum ada mutasi stok.</div>'}</section>`:''}`;
+}
+
+/* ================= TAHAP 4 — ANALITIK BISNIS ================= */
+window._analyticsData=null;window._analyticsLoading=false;
+function analyticsMonthDefault(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+async function analyticsLoad(silent){if(window._analyticsLoading)return;window._analyticsLoading=true;try{window._analyticsData=await run('analytics_getData',$('#analyticsMonth')?.value||analyticsMonthDefault());}catch(e){if(!silent)toast('Gagal memuat analitik: '+msgOf(e),'error');window._analyticsData=window._analyticsData||null;}finally{window._analyticsLoading=false;if(tab==='analytics')render();}}
+function analyticsRefresh(){window._analyticsData=null;analyticsLoad();}
+function vAnalytics(){const d=window._analyticsData;if(window._analyticsLoading)return '<div class="card">Menghitung analitik penjualan…</div>';const k=d?.kpi||{};const cur=$('#analyticsMonth')?.value||d?.month||analyticsMonthDefault();const fmt=v=>invFormatCurrency(v);const growth=Number(k.growth)||0;const growthLabel=Number(k.previousRevenue)>0?((growth>=0?'▲':'▼')+' '+Math.abs(growth).toFixed(1)+'% dari bulan sebelumnya'):'Belum ada data pembanding bulan sebelumnya';const products=d?.products||[],customers=d?.customers||[];const maxDay=Math.max(1,...(d?.daily||[]).map(x=>Number(x.revenue)||0));
+ return `<div class="page-head"><div><div class="eyebrow">TAHAP 4 · BUSINESS INTELLIGENCE & CUSTOMER INSIGHT</div><h2>Analitik Bisnis</h2><div class="page-subtitle">Ringkasan performa penjualan, pembayaran, produk favorit, dan pelanggan berulang dari data pesanan.</div></div><div class="page-head-action"><button class="o" onclick="analyticsRefresh()">↻ Muat ulang</button></div></div><section class="card col"><div class="row"><div><b>Periode laporan</b><div class="mut">Omzet produk tidak mencampur ongkos kirim. Pesanan dibatalkan tidak dihitung.</div></div><input id="analyticsMonth" type="month" value="${esc(cur)}" onchange="analyticsRefresh()" style="max-width:180px"></div></section>
+ ${!d?'<div class="empty">Belum ada data analitik untuk ditampilkan.</div>':`<div class="hpp-kpi"><div class="card"><small>Omzet produk</small><b>${fmt(k.revenue)}</b><small>${growthLabel}</small></div><div class="card"><small>Total pesanan</small><b>${invNum(k.orders)}</b><small>Rata-rata ${fmt(k.average)} / pesanan</small></div><div class="card"><small>Sudah dibayar</small><b>${fmt(k.paid)}</b><small>Nilai tagihan lunas, termasuk ongkir terkonfirmasi</small></div><div class="card"><small>Belum lunas</small><b>${fmt(k.unpaid)}</b><small>Nilai tagihan belum lunas, termasuk ongkir terkonfirmasi</small></div><div class="card"><small>Pelanggan</small><b>${invNum(k.customers)}</b><small>${invNum(k.repeatCustomers)} pelanggan melakukan lebih dari satu pesanan pada periode ini</small></div></div>
+ <section class="card col"><div class="row"><b>Tren omzet harian</b><span class="mut">${esc(d.month)}</span></div>${d.daily.length?`<div class="analytics-bars">${d.daily.map(x=>`<div class="analytics-bar-col" title="${esc(x.date)} · ${fmt(x.revenue)}"><div class="analytics-bar" style="height:${Math.max(3,Number(x.revenue)/maxDay*100)}%"></div><small>${esc(x.label)}</small></div>`).join('')}</div>`:'<div class="empty">Belum ada penjualan pada periode ini.</div>'}</section>
+ <div class="form-grid"><section class="card col"><b>Produk terlaris</b>${products.length?`<div class="table-wrap"><table><thead><tr><th>Produk</th><th>Qty</th><th>Omzet</th></tr></thead><tbody>${products.map(x=>`<tr><td>${esc(x.nama)}</td><td class="num">${invNum(x.qty)}</td><td class="num">${fmt(x.revenue)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Belum ada data produk.</div>'}</section><section class="card col"><b>Pelanggan teratas</b>${customers.length?`<div class="table-wrap"><table><thead><tr><th>Pelanggan</th><th>Pesanan</th><th>Omzet</th></tr></thead><tbody>${customers.map(x=>`<tr><td>${esc(x.nama)}${x.hp?'<div class="mut">'+esc(x.hp)+'</div>':''}</td><td class="num">${x.orders}</td><td class="num">${fmt(x.revenue)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Belum ada data pelanggan.</div>'}</section></div>
+ <div class="form-grid"><section class="card col"><b>Status pesanan</b>${(d.statuses||[]).map(x=>`<div class="row"><span>${esc(x.name)}</span><b>${x.count}</b></div>`).join('')||'<div class="mut">Belum ada data.</div>'}</section><section class="card col"><b>Sumber pesanan</b>${(d.sources||[]).map(x=>`<div class="row"><span>${esc(x.name)}</span><b>${x.count}</b></div>`).join('')||'<div class="mut">Belum ada data.</div>'}</section></div>`}`;
+}
+
+
+
+/* ================= TAHAP 5 — RENCANA PRODUKSI PER PO ================= */
+window._planData=null;window._planLoading=false;window._planPoId='';
+async function planLoad(silent){if(window._planLoading)return;window._planLoading=true;try{window._planData=await run('prodPlan_getData',window._planPoId||'');window._planPoId=window._planData?.selectedPo||'';}catch(e){if(!silent)toast('Gagal menyusun rencana produksi: '+msgOf(e),'error');window._planData=window._planData||null;}finally{window._planLoading=false;if(tab==='planning')render();}}
+function planChangePo(value){window._planPoId=value;window._planData=null;planLoad();}
+async function planSave(){const note=$('#plan-note')?.value||'';if(!window._planPoId){toast('Pilih PO terlebih dahulu.','warning');return;}try{const r=await run('prodPlan_save',{poId:window._planPoId,catatan:note,requestId:'PLAN'+Date.now()+Math.random().toString(36).slice(2,8)});toast('Rencana produksi '+r.id+' tersimpan.','success');await planLoad(true);}catch(e){toast('Rencana belum tersimpan: '+msgOf(e),'error');}}
+async function planSetStatus(id,status){try{await run('prodPlan_setStatus',id,status);toast('Status rencana diperbarui.','success');await planLoad(true);}catch(e){toast(msgOf(e),'error');}}
+function vPlanning(){const d=window._planData;if(window._planLoading)return '<div class="card">Menghitung kebutuhan produksi berdasarkan PO…</div>';const pos=d?.pos||[],p=d?.plan,history=d?.history||[];const fmt=v=>invFormatCurrency(v);const poOptions=pos.map(x=>`<option value="${esc(x.id)}" ${x.id===window._planPoId?'selected':''}>${esc(x.nama)} · ${esc(x.kirim||'-')} · ${esc(x.status)}</option>`).join('');
+ const productRows=(p?.products||[]).map(x=>`<tr><td>${esc(x.nama)}</td><td class="num">${invNum(x.qty)}</td><td class="num">${invNum(x.jumlahOrder)}</td></tr>`).join('');
+ const componentRows=(p?.components||[]).map(x=>`<tr><td>${esc(x.nama)}</td><td class="num">${invNum(x.qty)}</td><td>${esc(x.source||'Resep HPP')}</td></tr>`).join('');
+ const materialRows=(p?.materials||[]).map(x=>`<tr><td><b>${esc(x.nama)}</b></td><td class="num">${invNum(x.required)} ${esc(x.satuan)}</td><td class="num">${invNum(x.stock)} ${esc(x.satuan)}</td><td class="num"><b>${x.shortage>0?invNum(x.shortage):'—'} ${esc(x.satuan)}</b></td><td class="num">${fmt(x.estimatedCost)}</td></tr>`).join('');
+ const missingRecipe=p?.missingRecipes?.length?`<div class="note warn"><b>Resep HPP belum tersedia / belum lengkap</b><div class="mut">${p.missingRecipes.map(x=>esc(x.nama)+' ('+invNum(x.qty)+' unit)').join(' · ')}</div>Tambahkan atau lengkapi resep tersebut di Hitung HPP agar kebutuhan bahan dapat dihitung lengkap.</div>`:'';
+ const partialRecipe=p?.partialRecipes?.length?`<div class="note warn"><b>Perhitungan adonan bersama saja</b><div class="mut">${p.partialRecipes.map(x=>esc(x.nama)).join(' · ')}</div>Resep Adonan Bolen ditemukan, tetapi resep lengkap per varian belum ada. Isian/topping khusus varian belum masuk estimasi. Lengkapi resep HPP setiap SKU untuk hasil penuh.</div>`:'';
+ const missingMaterial=p?.missingMaterials?.length?`<div class="note warn"><b>Bahan pada resep tidak ditemukan di Master HPP</b><div class="mut">${p.missingMaterials.map(x=>esc(x.nama)).join(' · ')}</div></div>`:'';
+ const historyRows=history.map(x=>`<tr><td>${esc(x.dibuat)}</td><td>${esc(x.poNama)}</td><td class="num">${invNum(x.orders)}</td><td><span class="tag ${x.status==='Disetujui'?'ok':x.status==='Ditutup'?'':'warn'}">${esc(x.status)}</span></td><td>${esc(x.catatan)}</td><td><div class="acts"><button class="o" onclick="planSetStatus('${esc(x.id)}','Disetujui')">Setujui</button><button class="o" onclick="planSetStatus('${esc(x.id)}','Ditutup')">Tutup</button></div></td></tr>`).join('');
+ return `<div class="page-head"><div><div class="eyebrow">TAHAP 5 · PRODUCTION PLANNING</div><h2>Rencana Produksi</h2><div class="page-subtitle">Gabungkan semua pesanan dalam satu PO menjadi daftar kebutuhan produk dan bahan baku berdasarkan resep HPP.</div></div><div class="page-head-action"><button class="o" onclick="window._planData=null;planLoad()">↻ Muat ulang</button></div></div>
+ <section class="card col"><div class="form-grid"><div class="field"><label>Periode PO</label><select id="plan-po" onchange="planChangePo(this.value)">${poOptions||'<option value="">Belum ada PO</option>'}</select></div><div class="field"><label>Catatan rencana (opsional)</label><input id="plan-note" placeholder="Mis. produksi tahap 1 / jadwal dapur"></div></div><div class="row"><span class="mut">Pesanan Dibatalkan tidak dimasukkan ke rencana.</span><button onclick="planSave()" ${p&&p.orderCount?'':'disabled'}>Simpan snapshot rencana</button></div></section>
+ ${!p?'<div class="empty">Pilih PO untuk menghitung kebutuhan produksi.</div>':`<div class="hpp-kpi"><div class="card"><small>Pesanan aktif</small><b>${invNum(p.orderCount)}</b><small>${invNum(p.lineCount)} baris item</small></div><div class="card"><small>Jenis produk</small><b>${invNum(p.products.length)}</b><small>Produk dan paket dalam PO</small></div><div class="card"><small>Komponen produksi</small><b>${invNum(p.components.length)}</b><small>Komponen setelah paket diurai</small></div><div class="card"><small>Estimasi biaya bahan</small><b>${fmt(p.estimatedMaterialCost)}</b><small>Berdasarkan resep HPP yang cocok</small></div></div>
+ <div class="form-grid"><section class="card col"><b>Permintaan menu / paket</b><div class="table-wrap"><table><thead><tr><th>Menu</th><th>Qty</th><th>Jumlah order</th></tr></thead><tbody>${productRows||'<tr><td colspan="3">Belum ada pesanan aktif.</td></tr>'}</tbody></table></div></section><section class="card col"><b>Komponen yang harus diproduksi</b><div class="table-wrap"><table><thead><tr><th>Komponen</th><th>Kebutuhan</th><th>Dasar resep</th></tr></thead><tbody>${componentRows||'<tr><td colspan="3">Komposisi belum dapat diurai.</td></tr>'}</tbody></table></div></section></div>
+ <section class="card col"><div class="row"><b>Kebutuhan bahan baku</b><span class="tag ${p.enough?'ok':'warn'}">${p.enough?'Resep & stok tercakup':'Perlu pemeriksaan'}</span></div><div class="table-wrap"><table><thead><tr><th>Bahan</th><th>Kebutuhan</th><th>Stok sekarang</th><th>Perlu beli</th><th>Estimasi biaya</th></tr></thead><tbody>${materialRows||'<tr><td colspan="5">Belum ada kebutuhan bahan yang dapat dihitung. Pastikan resep HPP sudah dibuat.</td></tr>'}</tbody></table></div>${missingRecipe}${partialRecipe}${missingMaterial}<div class="note">${esc(p.planNotice)}</div></section>`}
+ <section class="card col"><b>Riwayat rencana produksi</b>${history.length?`<div class="table-wrap"><table><thead><tr><th>Dibuat</th><th>PO</th><th>Order</th><th>Status</th><th>Catatan</th><th>Aksi</th></tr></thead><tbody>${historyRows}</tbody></table></div>`:'<div class="empty">Belum ada snapshot rencana yang disimpan.</div>'}</section>`;}
+
+/* ================= TAHAP 6 — PROFITABILITAS BERDASARKAN HPP ================= */
+window._profitData=null;window._profitLoading=false;
+async function profitLoad(silent){if(window._profitLoading)return;window._profitLoading=true;try{window._profitData=await run('profit_getData',$('#profitMonth')?.value||analyticsMonthDefault());}catch(e){if(!silent)toast('Gagal menghitung laba: '+msgOf(e),'error');window._profitData=window._profitData||null;}finally{window._profitLoading=false;if(tab==='profit')render();}}
+function profitRefresh(){window._profitData=null;profitLoad();}
+function vProfit(){const d=window._profitData;if(window._profitLoading)return '<div class="card">Menghitung HPP dan estimasi laba kotor…</div>';const k=d?.kpi||{};const fmt=v=>invFormatCurrency(v);const cur=$('#profitMonth')?.value||d?.month||analyticsMonthDefault();const products=d?.products||[];const missing=d?.missingRecipes||[];
+ const rows=products.map(x=>`<tr><td><b>${esc(x.nama)}</b>${x.known?'':'<div class="mut"><span class="tag warn">HPP belum lengkap</span></div>'}</td><td class="num">${invNum(x.qty)}</td><td class="num">${fmt(x.revenue)}</td><td class="num">${x.known?fmt(x.cost):'—'}</td><td class="num">${x.known?fmt(x.profit):'—'}</td><td class="num">${x.margin==null?'—':Number(x.margin).toFixed(1)+'%'}</td></tr>`).join('');
+ return `<div class="page-head"><div><div class="eyebrow">TAHAP 6 · PROFITABILITY & HPP INSIGHT</div><h2>Laba & Margin Produk</h2><div class="page-subtitle">Bandingkan omzet produk dengan biaya resep HPP. Perhitungan ini estimasi dan hanya memasukkan menu yang resepnya lengkap.</div></div><div class="page-head-action"><button class="o" onclick="profitRefresh()">↻ Muat ulang</button></div></div><section class="card col"><div class="row"><div><b>Periode laporan</b><div class="mut">Pesanan Dibatalkan tidak dihitung. Ongkir tidak termasuk omzet dan laba produk.</div></div><input id="profitMonth" type="month" value="${esc(cur)}" onchange="profitRefresh()" style="max-width:180px"></div></section>
+ ${!d?'<div class="empty">Belum ada data HPP atau pesanan pada periode ini.</div>':`<div class="hpp-kpi"><div class="card"><small>Omzet produk</small><b>${fmt(k.revenue)}</b><small>Semua pesanan aktif</small></div><div class="card"><small>Omzet dengan HPP</small><b>${fmt(k.coveredRevenue)}</b><small>${Number(k.coverage||0).toFixed(1)}% omzet tercakup</small></div><div class="card"><small>Estimasi biaya pokok</small><b>${fmt(k.cost)}</b><small>Resep yang cocok dan lengkap</small></div><div class="card"><small>Estimasi laba kotor</small><b>${fmt(k.grossProfit)}</b><small>Margin ${k.margin==null?'—':Number(k.margin).toFixed(1)+'%'}</small></div></div>
+ <section class="card col"><div class="row"><b>Profitabilitas per menu</b><span class="tag ${k.coverage>=99.9?'ok':'warn'}">${Number(k.coverage||0).toFixed(1)}% cakupan HPP</span></div><div class="table-wrap"><table><thead><tr><th>Produk</th><th>Qty</th><th>Omzet</th><th>Estimasi HPP</th><th>Laba kotor</th><th>Margin</th></tr></thead><tbody>${rows||'<tr><td colspan="6">Belum ada penjualan pada periode ini.</td></tr>'}</tbody></table></div></section>
+ <section class="card col"><b>Resep HPP yang perlu dilengkapi</b>${missing.length?`<div class="note warn">Produk berikut tetap masuk omzet, tetapi tidak dihitung dalam estimasi laba sampai resep HPP yang sesuai dilengkapi.</div><div class="tags">${missing.map(n=>`<span class="tag warn">${esc(n)}</span>`).join('')}</div>`:'<div class="note ok">Semua menu terjual pada periode ini memiliki resep HPP yang cocok.</div>'}</section><div class="note">${esc(d.note)}</div>`}`;}
+
 </script>
 </body>
 </html>
+
