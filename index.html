@@ -668,13 +668,129 @@ img,svg,canvas,video{max-width:100%}
 }
 @media(max-width:380px){.oc-tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
+
+<style id="uwais-desktop-navigation-v11-10-1">
+/* ==========================================================
+   UWAIS FOOD ADMIN v11.10.1 — DESKTOP NAVIGATION REFINEMENT
+   Fokus: sidebar terukur, konten tidak overflow, dan header rapi.
+   Mobile/tablet <900px tetap memakai bottom navigation yang lama.
+   ========================================================== */
+@media (min-width:900px){
+  html,body{width:100%;min-width:0;max-width:100%;overflow-x:hidden}
+  body{padding-bottom:0}
+  .app{
+    display:grid!important;
+    grid-template-columns:252px minmax(0,1fr)!important;
+    align-items:stretch;
+    width:100%;max-width:100%;min-height:100vh;
+  }
+  .app>div:last-child{display:flex;flex-direction:column;min-width:0;width:100%;max-width:100%}
+  .side{
+    display:flex!important;flex-direction:column;align-items:stretch;gap:4px;
+    position:sticky;top:0;align-self:start;
+    width:auto!important;min-width:0;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;
+    overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
+    padding:19px 13px 14px;
+    background:var(--surface);border-right:1px solid var(--ln);
+    scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mut) 26%,transparent) transparent;
+  }
+  .side::-webkit-scrollbar{width:6px}
+  .side::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mut) 24%,transparent);border-radius:99px}
+  .side .logo{
+    display:flex;align-items:center;gap:11px;min-height:66px;
+    padding:3px 9px 17px;margin:0 1px 9px;
+    border-bottom:1px solid var(--ln);
+  }
+  .side .logo-mark{width:43px;height:43px;flex:0 0 43px;border-radius:14px}
+  .side .logo-copy{min-width:0;white-space:nowrap}
+  .side .logo-copy small{font-size:9px;letter-spacing:.11em}
+  .side .nav-label{
+    display:block;padding:10px 11px 5px;margin:0;
+    color:var(--mut);font-size:9px;font-weight:850;letter-spacing:.16em;line-height:1.25;
+  }
+  .side .nav-label-gap{margin-top:9px;padding-top:14px;border-top:1px solid var(--ln)}
+  .side button.nv{
+    display:flex;align-items:center;justify-content:flex-start;gap:11px;
+    width:100%;min-width:0;min-height:43px;height:43px;flex:0 0 43px;
+    margin:1px 0;padding:8px 11px;border:1px solid transparent;
+    border-radius:13px;background:transparent;color:var(--mut);
+    font-size:12.5px;font-weight:680;letter-spacing:0;text-align:left;
+    line-height:1.25;white-space:nowrap;box-shadow:none;
+    transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease;
+  }
+  .side button.nv:hover{background:var(--soft);color:var(--tx);border-color:var(--ln);transform:translateX(1px)}
+  .side button.nv:focus-visible{outline:2px solid var(--pr);outline-offset:2px}
+  .side button.nv.on{
+    background:var(--pr-l);color:var(--pr-d);
+    border-color:color-mix(in srgb,var(--pr) 18%,var(--ln));
+    box-shadow:inset 3px 0 0 var(--pr);
+    font-weight:800;
+  }
+  .side button.nv .nv-ico{
+    display:inline-grid;place-items:center;width:27px;height:27px;flex:0 0 27px;
+    margin:0;border-radius:9px;background:color-mix(in srgb,var(--soft) 78%,transparent);
+    font-size:16px;line-height:1;
+  }
+  .side button.nv.on .nv-ico{background:color-mix(in srgb,var(--pr) 12%,var(--surface));transform:none}
+  .side button.nv span:last-child{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .side .side-spacer{flex:1 0 14px;min-height:14px}
+  .side .side-foot{
+    flex:0 0 auto;margin:10px 3px 0;padding:13px 9px 3px;
+    border-top:1px solid var(--ln);font-size:10.5px;line-height:1.4;
+  }
+  .side .side-foot small{margin:5px 0 0 13px;font-size:9px;line-height:1.4;overflow-wrap:anywhere}
+  .top{
+    position:sticky;top:0;z-index:25;display:flex;align-items:center;justify-content:flex-end;
+    gap:10px;min-width:0;min-height:62px;height:62px;flex:0 0 62px;
+    padding:9px clamp(20px,2.5vw,38px);
+    background:color-mix(in srgb,var(--bg) 90%,transparent);
+    border-bottom:1px solid var(--ln);box-shadow:0 4px 18px #00000008;
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  }
+  .top>span:last-child{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0;max-width:100%}
+  .top .chip-pr{min-height:38px;height:38px;padding:7px 13px;font-size:12px;border-radius:12px;white-space:nowrap}
+  .brand{display:none}
+  .wrap{
+    display:block;width:100%;max-width:1600px;min-width:0;
+    margin:0 auto;padding:28px clamp(22px,2.5vw,42px) 48px;
+  }
+  .wrap>*{min-width:0;max-width:100%}
+  .grid,.split,.order-workspace,.settings-grid{min-width:0;max-width:100%}
+  .bottom,.fab{display:none!important}
+  #msg{bottom:28px}
+}
+/* Laptop standar dan layar agak sempit: sidebar lebih ramping, konten tetap lega. */
+@media (min-width:900px) and (max-width:1199px){
+  .app{grid-template-columns:224px minmax(0,1fr)!important}
+  .side{padding:15px 10px 12px}
+  .side .logo{gap:9px;padding-inline:7px}
+  .side .logo-copy{font-size:17px}
+  .side button.nv{min-height:41px;height:41px;flex-basis:41px;padding:7px 9px;font-size:11.5px;gap:9px}
+  .side button.nv .nv-ico{width:25px;height:25px;flex-basis:25px;font-size:15px}
+  .side .nav-label{padding-left:9px}
+  .wrap{padding:23px clamp(18px,2vw,28px) 40px}
+  .top{height:58px;min-height:58px;flex-basis:58px;padding-inline:20px}
+}
+/* Layar desktop lebar: beri ruang navigasi dan konten yang seimbang. */
+@media (min-width:1500px){
+  .app{grid-template-columns:264px minmax(0,1fr)!important}
+  .side{padding-inline:15px}
+}
+/* Memastikan panel utama tidak memaksa seluruh layout melebar. */
+@media (min-width:900px){
+  .wrap,.wrap>*,.card,.table-wrap,.page-head,.page-head>*{min-width:0}
+  .table-wrap{max-width:100%;overflow-x:auto}
+  .page-head{align-items:center}
+}
+</style>
+
 </head>
 <body>
 <div class="app">
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.6.0)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.10.1)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -697,10 +813,10 @@ window.__len = 236026;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v11.10.0)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v11.10.1)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v11.10.0)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v11.10.1)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -724,7 +840,7 @@ window.__len = 236026;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.10.0 · Remember Device';
+var APP_VER = 'v11.10.1 · Desktop Navigation';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -761,7 +877,7 @@ try {
   else if (colorPref.addListener) colorPref.addListener(onColorPref);
 } catch (e) {}
 // Opsional: isi URL /exec di sini agar tidak perlu mengisi lewat layar setup
-var DEFAULT_API = 'https://script.google.com/macros/s/AKfycbwWcnvTcBJzY4SXIxKY30sPXj31oNapu-nIYPnQWDplQOOb5Xvb8WvT3vcZwGDhVOBpFw/exec';
+var DEFAULT_API = '';
 var getApi = () => LS.get('uf_api') || DEFAULT_API;
 var getTok = () => window._tok || LS.get('uf_tok');
 var setTok = t => { window._tok = t || ''; if (t) LS.set('uf_tok', t); else LS.del('uf_tok'); };
