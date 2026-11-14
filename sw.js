@@ -1,9 +1,9 @@
-/* UWAIS FOOD ADMIN PWA — v11.10.3 Order Workspace Clean Layout
+/* UWAIS FOOD ADMIN PWA — v11.10.4 Fixed Order Panel Layout
  * Network-first navigation, versioned app shell, user-approved update activation.
  * API requests use POST and are never cached.
  */
 const CACHE_PREFIX = 'uwais-food-admin-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v11-10-3-order-workspace-20261114';
+const CACHE_NAME = CACHE_PREFIX + 'v11-10-4-order-panel-fixed-20261114';
 const SHELL_FILES = [
   './',
   './index.html',

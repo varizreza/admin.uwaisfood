@@ -671,7 +671,7 @@ img,svg,canvas,video{max-width:100%}
 
 <style id="uwais-desktop-navigation-v11-10-3">
 /* =============================================================
-   UWAIS FOOD ADMIN v11.10.3 — SIDEBAR FLEX / NO FLOATING FOOTER
+   UWAIS FOOD ADMIN v11.10.4 — SIDEBAR FLEX / NO FLOATING FOOTER
    Desktop: header tetap, menu mengisi dan menggulir ruang tengah,
    footer selalu menempel pada sisi bawah viewport.
    Mobile tetap menggunakan bottom navigation sebelumnya.
@@ -803,7 +803,7 @@ img,svg,canvas,video{max-width:100%}
 
 <style id="uf-v11103-order-workspace">
 /* =============================================================
-   UWAIS FOOD ADMIN v11.10.3 — ORDER WORKSPACE CLEANUP
+   UWAIS FOOD ADMIN v11.10.4 — ORDER WORKSPACE CLEANUP
    Product selection is compact and scannable; checkout summary is
    structured, sticky on wide screens, and stacked on narrower screens.
    Functional markup and event handlers remain unchanged.
@@ -937,7 +937,7 @@ img,svg,canvas,video{max-width:100%}
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.10.3)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.10.4)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -960,10 +960,10 @@ window.__len = 236026;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v11.10.3)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v11.10.4)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v11.10.3)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v11.10.4)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -987,7 +987,7 @@ window.__len = 236026;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.10.3 · Order Workspace Clean Layout';
+var APP_VER = 'v11.10.4 · Order Panel Fixed';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -2083,26 +2083,34 @@ function vPesan() {
   const adnOver = adn && adn.rows.some(r => r.sisa < 0);
   const adnNote = adn ? `<div class="note ${adnOver ? 'bad' : 'ok'}">🥣 <b>${adnOver ? 'Adonan tidak cukup' : 'Sisa adonan setelah pesanan ini'}</b><div class="tags" style="margin-top:6px">${adn.rows.map(r => `<span class="tag ${r.sisa < 0 ? 'neg' : 'ok'}">${esc(r.nama)}: ${r.sisa < 0 ? 'kurang ' + (-r.sisa) : r.sisa} pcs</span>`).join('')}</div></div>` : '';
   const panel = `
-    <div class="card panel col">
-      <div class="panel-heading"><span class="panel-heading-icon">🛍️</span><span><b>${editing ? 'Edit pesanan' : 'Ringkasan pesanan'}</b><small>${nLines} jenis produk dipilih</small></span></div>
-      ${top.length ? `<div><div class="mut" style="margin-bottom:6px">Pelanggan langganan</div><div class="tags">${top.map(x => `<button class="tag" onclick="pilihPel(${x.i})">${esc(x.p.nama)}</button>`).join('')}</div></div>` : ''}
-      <label class="field-label" for="nama">Nama pemesan</label>
-      <input id="nama" list="pelList" placeholder="Ketik nama pelanggan" value="${esc(window._n || '')}" oninput="ubahNamaPesanan(this.value)" autocomplete="off">
-      <datalist id="pelList">${D.pelanggan.map(p => `<option value="${esc(p.nama)}">`).join('')}</datalist>
-      <div id="pinfo">${pinfo()}</div>
-      <div class="shipping-selector"><label class="field-label">Metode penyerahan</label><div class="seg shipping-seg">
-        <button class="${shippingMode === 'Pickup' ? 'on' : ''}" onclick="setMetodeKirim('Pickup')">📦 Pickup</button>
-        <button class="${shippingMode === 'Kurir3' ? 'on' : ''}" onclick="setMetodeKirim('Kurir3')">🚚 Kurir</button>
-        ${(cfg().kurirMaps || shippingMode === 'Kurir') ? `<button class="${shippingMode === 'Kurir' ? 'on' : ''}" onclick="setMetodeKirim('Kurir')">📍 Kurir Maps</button>` : ''}
-      </div><div id="kirimBox">${kirimBox()}</div></div>
-      <div class="cart-lines">${nLines ? lines.map(x => `<div class="line"><span>${x.q}× ${esc(x.m.nama)}</span><b>${rp(x.q * priceOf(x.m))}</b></div>`).join('') + ex.filter(x => x.qty > 0).map(x => `<div class="line"><span>${x.qty}× ${esc(x.nama)}</span><b>${rp(x.qty * x.harga)}</b></div>`).join('') : '<div class="mut">Belum ada produk dipilih. Tambahkan produk dari daftar.</div>'}</div>
-      ${adnNote}
-      ${comp.length ? `<div><div class="mut" style="margin-bottom:6px">Rincian isi paket</div><div class="tags">${comp.map(c => `<span class="tag ok">${c.qty} ${esc(c.nama)}</span>`).join('')}</div></div>` : ''}
-      <div class="totals-box"><div class="line"><span class="mut">Subtotal produk</span><b>${rp(total)}</b></div>
-      ${shippingMode !== 'Pickup' ? `<div class="line"><span class="mut">Ongkos kirim</span><b id="orderFee">${rp(shipPreview.valid ? shipPreview.ongkir : 0)}</b></div>` : ''}
-      <div class="grand-total"><span>Total pembayaran</span><strong id="orderTotal">${rp(totalTagihan)}</strong></div></div>
-      <button class="full checkout-btn" onclick="${editing ? 'simpanEdit()' : 'simpan()'}">${editing ? 'Simpan Perubahan' : 'Simpan Pesanan'} <span>→</span></button>
-      ${editing ? '<button class="o" onclick="batalEdit()">Batal edit</button>' : (nLines ? '<button class="o" onclick="cart={};render()">Kosongkan keranjang</button>' : '')}
+    <div class="card panel col order-panel-shell">
+      <div class="order-panel-head">
+        <div class="panel-heading"><span class="panel-heading-icon">🛍️</span><span><b>${editing ? 'Edit pesanan' : 'Ringkasan pesanan'}</b><small>${nLines} jenis produk dipilih</small></span></div>
+      </div>
+      <div class="order-panel-body">
+        ${top.length ? `<div class="order-customer-shortcuts"><div class="mut" style="margin-bottom:6px">Pelanggan langganan</div><div class="tags">${top.map(x => `<button class="tag" onclick="pilihPel(${x.i})">${esc(x.p.nama)}</button>`).join('')}</div></div>` : ''}
+        <div class="order-customer-field">
+          <label class="field-label" for="nama">Nama pemesan</label>
+          <input id="nama" list="pelList" placeholder="Ketik nama pelanggan" value="${esc(window._n || '')}" oninput="ubahNamaPesanan(this.value)" autocomplete="off">
+          <datalist id="pelList">${D.pelanggan.map(p => `<option value="${esc(p.nama)}">`).join('')}</datalist>
+          <div id="pinfo">${pinfo()}</div>
+        </div>
+        <div class="shipping-selector"><label class="field-label">Metode penyerahan</label><div class="seg shipping-seg">
+          <button class="${shippingMode === 'Pickup' ? 'on' : ''}" onclick="setMetodeKirim('Pickup')">📦 Pickup</button>
+          <button class="${shippingMode === 'Kurir3' ? 'on' : ''}" onclick="setMetodeKirim('Kurir3')">🚚 Kurir</button>
+          ${(cfg().kurirMaps || shippingMode === 'Kurir') ? `<button class="${shippingMode === 'Kurir' ? 'on' : ''}" onclick="setMetodeKirim('Kurir')">📍 Kurir Maps</button>` : ''}
+        </div><div id="kirimBox">${kirimBox()}</div></div>
+        <div class="cart-lines">${nLines ? lines.map(x => `<div class="line"><span>${x.q}× ${esc(x.m.nama)}</span><b>${rp(x.q * priceOf(x.m))}</b></div>`).join('') + ex.filter(x => x.qty > 0).map(x => `<div class="line"><span>${x.qty}× ${esc(x.nama)}</span><b>${rp(x.qty * x.harga)}</b></div>`).join('') : '<div class="mut">Belum ada produk dipilih. Tambahkan produk dari daftar.</div>'}</div>
+        ${adnNote}
+        ${comp.length ? `<div class="order-package-breakdown"><div class="mut" style="margin-bottom:6px">Rincian isi paket</div><div class="tags">${comp.map(c => `<span class="tag ok">${c.qty} ${esc(c.nama)}</span>`).join('')}</div></div>` : ''}
+      </div>
+      <div class="order-panel-footer">
+        <div class="totals-box"><div class="line"><span class="mut">Subtotal produk</span><b>${rp(total)}</b></div>
+        ${shippingMode !== 'Pickup' ? `<div class="line"><span class="mut">Ongkos kirim</span><b id="orderFee">${rp(shipPreview.valid ? shipPreview.ongkir : 0)}</b></div>` : ''}
+        <div class="grand-total"><span>Total pembayaran</span><strong id="orderTotal">${rp(totalTagihan)}</strong></div></div>
+        <button class="full checkout-btn" onclick="${editing ? 'simpanEdit()' : 'simpan()'}">${editing ? 'Simpan Perubahan' : 'Simpan Pesanan'} <span>→</span></button>
+        ${editing ? '<button class="o" onclick="batalEdit()">Batal edit</button>' : (nLines ? '<button class="o" onclick="cart={};render()">Kosongkan keranjang</button>' : '')}
+      </div>
     </div>`;
   return `<div class="page-head"><div><div class="eyebrow">TRANSAKSI</div><h2>${editing ? 'Edit Pesanan' : 'Buat Pesanan'}</h2><div class="page-subtitle">Pilih produk, pelanggan, dan metode penyerahan pesanan.</div></div><div class="page-head-action">${editing ? '' : poBar('pesan')}</div></div>${editing ? editBanner() : ''}
     <div class="order-workspace"><section class="product-section"><div class="product-toolbar"><div><b>Pilih Produk</b><small>${D.menu.length} produk tersedia</small></div><div class="product-search"><span>⌕</span><input placeholder="Cari produk…" value="${esc(window._productQuery || '')}" oninput="window._productQuery=this.value;filterProducts(this.value)"></div></div>
@@ -3441,7 +3449,59 @@ function exportPdfRekap() {
     h2{font-size:11pt;margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid #e9e1d9;color:#352c25}.table-wrap{width:100%;overflow:visible}table{width:100%;border-collapse:collapse;font-size:8.4pt;table-layout:auto}thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}th{background:#f6eee7;color:#56463a;text-align:left;font-size:7.7pt;padding:8px 7px;border:1px solid #e5dbd1}td{padding:7px;border:1px solid #e9e3dc;vertical-align:top}tbody tr:nth-child(even){background:#fffdfa}.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.strong{font-weight:800}.sub{font-size:7.3pt;color:#82766c;margin-top:3px}.empty{text-align:center;color:#8d8279;padding:12px}.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}.totals{max-width:440px;margin:14px 0 0 auto;border:1px solid #e9e1d9;border-radius:10px;padding:10px 12px}.totals div{display:flex;justify-content:space-between;gap:15px;padding:4px 0}.totals .final{border-top:1px solid #dfd4c9;margin-top:5px;padding-top:9px;font-size:12pt;font-weight:800;color:#c64b0b}.foot{border-top:1px solid #e9e1d9;margin-top:22px;padding-top:9px;color:#8a7e73;font-size:8pt;display:flex;justify-content:space-between;gap:12px}
     @page{size:A4 portrait;margin:13mm 11mm 14mm}@media print{html,body{background:#fff!important}body{padding:0}.toolbar{display:none!important}.report{max-width:none}.head{break-inside:avoid;page-break-inside:avoid}.metric{break-inside:avoid;page-break-inside:avoid}h2{break-after:avoid-page}.foot{break-inside:avoid}}
     @media screen and (max-width:700px){body{padding:12px}.head{display:block}.generated{text-align:left;margin-top:10px;white-space:normal}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}.table-wrap{overflow-x:auto}table{min-width:760px}}
-  </style></head><body>
+  
+
+/* ===== ORDER INPUT v11.10.4 — FIXED PANEL FRAME =====
+/* On wide screens the order panel follows the same three-zone pattern as the
+   left navigation: fixed heading, independently scrollable middle, anchored actions. */
+@media (min-width:1200px){
+  .panel.order-panel-shell{
+    position:sticky;top:78px;
+    display:flex;flex-direction:column;gap:0;
+    height:calc(100vh - 98px);max-height:calc(100vh - 98px);min-height:420px;
+    padding:0;overflow:hidden;overscroll-behavior:contain;
+  }
+  .order-panel-head{
+    flex:0 0 auto;padding:14px 15px 10px;
+    background:var(--surface);border-bottom:1px solid var(--ln);
+  }
+  .order-panel-head .panel-heading{padding:0;border:0}
+  .order-panel-body{
+    flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+    display:flex;flex-direction:column;gap:10px;padding:11px 15px 14px;
+    scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mut) 28%,transparent) transparent;
+  }
+  .order-panel-body::-webkit-scrollbar{width:5px}
+  .order-panel-body::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mut) 28%,transparent);border-radius:99px}
+  .order-panel-body .order-customer-field{display:flex;flex-direction:column;gap:7px}
+  .order-panel-body .order-customer-shortcuts{display:flex;flex-direction:column;gap:2px}
+  .order-panel-body .cart-lines{margin-top:1px}
+  .order-panel-footer{
+    flex:0 0 auto;display:flex;flex-direction:column;gap:9px;
+    padding:11px 15px 14px;border-top:1px solid var(--ln);
+    background:var(--surface);box-shadow:0 -7px 18px #0000000b;
+  }
+  .order-panel-footer .totals-box{margin:0}
+  .order-panel-footer .checkout-btn,.order-panel-footer>.o{width:100%;margin:0}
+}
+/* On narrower laptops/tablets the panel is stacked below the product grid;
+   keep natural document flow and do not create a nested scroll area. */
+@media (min-width:900px) and (max-width:1199px){
+  .panel.order-panel-shell{height:auto;max-height:none;min-height:0;overflow:visible;padding:15px;gap:10px}
+  .order-panel-head{padding:0 0 10px;background:transparent;border-bottom:1px solid var(--ln)}
+  .order-panel-head .panel-heading{padding:0;border:0}
+  .order-panel-body{flex:initial;min-height:0;overflow:visible;padding:0;gap:10px}
+  .order-panel-footer{flex:initial;gap:9px;padding:10px 0 0;border-top:1px solid var(--ln);background:transparent;box-shadow:none}
+}
+/* Mobile retains the existing stacked checkout and bottom navigation. */
+@media (max-width:899px){
+  .panel.order-panel-shell{height:auto;max-height:none;min-height:0;overflow:visible;padding:13px;gap:9px}
+  .order-panel-head{padding:0 0 9px;background:transparent;border-bottom:1px solid var(--ln)}
+  .order-panel-head .panel-heading{padding:0;border:0}
+  .order-panel-body{flex:initial;min-height:0;overflow:visible;padding:0;gap:9px}
+  .order-panel-footer{flex:initial;gap:8px;padding:10px 0 0;border-top:1px solid var(--ln);background:transparent;box-shadow:none}
+}
+</style></head><body>
   <div class="toolbar"><button onclick="window.print()">📄 Simpan sebagai PDF</button><button class="secondary" onclick="window.close()">Tutup</button><span>Pada dialog cetak Chrome, pilih tujuan <b>Save as PDF / Simpan sebagai PDF</b>.</span></div>
   <main class="report">
     <header class="head"><div><div class="brand">UWAIS FOOD</div><div class="kicker">BAKERY · ORDER MANAGEMENT</div><div class="title">Laporan Rekap Data Pesanan</div><div class="meta">Periode: <b>${safe(poLabel)}</b> &nbsp;·&nbsp; Status: <b>${safe(statusLabel)}</b></div></div><div class="generated">Dibuat pada<br><b>${safe(generatedAt)}</b></div></header>
