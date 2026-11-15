@@ -1,9 +1,9 @@
-/* UWAIS FOOD ADMIN PWA — v11.10.5 Mobile Order Layout Fix
+/* UWAIS FOOD ADMIN PWA — v11.10.7 Menu Variant Builder Fix
  * Network-first navigation, versioned app shell, user-approved update activation.
  * API requests use POST and are never cached.
  */
 const CACHE_PREFIX = 'uwais-food-admin-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v11-10-5-mobile-order-layout-20261114';
+const CACHE_NAME = CACHE_PREFIX + 'v11-10-7-menu-variant-builder-20261115';
 const SHELL_FILES = [
   './',
   './index.html',

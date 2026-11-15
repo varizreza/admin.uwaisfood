@@ -398,6 +398,26 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 .menu-admin-field input,.menu-admin-field textarea{width:100%;min-width:0;border:1px solid var(--ln);border-radius:11px;padding:10px 11px;background:var(--bg);color:var(--tx);font:inherit;font-size:13px;outline:none}
 .menu-admin-field textarea{min-height:66px;resize:vertical;line-height:1.45}
 .menu-admin-field input:focus,.menu-admin-field textarea:focus{border-color:var(--pr);box-shadow:0 0 0 3px var(--pr-l)}
+.menu-composition{display:grid;gap:9px;padding:11px;border:1px solid var(--ln);border-radius:13px;background:var(--soft)}
+.menu-composition-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.menu-composition-head b{font-size:12px}
+.menu-composition-head small{font-size:10px;color:var(--mut)}
+.menu-variant-row{display:grid;grid-template-columns:minmax(76px,96px) minmax(0,1fr) auto;gap:7px;align-items:end}
+.menu-variant-row .menu-admin-field{gap:4px}
+.menu-variant-row .menu-admin-field label{font-size:9px;letter-spacing:.04em}
+.menu-variant-row input,.menu-variant-row select{width:100%;min-width:0;height:39px;border:1px solid var(--ln);border-radius:10px;padding:8px;background:var(--bg);color:var(--tx);font:inherit;font-size:12px;outline:none}
+.menu-variant-row input:focus,.menu-variant-row select:focus{border-color:var(--pr);box-shadow:0 0 0 3px var(--pr-l)}
+.menu-variant-remove{height:39px;width:38px;border:1px solid var(--ln);border-radius:10px;background:var(--surface);color:var(--mut);font-size:16px}
+.menu-variant-remove:hover{background:#5b2424;color:#ffe0dc}
+.menu-variant-add{justify-self:start;padding:8px 10px;border:1px dashed var(--pr);border-radius:10px;background:transparent;color:var(--pr);font-size:11px;font-weight:800}
+.menu-composition-preview{font-size:10px;line-height:1.45;color:var(--mut);padding-top:7px;border-top:1px solid var(--ln);overflow-wrap:anywhere}
+.menu-composition-preview strong{color:var(--tx)}
+.menu-composition-empty{font-size:11px;color:var(--mut);line-height:1.45}
+.menu-legacy-composition{display:grid;gap:8px;padding:10px;border:1px solid #b7791f55;border-radius:12px;background:#b7791f0d}
+.menu-legacy-composition textarea{width:100%;min-width:0;border:1px solid var(--ln);border-radius:10px;padding:9px;background:var(--bg);color:var(--tx);font:inherit;font-size:12px;min-height:62px}
+.menu-legacy-composition button{justify-self:start;padding:8px 10px;border-radius:9px;border:1px solid var(--ln);background:var(--surface);color:var(--tx);font-size:11px;font-weight:750}
+.menu-composition .note{font-size:10px;margin:0;padding:8px}
+@media(max-width:640px){.menu-variant-row{grid-template-columns:82px minmax(0,1fr) 36px;gap:6px}.menu-variant-row input,.menu-variant-row select{font-size:11px;padding:7px}.menu-composition{padding:9px}}
 .menu-admin-price-wrap{position:relative}
 .menu-admin-price-wrap b{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--mut);pointer-events:none}
 .menu-admin-price-wrap input{padding-left:38px;font-weight:750;color:var(--pr)}
@@ -951,7 +971,7 @@ img,svg,canvas,video{max-width:100%}
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.10.5)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.10.7)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -1001,7 +1021,7 @@ window.__len = 236026;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.10.4 · Order Panel Fixed';
+var APP_VER = 'v11.10.7 · Menu Variant Builder';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -2708,7 +2728,7 @@ function filterMenuAdmin(value) {
   if (empty) empty.style.display = [...document.querySelectorAll('.menu-admin-card')].some(el => !el.hidden) ? 'none' : 'block';
 }
 function tambahMenuProduk() {
-  D.menu.push({nama:'', harga:0, isi:'', gambar:''});
+  D.menu.push({nama:'', harga:0, isi:'', gambar:'', _variantMode:'structured', _variantRows:[], _variantDirty:false});
   render();
   const el = document.querySelectorAll('.menu-admin-card input[placeholder="Nama produk"]');
   if (el.length) el[el.length - 1].focus();
@@ -2718,6 +2738,134 @@ async function hapusMenuProduk(index) {
   if (!m) return;
   if (!(await popupConfirm('Hapus produk "' + m.nama + '" dari daftar menu?', {title:'Hapus produk?', confirmText:'Ya, hapus'}))) return;
   D.menu.splice(index, 1); render();
+}
+function menuVariantKey(value) { return key(String(value || '').replace(/\s*\/\s*/g, ' ')); }
+function menuIsSelfVariantProduct(m) {
+  if (!m || !String(m.nama || '').trim()) return false;
+  const parts = parseIsi(m.isi);
+  return parts.length === 1 && menuVariantKey(parts[0].nama) === menuVariantKey(m.nama);
+}
+function menuHasStructuredContents(m) {
+  if (!m) return false;
+  // Produk satuan boleh mempunyai Isi seperti "10 Nama Produk" untuk jumlah
+  // per kemasan; produk seperti ini tetap menjadi pilihan komponen paket.
+  if (menuIsSelfVariantProduct(m)) return false;
+  if (m._variantMode === 'structured' && Array.isArray(m._variantRows))
+    return m._variantRows.length > 0 || !!String(m.isi || '').trim();
+  return !!String(m.isi || '').trim();
+}
+function menuVariantOptions(index) {
+  return (D.menu || []).map((m, i) => ({m, i}))
+    .filter(x => x.i !== index && String(x.m.nama || '').trim() && !menuHasStructuredContents(x.m))
+    .map(x => ({nama:String(x.m.nama).trim()}));
+}
+function menuResolveVariantName(index, rawName) {
+  const options = menuVariantOptions(index);
+  const raw = menuVariantKey(rawName);
+  const exact = options.find(o => menuVariantKey(o.nama) === raw);
+  if (exact) return exact.nama;
+  const aliases = {
+    'bolen manis':['bolen pisang cokelat keju','bolen pisang','bolen manis'],
+    'bolen pisang':['bolen pisang cokelat keju','bolen pisang'],
+    'bolen pisang manis':['bolen pisang cokelat keju','bolen pisang','bolen manis'],
+    'bolen pisang cokelat keju manis':['bolen pisang cokelat keju','bolen pisang'],
+    'bolen daging':['bolen cheesy beef','bolen daging'],
+    'bolen asin':['bolen cheesy beef','bolen daging','bolen asin'],
+    'bolen cheesy beef asin':['bolen cheesy beef','bolen daging']
+  };
+  for (const alias of (aliases[raw] || [])) {
+    const match = options.find(o => menuVariantKey(o.nama) === menuVariantKey(alias));
+    if (match) return match.nama;
+  }
+  return '';
+}
+function menuInitVariantEditor(index) {
+  const m = D.menu[index];
+  if (!m || m._variantMode) return;
+  const raw = String(m.isi || '').trim();
+  if (menuIsSelfVariantProduct(m)) {
+    m._variantMode = 'legacy'; m._legacyIsi = raw; m._variantRows = []; m._variantDirty = false;
+    return;
+  }
+  if (!raw) {
+    m._variantMode = 'structured'; m._variantRows = []; m._variantDirty = false;
+    return;
+  }
+  const parts = parseIsi(raw);
+  const rows = parts.map(p => ({qty:Math.max(1, Math.floor(Number(p.n) || 1)), nama:menuResolveVariantName(index, p.nama)}));
+  if (rows.length && rows.every(r => r.nama)) {
+    m._variantMode = 'structured'; m._variantRows = rows; m._variantDirty = false;
+  } else {
+    // Komposisi lama yang tidak cocok dengan master varian dipertahankan apa adanya.
+    m._variantMode = 'legacy'; m._legacyIsi = raw; m._variantRows = rows; m._variantDirty = false;
+  }
+}
+function menuVariantRows(index) {
+  menuInitVariantEditor(index);
+  const m = D.menu[index];
+  if (!Array.isArray(m._variantRows)) m._variantRows = [];
+  return m._variantRows;
+}
+function menuBuildIsi(index) {
+  const rows = menuVariantRows(index);
+  const grouped = new Map();
+  rows.forEach(r => {
+    const nama = String(r.nama || '').trim();
+    const qty = Math.floor(Number(r.qty) || 0);
+    if (nama && qty > 0) grouped.set(nama, (grouped.get(nama) || 0) + qty);
+  });
+  return [...grouped.entries()].map(([nama, qty]) => `${qty} ${nama}`).join(' + ');
+}
+function menuSyncVariantPreview(index) {
+  const m = D.menu[index];
+  if (!m) return;
+  const preview = document.getElementById('menu-composition-preview-' + index);
+  if (preview) preview.innerHTML = m.isi ? '<strong>Komposisi tersimpan:</strong> ' + esc(m.isi) : 'Belum ada varian dipilih. Produk akan disimpan sebagai produk satuan.';
+  const chip = document.getElementById('menu-kind-' + index);
+  if (chip) {
+    const selfVariant = menuIsSelfVariantProduct(m);
+    chip.className = 'tag ' + (m.isi && !selfVariant ? 'pr' : '');
+    chip.textContent = selfVariant ? '🥐 Produk varian' : (m.isi ? '📦 Produk paket' : '🥐 Produk satuan');
+  }
+}
+function menuVariantAdd(index) {
+  const m = D.menu[index]; if (!m) return;
+  menuInitVariantEditor(index);
+  if (m._variantMode === 'legacy') return;
+  m._variantRows = menuVariantRows(index);
+  m._variantRows.push({qty:1,nama:''});
+  m._variantDirty = true; m.isi = menuBuildIsi(index);
+  render();
+}
+function menuVariantRemove(index, rowIndex) {
+  const m = D.menu[index]; if (!m) return;
+  const rows = menuVariantRows(index);
+  rows.splice(rowIndex, 1); m._variantRows = rows; m._variantDirty = true;
+  m.isi = menuBuildIsi(index); render();
+}
+function menuVariantChange(index, rowIndex, field, value) {
+  const m = D.menu[index]; if (!m) return;
+  const rows = menuVariantRows(index);
+  if (!rows[rowIndex]) return;
+  if (field === 'qty') rows[rowIndex].qty = Math.max(0, Math.floor(Number(value) || 0));
+  else if (field === 'nama') rows[rowIndex].nama = String(value || '').trim();
+  m._variantRows = rows; m._variantMode = 'structured'; m._variantDirty = true;
+  m.isi = menuBuildIsi(index); menuSyncVariantPreview(index);
+}
+function menuUseVariantEditor(index) {
+  const m = D.menu[index]; if (!m) return;
+  menuInitVariantEditor(index);
+  const previous = String(m._legacyIsi || m.isi || '').trim();
+  const parts = parseIsi(previous);
+  m._variantRows = parts.map(p => ({qty:Math.max(1, Math.floor(Number(p.n) || 1)), nama:menuResolveVariantName(index, p.nama)}));
+  if (!m._variantRows.length) m._variantRows = [{qty:1,nama:''}];
+  m._variantMode = 'structured'; m._variantDirty = false; m._legacyIsi = previous;
+  render();
+}
+function menuLegacyIsiChange(index, value) {
+  const m = D.menu[index]; if (!m) return;
+  m.isi = String(value || '').trim(); m._legacyIsi = m.isi; m._variantMode = 'legacy'; m._variantDirty = false;
+  menuSyncVariantPreview(index);
 }
 function compressMenuImage(file) {
   return new Promise((resolve, reject) => {
@@ -2778,7 +2926,40 @@ function hapusGambarMenu(index) {
 }
 function vMenu() {
   const query = key(window._menuAdminQuery || '');
-  const cards = D.menu.map((m, i) => `
+  const cards = D.menu.map((m, i) => {
+    menuInitVariantEditor(i);
+    const options = menuVariantOptions(i);
+    const isLegacy = m._variantMode === 'legacy';
+    const isSelfVariant = menuIsSelfVariantProduct(m);
+    const rows = menuVariantRows(i);
+    const variantEditor = isLegacy ? (isSelfVariant ? `
+      <div class="menu-admin-field"><label>Isi per kemasan (produk satuan)</label>
+        <div class="menu-legacy-composition">
+          <textarea placeholder="Contoh: 10 ${esc(m.nama)}" onchange="menuLegacyIsiChange(${i},this.value)">${esc(m._legacyIsi || m.isi || '')}</textarea>
+          <small class="mut">Produk ini tetap tersedia sebagai pilihan varian ketika membuat paket custom.</small>
+        </div>
+      </div>` : `
+      <div class="menu-admin-field"><label>Komposisi paket lama / keterangan</label>
+        <div class="menu-legacy-composition">
+          <textarea placeholder="Komposisi lama dipertahankan di sini" onchange="menuLegacyIsiChange(${i},this.value)">${esc(m._legacyIsi || m.isi || '')}</textarea>
+          <small class="mut">Komposisi ini belum cocok dengan nama varian produk satuan yang terdaftar. Nilai lama tidak diubah otomatis.</small>
+          <button type="button" onclick="menuUseVariantEditor(${i})">Susun ulang dengan pilihan varian</button>
+        </div>
+      </div>`) : `
+      <div class="menu-admin-field"><label>Komposisi varian paket (opsional)</label>
+        <div class="menu-composition">
+          <div class="menu-composition-head"><b>🧩 Isi menu custom</b><small>${rows.filter(r=>r.nama).length} varian dipilih</small></div>
+          ${rows.length ? rows.map((row, ri) => `
+            <div class="menu-variant-row">
+              <div class="menu-admin-field"><label>Jumlah (pcs)</label><input type="number" min="1" step="1" inputmode="numeric" value="${Number(row.qty)||1}" onchange="menuVariantChange(${i},${ri},'qty',this.value)"></div>
+              <div class="menu-admin-field"><label>Nama varian</label><select onchange="menuVariantChange(${i},${ri},'nama',this.value)"><option value="">Pilih varian produk…</option>${options.map(o=>`<option value="${esc(o.nama)}" ${menuVariantKey(o.nama)===menuVariantKey(row.nama)?'selected':''}>${esc(o.nama)}</option>`).join('')}</select></div>
+              <button class="menu-variant-remove" type="button" aria-label="Hapus varian" title="Hapus varian" onclick="menuVariantRemove(${i},${ri})">×</button>
+            </div>`).join('') : `<div class="menu-composition-empty">Belum ada varian. Tambahkan komponen jika produk ini merupakan paket atau menu custom. Kosongkan bagian ini untuk produk satuan.</div>`}
+          ${options.length ? `<button class="menu-variant-add" type="button" onclick="menuVariantAdd(${i})">＋ Tambah varian</button>` : `<div class="note">Belum ada produk satuan lain untuk dipilih. Simpan dahulu produk varian seperti Bolen Pisang Cokelat Keju atau Bolen Cheesy Beef.</div>`}
+          <div class="menu-composition-preview" id="menu-composition-preview-${i}">${m.isi ? '<strong>Komposisi tersimpan:</strong> ' + esc(m.isi) : 'Belum ada varian dipilih. Produk akan disimpan sebagai produk satuan.'}</div>
+        </div>
+      </div>`;
+    return `
     <article class="card col menu-admin-card" data-search="${esc(key(m.nama))}" ${query && !key(m.nama).includes(query) ? 'hidden' : ''}>
       <div class="menu-admin-photo">
         ${m.gambar ? `<img src="${esc(m.gambar)}" alt="${esc(m.nama || 'Gambar produk')}" loading="lazy">` : `<div class="menu-admin-photo-placeholder"><span>${productEmoji(m.nama || 'produk')}</span><small>FOTO PRODUK</small></div>`}
@@ -2791,16 +2972,17 @@ function vMenu() {
       <div class="menu-admin-fields">
         <div class="menu-admin-field"><label>Nama produk</label><input placeholder="Nama produk" value="${esc(m.nama)}" onchange="D.menu[${i}].nama=this.value.trim();render()"></div>
         <div class="menu-admin-field"><label>Harga jual</label><div class="menu-admin-price-wrap"><b>Rp</b><input type="number" min="0" step="500" inputmode="numeric" placeholder="Contoh: 65000" value="${Number(m.harga) || 0}" onchange="D.menu[${i}].harga=Math.max(0,+this.value||0)"></div></div>
-        <div class="menu-admin-field"><label>Komposisi paket / keterangan</label><textarea placeholder="Kosongkan untuk produk satuan. Contoh: 6 Bolen Manis + 4 Banana Milk Cheese" onchange="D.menu[${i}].isi=this.value.trim()">${esc(m.isi || '')}</textarea></div>
+        ${variantEditor}
       </div>
-      <div class="menu-admin-card-foot"><span class="tag ${m.isi ? 'pr' : ''}">${m.isi ? '📦 Produk paket' : '🥐 Produk satuan'}</span><button class="r" type="button" onclick="hapusMenuProduk(${i})">🗑 Hapus produk</button></div>
-    </article>`).join('');
-  return `<div class="page-head"><div><div class="eyebrow">KATALOG PRODUK</div><h2>Menu Produk</h2><div class="page-subtitle">Atur foto, nama, harga, dan komposisi produk Uwais Food.</div></div><button onclick="tambahMenuProduk()">＋ Tambah produk</button></div>
-    <div class="note" style="margin-bottom:12px">📸 Unggah foto produk agar tampil pada katalog pemesanan. Gambar akan dikompres otomatis sebelum disimpan ke Google Drive. Format JPG, PNG, atau WEBP.</div>
+      <div class="menu-admin-card-foot"><span class="tag ${m.isi && !isSelfVariant ? 'pr' : ''}" id="menu-kind-${i}">${isSelfVariant ? '🥐 Produk varian' : (m.isi ? '📦 Produk paket' : '🥐 Produk satuan')}</span><button class="r" type="button" onclick="hapusMenuProduk(${i})">🗑 Hapus produk</button></div>
+    </article>`;
+  }).join('');
+  return `<div class="page-head"><div><div class="eyebrow">KATALOG PRODUK</div><h2>Menu Produk</h2><div class="page-subtitle">Atur foto, nama, harga, dan isi menu custom dari varian produk yang sudah tersedia.</div></div><button onclick="tambahMenuProduk()">＋ Tambah produk</button></div>
+    <div class="note" style="margin-bottom:12px">📸 Unggah foto produk agar tampil pada katalog pemesanan. Untuk membuat paket custom, tambahkan baris varian lalu pilih nama produk dan jumlah pcs. Kosongkan komposisi untuk produk satuan.</div>
     <div class="menu-admin-toolbar"><label class="menu-admin-search"><span>⌕</span><input id="menuAdminSearch" placeholder="Cari nama produk…" value="${esc(window._menuAdminQuery || '')}" oninput="filterMenuAdmin(this.value)"></label><span class="menu-admin-count">${D.menu.length} produk terdaftar</span></div>
     <div class="menu-admin-grid">${cards || '<div class="empty">Belum ada produk. Tambahkan produk pertama Anda.</div>'}</div>
     <div id="menuAdminEmpty" class="empty" style="display:none;padding:20px">Produk tidak ditemukan.</div>
-    <div class="menu-admin-footer"><span class="mut">Perubahan nama, harga, komposisi, dan foto disimpan bersama.</span><button class="o" onclick="tambahMenuProduk()">＋ Tambah produk</button><button onclick="simpanMenu()">💾 Simpan semua menu</button></div>`;
+    <div class="menu-admin-footer"><span class="mut">Komposisi paket disimpan dalam format yang dibaca stok, HPP, dan rencana produksi.</span><button class="o" onclick="tambahMenuProduk()">＋ Tambah produk</button><button onclick="simpanMenu()">💾 Simpan semua menu</button></div>`;
 }
 
 /* ---- Pengaturan Terpusat ---- */
@@ -2889,10 +3071,23 @@ function vPengaturan() {
   return vPengaturan();
 }
 function simpanMenu() {
-  D.menu = D.menu.filter(m => m.nama && m.nama.trim()).map(m => ({nama:m.nama.trim(), harga:Math.max(0, Number(m.harga)||0), isi:m.isi||'', gambar:m.gambar||''}));
+  const named = D.menu.filter(m => m.nama && String(m.nama).trim());
+  for (let i = 0; i < named.length; i++) {
+    const m = named[i];
+    if (m._variantMode === 'structured' && Array.isArray(m._variantRows)) {
+      const rows = m._variantRows;
+      const incomplete = rows.some(r => {
+        const qty = Math.floor(Number(r.qty) || 0), name = String(r.nama || '').trim();
+        return (qty > 0 || name) && (!name || qty < 1);
+      });
+      if (incomplete) { toast('Lengkapi jumlah pcs dan nama varian pada menu "' + m.nama + '" atau hapus baris yang belum digunakan.', 'error'); return; }
+      if (m._variantDirty) m.isi = menuBuildIsi(D.menu.indexOf(m));
+    }
+  }
+  D.menu = named.map(m => ({nama:String(m.nama).trim(), harga:Math.max(0, Number(m.harga)||0), isi:m.isi||'', gambar:m.gambar||''}));
   cart = {};
   enqueue('saveMenu', JSON.parse(JSON.stringify(D.menu)));
-  toast(ONLINE ? 'Menu dan gambar tersimpan ✔' : 'Menu tersimpan di perangkat — akan dikirim saat online'); render();
+  toast(ONLINE ? 'Menu dan komposisi varian tersimpan ✔' : 'Menu tersimpan di perangkat — akan dikirim saat online'); render();
 }
 
 /* ================= STRUK & PRINTER THERMAL (ESC/POS) ================= */
