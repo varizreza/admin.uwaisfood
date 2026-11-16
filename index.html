@@ -965,13 +965,51 @@ img,svg,canvas,video{max-width:100%}
 @media(prefers-reduced-motion:reduce){.product-card,.product-search{transition:none!important}}
 </style>
 
+
+<style id="uwais-ui-polish-v11-10-8">
+/* PO: prioritize live and upcoming periods, keep completed periods compact. */
+.po-page-head{margin-bottom:14px}
+.po-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px}
+.po-overview-item{display:flex;align-items:center;gap:10px;min-width:0;padding:13px 14px;border:1px solid var(--ln);border-radius:16px;background:var(--surface)}
+.po-overview-icon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border-radius:11px;background:var(--soft);font-size:16px}
+.po-overview-item>div{display:flex;flex-direction:column;min-width:0}.po-overview-item b{font-size:19px;line-height:1.15;font-weight:850}.po-overview-item small{font-size:10.5px;color:var(--mut)}
+.po-overview-item.is-active .po-overview-icon{background:var(--ok-l)}.po-overview-item.is-upcoming .po-overview-icon{background:var(--pr-l)}
+.po-section{margin:16px 0 20px}.po-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 9px}.po-section-head>div{display:flex;align-items:baseline;gap:9px}.po-section-head b{font-size:15px}.po-section-head small{font-size:11px;color:var(--mut)}
+.po-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,310px),1fr))!important;gap:11px}
+.po-card{min-width:0;padding:14px;border-radius:18px;gap:11px;border-color:color-mix(in srgb,var(--ln) 82%,transparent)}
+.po-card-selected{border-color:var(--pr)!important;box-shadow:0 0 0 2px var(--pr-l),var(--sh)!important}
+.po-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.po-card-title-wrap{display:flex;flex-direction:column;gap:3px;min-width:0}.po-card-title-wrap>b{font-size:15px;line-height:1.25}.po-card-title-wrap>small{font-size:10.5px;color:var(--mut)}
+.po-status{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:99px;font-size:10px;font-weight:800;background:var(--soft);color:var(--mut)}
+.po-status-active{background:var(--ok-l);color:var(--ok)}.po-status-upcoming{background:var(--pr-l);color:var(--pr-d)}.po-status-warning{background:var(--bad-l);color:var(--bad)}.po-status-done,.po-status-muted{background:var(--soft);color:var(--mut)}
+.po-card-schedule{display:grid;grid-template-columns:48px minmax(0,1fr);gap:3px 8px;padding:9px 10px;border-radius:12px;background:var(--soft);font-size:10.5px}.po-card-schedule span{color:var(--mut)}.po-card-schedule b{font-weight:650;overflow-wrap:anywhere}
+.po-card-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.po-card-stats>div{display:flex;flex-direction:column;gap:2px;padding:8px 9px;min-width:0;border:1px solid var(--ln);border-radius:11px}.po-card-stats b{font-size:13px;overflow-wrap:anywhere}.po-card-stats small{font-size:9.5px;color:var(--mut)}
+.po-card-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.po-card-actions button{min-width:0;padding:8px 9px;font-size:11px;min-height:36px}.po-card-delete{display:flex;justify-content:flex-end;padding-top:7px;border-top:1px solid var(--ln)}.po-card-delete button{padding:5px 8px;font-size:10px}
+.po-empty{padding:15px 14px;border:1px dashed var(--ln);border-radius:13px;color:var(--mut);font-size:12px;background:color-mix(in srgb,var(--surface) 70%,var(--soft))}
+.po-archive{margin:20px 0;border:1px solid var(--ln);border-radius:16px;background:var(--surface);overflow:hidden}.po-archive>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;cursor:pointer;list-style:none}.po-archive>summary::-webkit-details-marker{display:none}.po-archive>summary>span:first-child{display:flex;flex-direction:column;gap:3px}.po-archive>summary b{font-size:13px}.po-archive>summary small{font-size:10.5px;color:var(--mut)}.po-archive-chevron{font-size:20px;color:var(--mut);transition:transform .18s}.po-archive[open] .po-archive-chevron{transform:rotate(180deg)}.po-archive-list{border-top:1px solid var(--ln);padding:8px 12px;display:flex;flex-direction:column;gap:6px;max-height:420px;overflow:auto}
+.po-archive-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 10px;align-items:center;padding:10px 11px;border:1px solid var(--ln);border-radius:12px;background:var(--bg)}.po-archive-info{min-width:0}.po-archive-title{font-weight:800;font-size:12px;overflow-wrap:anywhere}.po-archive-meta{font-size:10px;color:var(--mut);margin-top:2px}.po-archive-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}.po-archive-actions button{padding:6px 9px;font-size:10px;min-height:31px}
+.po-edit-form{border-color:var(--pr);box-shadow:0 0 0 2px var(--pr-l),var(--sh)}
+/* Customer directory: clearer hierarchy, compact summaries, responsive contact cards. */
+.customer-page-head{margin-bottom:15px}.customer-page-head .page-head-action button{white-space:nowrap}
+.customer-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:15px}
+.customer-metric{display:flex;align-items:center;gap:10px;min-width:0;padding:12px 13px;border:1px solid var(--ln);border-radius:15px;background:var(--surface)}.customer-metric>span{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:var(--pr-l);color:var(--pr-d);font-size:17px}.customer-metric>div{display:flex;flex-direction:column;min-width:0}.customer-metric b{font-size:19px;line-height:1.1}.customer-metric small{font-size:10px;color:var(--mut)}
+.customer-list-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 1px 12px}.customer-list-toolbar>small{flex:0 0 auto;color:var(--mut);font-size:10px}.customer-search-box{display:flex;align-items:center;gap:8px;min-width:0;max-width:520px;flex:1;padding:0 10px;border:1px solid var(--ln);border-radius:13px;background:var(--surface)}.customer-search-box>span{color:var(--mut);font-size:22px}.customer-search-box input{border:0!important;box-shadow:none!important;background:transparent!important;padding:11px 0!important;min-width:0}.customer-search-box button{width:28px;height:28px;padding:0;border-radius:50%;background:var(--soft);color:var(--mut)}
+.customer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,310px),1fr));gap:11px}.customer-card{display:flex;flex-direction:column;gap:11px;min-width:0;padding:14px;border:1px solid var(--ln);border-radius:18px;background:var(--surface);box-shadow:var(--sh);transition:border-color .15s,transform .15s}.customer-card:hover{border-color:color-mix(in srgb,var(--pr) 55%,var(--ln));transform:translateY(-1px)}.customer-card-main{display:flex;align-items:center;gap:10px;min-width:0}.customer-avatar{width:42px;height:42px;display:grid;place-items:center;flex:0 0 42px;border-radius:14px;background:linear-gradient(145deg,var(--pr-l),var(--soft));color:var(--pr-d);font-weight:850;font-size:14px}.customer-card-identity{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}.customer-card-identity>b{font-size:13px;overflow-wrap:anywhere}.customer-card-identity>small{font-size:10px;color:var(--mut);overflow-wrap:anywhere}.customer-order-count{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:48px;padding:6px 8px;border-radius:11px;background:var(--soft);font-size:14px;font-weight:850}.customer-order-count small{font-size:9px;color:var(--mut);font-weight:600}
+.customer-card-details{display:flex;flex-direction:column;gap:6px;min-height:20px}.customer-card-details>div{display:flex;align-items:flex-start;gap:7px;font-size:10.5px;color:var(--mut)}.customer-card-details>div>span{flex:0 0 14px;color:var(--pr-d)}.customer-card-details p{margin:0;overflow-wrap:anywhere}.customer-card-details .customer-no-address{font-size:10px;opacity:.75}.customer-card-foot{display:flex;flex-direction:column;gap:8px;padding-top:9px;border-top:1px solid var(--ln)}.customer-card-foot>small{font-size:9.5px;color:var(--mut)}.customer-card-actions{display:flex;gap:6px;flex-wrap:wrap}.customer-card-actions button,.customer-card-actions a{min-height:32px;padding:6px 9px;font-size:10px;border-radius:9px}.customer-card-actions button:nth-last-child(-n+2){margin-left:auto}.customer-card-actions button:nth-last-child(2)+button{margin-left:0}
+.customer-empty{display:flex;flex-direction:column;align-items:center;gap:7px;padding:40px 16px;border:1px dashed var(--ln);border-radius:18px;background:var(--surface);text-align:center}.customer-empty>span{font-size:30px}.customer-empty>b{font-size:14px}.customer-empty>small{max-width:360px;color:var(--mut);font-size:11px}
+.customer-edit-card{margin-bottom:14px;border-color:var(--pr);box-shadow:0 0 0 2px var(--pr-l),var(--sh)}.customer-form-head{display:flex;align-items:center;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--ln)}.customer-form-head>span{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:var(--pr-l);color:var(--pr-d)}.customer-form-head>div{display:flex;flex-direction:column;gap:2px}.customer-form-head small{color:var(--mut);font-size:10px}.customer-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.customer-form-grid>label{display:flex;flex-direction:column;gap:6px;font-size:10.5px;color:var(--mut)}.customer-form-grid .customer-form-wide{grid-column:1/-1}
+/* Customer name: custom combobox instead of browser-native datalist. */
+.customer-combobox{position:relative;width:100%;min-width:0}.customer-input-shell{display:flex;align-items:center;gap:9px;min-width:0;padding:0 10px;border:1px solid var(--ln);border-radius:14px;background:var(--surface);transition:border-color .15s,box-shadow .15s}.customer-input-shell:focus-within{border-color:var(--pr);box-shadow:0 0 0 3px var(--pr-l)}.customer-input-icon{width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;border-radius:9px;background:var(--soft);font-size:14px}.customer-input-shell input#nama,#panel .customer-input-shell input#nama{width:100%;min-width:0;height:46px;padding:10px 2px;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-size:13px!important;outline:0}.customer-input-shell input#nama::placeholder{color:var(--mut);opacity:.9}.customer-input-toggle{width:29px;height:29px;flex:0 0 29px;padding:0;border-radius:9px;background:var(--soft);color:var(--mut);font-size:18px}.customer-suggestions{position:absolute;top:calc(100% + 7px);left:0;right:0;z-index:80;max-height:300px;overflow:auto;padding:6px;border:1px solid var(--ln);border-radius:14px;background:var(--surface);box-shadow:0 16px 38px #0006;overscroll-behavior:contain}.customer-suggestions[hidden]{display:none!important}.customer-suggest-caption{padding:5px 8px 7px;color:var(--mut);font-size:9px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.customer-suggest-option{display:flex;width:100%;align-items:center;gap:9px;padding:8px;border-radius:10px;background:transparent;color:var(--tx);text-align:left}.customer-suggest-option:hover,.customer-suggest-option.active{background:var(--soft);filter:none}.customer-suggest-avatar{width:31px;height:31px;display:grid;place-items:center;flex:0 0 31px;border-radius:10px;background:var(--pr-l);color:var(--pr-d);font-size:10px;font-weight:850}.customer-suggest-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}.customer-suggest-copy>b{font-size:11px}.customer-suggest-copy>small{font-size:9px;color:var(--mut)}.customer-suggest-arrow{color:var(--mut)}.customer-suggest-empty{padding:12px 9px;color:var(--mut);font-size:10px}.customer-suggest-new{display:flex;align-items:center;gap:8px;width:100%;padding:9px 8px;border-top:1px solid var(--ln);border-radius:0;background:transparent;color:var(--pr-d);font-size:10px;text-align:left}.customer-suggest-new>span:first-child{font-size:17px}
+@media(max-width:700px){.po-overview,.customer-overview{gap:7px}.po-overview-item,.customer-metric{padding:9px 8px;gap:6px}.po-overview-icon,.customer-metric>span{width:29px;height:29px;flex-basis:29px;font-size:14px}.po-overview-item b,.customer-metric b{font-size:16px}.po-overview-item small,.customer-metric small{font-size:8.5px}.po-grid,.customer-grid{grid-template-columns:minmax(0,1fr)!important}.po-archive-card{grid-template-columns:minmax(0,1fr) auto}.customer-page-head{align-items:flex-start}.customer-page-head .page-head-action button{padding:9px 10px;font-size:10px}.customer-form-grid{grid-template-columns:minmax(0,1fr)}.customer-form-grid .customer-form-wide{grid-column:auto}.customer-list-toolbar{align-items:stretch;flex-direction:column}.customer-list-toolbar>small{text-align:right}}
+@media(max-width:390px){.po-overview-item{flex-direction:column;align-items:flex-start}.po-overview-item small{font-size:8px}.customer-overview{grid-template-columns:repeat(3,minmax(0,1fr))}.customer-metric{align-items:flex-start;flex-direction:column}.customer-metric>div{gap:2px}}
+</style>
+
 </head>
 <body>
 <div class="app">
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.10.7)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.10.8)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -985,7 +1023,7 @@ img,svg,canvas,video{max-width:100%}
 /* Penjaga: jika program utama gagal jalan, tampilkan penyebabnya di layar (bukan "Memuat…" selamanya) */
 window.__boot = false;
 window.__errs = [];
-window.__len = 236026;
+window.__len = 302189;
 (function () {
   var box = null;
   function esc(s) { return String(s).replace(/[&<>\"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -994,10 +1032,10 @@ window.__len = 236026;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v11.10.4)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v11.10.8)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v11.10.4)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v11.10.8)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -1021,7 +1059,7 @@ window.__len = 236026;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.10.7 · Menu Variant Builder';
+var APP_VER = 'v11.10.8 · PO & Customer UI Polish';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -2066,6 +2104,43 @@ function setDataPelangganPesanan(p) {
   window._area = p ? (p.alamat || '') : '';
   window._km = ''; window._ongkir = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null;
 }
+function closeCustomerSuggestions() {
+  const list = $('#customerSuggest'), input = $('#nama');
+  if (list) { list.hidden = true; list.innerHTML = ''; }
+  if (input) input.setAttribute('aria-expanded', 'false');
+  window._customerSuggestItems = []; window._customerSuggestActive = -1;
+}
+function showCustomerSuggestions(query) {
+  const input = $('#nama'), list = $('#customerSuggest');
+  if (!input || !list) return;
+  const q = String(query == null ? input.value : query).trim().toLowerCase();
+  const qKey = key(q);
+  const rows = D.pelanggan.map((p,i)=>({p,i})).filter(x => !q || (x.p.nama+' '+(x.p.hp||'')).toLowerCase().includes(q))
+    .sort((a,b) => {
+      const rank = x => !qKey ? 0 : key(x.p.nama) === qKey ? 0 : key(x.p.nama).startsWith(qKey) ? 1 : 2;
+      return rank(a)-rank(b) || (Number(b.p.jumlah)||0)-(Number(a.p.jumlah)||0) || a.p.nama.localeCompare(b.p.nama);
+    }).slice(0,8);
+  window._customerSuggestItems = rows.map(x=>x.i); window._customerSuggestActive = -1;
+  const exact = D.pelanggan.some(p => key(p.nama) === key(input.value));
+  const options = rows.map((x,n)=>`<button type="button" class="customer-suggest-option" data-customer-option="${n}" onmousedown="event.preventDefault()" onclick="pilihSaranPelanggan(${x.i})"><span class="customer-suggest-avatar">${esc(pelInitials(x.p.nama))}</span><span class="customer-suggest-copy"><b>${esc(x.p.nama)}</b><small>${x.p.hp ? esc(x.p.hp) : 'Nomor HP belum tersimpan'}${Number(x.p.jumlah)>0 ? ' · '+Number(x.p.jumlah)+' pesanan' : ''}</small></span><span class="customer-suggest-arrow">↗</span></button>`).join('');
+  const newEntry = q && !exact ? `<button type="button" class="customer-suggest-new" onmousedown="event.preventDefault()" onclick="gunakanNamaBaru()"><span>＋</span><span>Gunakan nama baru <b>“${esc(input.value.trim())}”</b></span></button>` : '';
+  list.innerHTML = `<div class="customer-suggest-caption">${q ? 'Hasil pelanggan' : 'Pelanggan tersimpan'}</div>${options || '<div class="customer-suggest-empty">Tidak ada nama yang cocok.</div>'}${newEntry}`;
+  list.hidden = false; input.setAttribute('aria-expanded', 'true');
+}
+function pilihSaranPelanggan(i) {
+  const p = D.pelanggan[i]; if (!p) return;
+  const input = $('#nama'); if (input) input.value = p.nama;
+  ubahNamaPesanan(p.nama); closeCustomerSuggestions();
+  if (input) input.focus();
+}
+function gunakanNamaBaru() { const input=$('#nama'); if(input){window._n=input.value.trim();ubahNamaPesanan(window._n);} closeCustomerSuggestions(); }
+function customerNameKeydown(event) {
+  const list=$('#customerSuggest');
+  if(event.key==='Escape'){closeCustomerSuggestions();return;}
+  if(event.key==='ArrowDown' && list && !list.hidden){event.preventDefault();const items=[...list.querySelectorAll('[data-customer-option]')];if(items.length){const cur=Number.isInteger(window._customerSuggestActive)?window._customerSuggestActive:-1;window._customerSuggestActive=Math.min(items.length-1,cur+1);items.forEach((el,i)=>el.classList.toggle('active',i===window._customerSuggestActive));}return;}
+  if(event.key==='ArrowUp' && list && !list.hidden){event.preventDefault();const items=[...list.querySelectorAll('[data-customer-option]')];if(items.length){const cur=Number.isInteger(window._customerSuggestActive)?window._customerSuggestActive:0;window._customerSuggestActive=Math.max(0,cur-1);items.forEach((el,i)=>el.classList.toggle('active',i===window._customerSuggestActive));}return;}
+  if(event.key==='Enter' && list && !list.hidden){const idx=window._customerSuggestActive>=0?window._customerSuggestActive:0;const id=(window._customerSuggestItems||[])[idx];if(id!=null){event.preventDefault();pilihSaranPelanggan(id);}else if(String(event.target.value||'').trim()){event.preventDefault();gunakanNamaBaru();}}
+}
 function ubahNamaPesanan(value) {
   window._n = value;
   const p = findPel(value);
@@ -2125,8 +2200,10 @@ function vPesan() {
         ${top.length ? `<div class="order-customer-shortcuts"><div class="mut" style="margin-bottom:6px">Pelanggan langganan</div><div class="tags">${top.map(x => `<button class="tag" onclick="pilihPel(${x.i})">${esc(x.p.nama)}</button>`).join('')}</div></div>` : ''}
         <div class="order-customer-field">
           <label class="field-label" for="nama">Nama pemesan</label>
-          <input id="nama" list="pelList" placeholder="Ketik nama pelanggan" value="${esc(window._n || '')}" oninput="ubahNamaPesanan(this.value)" autocomplete="off">
-          <datalist id="pelList">${D.pelanggan.map(p => `<option value="${esc(p.nama)}">`).join('')}</datalist>
+          <div class="customer-combobox" id="customerCombo">
+            <div class="customer-input-shell"><span class="customer-input-icon">👤</span><input id="nama" placeholder="Cari atau ketik nama pelanggan…" value="${esc(window._n || '')}" oninput="ubahNamaPesanan(this.value);showCustomerSuggestions(this.value)" onfocus="showCustomerSuggestions(this.value)" onkeydown="customerNameKeydown(event)" onblur="setTimeout(closeCustomerSuggestions,160)" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="customerSuggest"><button type="button" class="customer-input-toggle" onclick="const x=$('#nama');if(x){x.focus();showCustomerSuggestions(x.value)}" aria-label="Tampilkan pelanggan">⌄</button></div>
+            <div class="customer-suggestions" id="customerSuggest" hidden></div>
+          </div>
           <div id="pinfo">${pinfo()}</div>
         </div>
         <div class="shipping-selector"><label class="field-label">Metode penyerahan</label><div class="seg shipping-seg">
@@ -2461,35 +2538,34 @@ function statusDlg(id) { const g=groups().find(x=>x.id===id); if(!g)return; $('#
 async function hapus(id) { if (!(await popupConfirm('Hapus pesanan ini?', {title:'Hapus pesanan?', confirmText:'Ya, hapus'}))) return; D.orders = D.orders.filter(o => o.id !== id); enqueue('deleteOrder', id); render(); }
 
 /* ---- Pelanggan ---- */
+function pelInitials(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  return (parts.length > 1 ? parts[0][0] + parts[parts.length-1][0] : (parts[0] || 'P').slice(0,2)).toUpperCase();
+}
 function plist() {
-  const q = (window._pq || '').toLowerCase();
-  const l = D.pelanggan.map((p, i) => ({p, i})).filter(({p}) => (p.nama + ' ' + p.hp).toLowerCase().includes(q))
-    .sort((a, b) => a.p.nama.localeCompare(b.p.nama));
-  if (!l.length) return '<div class="empty">Belum ada pelanggan. Pelanggan tersimpan otomatis saat ada pesanan, atau tambah manual.</div>';
-  return `<div class="grid w">${l.map(({p, i}) => `
-    <div class="card col">
-      <div class="row"><b style="font-size:16px">${esc(p.nama)}</b><span class="tag ${p.jumlah ? 'pr' : ''}">${p.jumlah}× order</span></div>
-      ${p.hp ? `<div>📞 ${esc(p.hp)}</div>` : ''}
-      ${p.alamat ? `<div class="mut">📍 ${esc(p.alamat)}</div>` : ''}
-      ${p.catatan ? `<div class="mut">📝 ${esc(p.catatan)}</div>` : ''}
-      ${p.terakhir ? `<div class="mut">Terakhir order: ${p.terakhir}</div>` : ''}
-      <div class="acts"><button onclick="pilihPel(${i});go('pesan')">🛒 Pesan</button>
-        ${p.hp ? `<a class="btn o" href="${waLink(p.hp)}" target="_blank" rel="noopener">💬 WA</a>` : ''}
-        <button class="o" onclick="editPel(${i})">✏️</button><button class="r" onclick="hapusPel(${i})">🗑</button></div>
-    </div>`).join('')}</div>`;
+  const q = (window._pq || '').toLowerCase().trim();
+  const l = D.pelanggan.map((p, i) => ({p, i})).filter(({p}) => (p.nama + ' ' + (p.hp||'') + ' ' + (p.alamat||'')).toLowerCase().includes(q))
+    .sort((a, b) => (Number(b.p.jumlah)||0) - (Number(a.p.jumlah)||0) || a.p.nama.localeCompare(b.p.nama));
+  if (!l.length) return `<div class="customer-empty"><span>👥</span><b>${q ? 'Pelanggan tidak ditemukan' : 'Belum ada pelanggan'}</b><small>${q ? 'Coba kata kunci nama atau nomor HP yang lain.' : 'Pelanggan akan tersimpan otomatis setelah pesanan, atau tambahkan secara manual.'}</small></div>`;
+  return `<div class="customer-grid">${l.map(({p, i}) => `
+    <article class="customer-card">
+      <div class="customer-card-main"><div class="customer-avatar">${esc(pelInitials(p.nama))}</div><div class="customer-card-identity"><b>${esc(p.nama)}</b><small>${p.hp ? '☎ ' + esc(p.hp) : 'Nomor HP belum dicatat'}</small></div><span class="customer-order-count">${Number(p.jumlah)||0}<small>order</small></span></div>
+      <div class="customer-card-details">${p.alamat ? `<div><span>⌖</span><p>${esc(p.alamat)}</p></div>` : '<div class="customer-no-address">Alamat belum ditambahkan</div>'}${p.catatan ? `<div><span>✎</span><p>${esc(p.catatan)}</p></div>` : ''}</div>
+      <div class="customer-card-foot">${p.terakhir ? `<small>Terakhir pesan · ${esc(p.terakhir)}</small>` : '<small>Belum ada riwayat pesanan</small>'}<div class="customer-card-actions"><button onclick="pilihPel(${i});go('pesan')">🛒 Pesan</button>${p.hp ? `<a class="btn o" href="${waLink(p.hp)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}<button class="o" aria-label="Edit pelanggan" title="Edit" onclick="editPel(${i})">✎</button><button class="r" aria-label="Hapus pelanggan" title="Hapus" onclick="hapusPel(${i})">🗑</button></div></div>
+    </article>`).join('')}</div>`;
 }
 function vPelanggan() {
   const e = window._pe;
+  const total = D.pelanggan.length, repeat = D.pelanggan.filter(p => Number(p.jumlah) > 1).length, contacts = D.pelanggan.filter(p => String(p.hp||'').trim()).length;
   const f = (ph, k, extra = '') => `<input placeholder="${ph}" ${extra} value="${esc(e[k])}" oninput="window._pe.${k}=this.value">`;
-  const form = e ? `<div class="card col" style="margin-bottom:14px"><b>${e.lama ? 'Edit pelanggan' : 'Pelanggan baru'}</b>
-      ${f('Nama', 'nama')}${f('No. HP', 'hp', 'inputmode="tel"')}
-      <label class="mut">Alamat pelanggan</label><input id="pelAlamat" placeholder="Pilih alamat di Maps atau ketik manual" value="${esc(e.alamat || '')}" oninput="window._pe.alamat=this.value;if(window._pe.placeId){window._pe.placeId='';window._pe.lat=null;window._pe.lng=null}">
-      <div id="pelangganPlaceHost" class="maps-place-host"></div><div id="pelangganMapsInfo" class="maps-hint">Cari dan pilih titik alamat pelanggan melalui Maps.</div>
-      ${f('Catatan (mis. suka pedas, alergi kacang)', 'catatan')}
-      <div class="row"><button class="o" onclick="window._pe=null;render()">Batal</button><button onclick="simpanPel()">Simpan</button></div></div>` : '';
-  return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Pelanggan</h2>
-      <button onclick="window._pe={lama:'',nama:'',hp:'',alamat:'',catatan:''};render()">+ Pelanggan</button></div>${form}
-    <input placeholder="🔍 Cari nama / HP…" value="${esc(window._pq || '')}" oninput="window._pq=this.value;$('#plist').innerHTML=plist()" style="margin:10px 0 14px">
+  const form = e ? `<div class="card col customer-edit-card"><div class="customer-form-head"><span>✦</span><div><b>${e.lama ? 'Edit pelanggan' : 'Pelanggan baru'}</b><small>Lengkapi informasi pelanggan untuk memudahkan pesanan berikutnya.</small></div></div>
+      <div class="customer-form-grid"><label>Nama pelanggan${f('Nama lengkap', 'nama')}</label><label>Nomor WhatsApp${f('08xxxxxxxxxx', 'hp', 'inputmode="tel"')}</label><label class="customer-form-wide">Alamat pelanggan<input id="pelAlamat" placeholder="Pilih alamat di Maps atau ketik manual" value="${esc(e.alamat || '')}" oninput="window._pe.alamat=this.value;if(window._pe.placeId){window._pe.placeId='';window._pe.lat=null;window._pe.lng=null}"></label>
+      <div id="pelangganPlaceHost" class="customer-form-wide maps-place-host"></div><div class="maps-hint customer-form-wide" id="pelangganMapsInfo">Cari dan pilih titik alamat pelanggan melalui Maps.</div><label class="customer-form-wide">Catatan pelanggan${f('Catatan khusus (opsional)', 'catatan')}</label></div>
+      <div class="row"><button class="o" onclick="window._pe=null;render()">Batal</button><button onclick="simpanPel()">Simpan pelanggan</button></div></div>` : '';
+  return `<div class="page-head customer-page-head"><div><div class="eyebrow">PENGELOLAAN DATA</div><h2>Pelanggan</h2><div class="page-subtitle">Kelola kontak, alamat, dan riwayat pelanggan Uwais Food.</div></div><button onclick="window._pe={lama:'',nama:'',hp:'',alamat:'',catatan:''};render()">＋ Tambah pelanggan</button></div>
+    <div class="customer-overview"><div class="customer-metric"><span>👥</span><div><b>${total}</b><small>Total pelanggan</small></div></div><div class="customer-metric"><span>↻</span><div><b>${repeat}</b><small>Pelanggan berulang</small></div></div><div class="customer-metric"><span>☎</span><div><b>${contacts}</b><small>Kontak tersimpan</small></div></div></div>
+    ${form}
+    <div class="customer-list-toolbar"><div class="customer-search-box"><span>⌕</span><input id="customerSearch" placeholder="Cari nama, nomor WhatsApp, atau alamat…" value="${esc(window._pq || '')}" oninput="window._pq=this.value;$('#plist').innerHTML=plist()"><button type="button" onclick="window._pq='';const q=$('#customerSearch');if(q)q.value='';$('#plist').innerHTML=plist()" aria-label="Hapus pencarian">×</button></div><small>${D.pelanggan.length} data tersimpan</small></div>
     <div id="plist">${plist()}</div>`;
 }
 function editPel(i) { const p = D.pelanggan[i]; window._pe = {lama: p.nama, nama: p.nama, hp: p.hp, alamat: p.alamat, catatan: p.catatan, placeId: p.placeId || '', lat: p.lat, lng: p.lng}; render(); window.scrollTo(0, 0); }
@@ -2607,23 +2683,45 @@ function fmtPODateTime(value) {
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? String(value).replace('T', ' ') : d.toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 }
-function poCard(p) {
-  const s = poStats(p.id), aktif = viewPO() === p.id, selesai = p.status === 'Selesai';
-  return `<div class="card col" style="${aktif ? 'border-color:var(--pr);box-shadow:0 0 0 2px var(--pr-l)' : ''}">
-    <div class="row"><b style="font-size:16px">${esc(p.nama)}</b><span class="tag ${selesai ? '' : 'ok'}">${selesai ? 'Selesai' : 'Buka'}</span></div>
-    <div class="mut">${p.kirim ? '📅 ' + fmtTgl(p.kirim) : 'Tanggal ambil/kirim belum diisi'}</div>
-    <div class="mut" style="font-size:12px">🕒 Online: ${fmtPODateTime(p.mulai)} – ${fmtPODateTime(p.tutup)}</div>
-    <div class="tags"><span class="tag pr">${s.n} pesanan</span><span class="tag pr">${s.pcs} pcs</span><span class="tag pr">${rp(s.nilai)}</span></div>
+function poPhase(p, nowMs) {
+  const now = Number(nowMs || Date.now());
+  if (p.status === 'Selesai') return {group:'archive', label:'Selesai', tone:'done', rank:4};
+  const start = p.mulai ? new Date(p.mulai).getTime() : NaN;
+  const end = p.tutup ? new Date(p.tutup).getTime() : NaN;
+  const validStart = Number.isFinite(start), validEnd = Number.isFinite(end);
+  if (validEnd && end < now) return {group:'archive', label:'Jadwal berakhir', tone:'muted', rank:3};
+  if (validStart && start > now) return {group:'upcoming', label:'Akan dibuka', tone:'upcoming', rank:2, time:start};
+  if (validStart && validEnd && start <= now && now <= end && p.status !== 'Selesai')
+    return {group:'active', label:'Sedang berlangsung', tone:'active', rank:1, time:start};
+  return {group:'unscheduled', label:'Perlu jadwal', tone:'warning', rank:3};
+}
+function poCard(p, compact) {
+  const s = poStats(p.id), phase = poPhase(p), aktif = viewPO() === p.id;
+  const badge = `<span class="po-status po-status-${phase.tone}">${phase.label}</span>`;
+  if (compact) return `<article class="po-archive-card">
+    <div class="po-archive-info"><div class="po-archive-title">${esc(p.nama)}</div><div class="po-archive-meta">${p.kirim ? '📅 ' + fmtTgl(p.kirim) : 'Tanggal ambil/kirim belum diisi'} · ${s.n} pesanan · ${rp(s.nilai)}</div></div>
+    ${badge}<div class="po-archive-actions"><button class="o" onclick="pilihPO('${p.id}');go('order')">Orderan</button><button class="o" onclick="pilihPO('${p.id}');go('rekap')">Rekap</button><button class="o" onclick="editPO('${p.id}')">Detail / Edit</button>${p.status === 'Selesai' ? `<button class="g" onclick="togglePO('${p.id}')">↺ Buka lagi</button>` : ''}<button class="r" onclick="hapusPO('${p.id}')">🗑 Hapus</button></div>
+  </article>`;
+  return `<article class="card col po-card ${aktif ? 'po-card-selected' : ''}">
+    <div class="po-card-top"><div class="po-card-title-wrap"><b>${esc(p.nama)}</b><small>${p.kirim ? '📅 Ambil/kirim ' + fmtTgl(p.kirim) : 'Tanggal ambil/kirim belum diisi'}</small></div>${badge}</div>
+    <div class="po-card-schedule"><span>Mulai</span><b>${fmtPODateTime(p.mulai)}</b><span>Tutup</span><b>${fmtPODateTime(p.tutup)}</b></div>
+    <div class="po-card-stats"><div><b>${s.n}</b><small>Pesanan</small></div><div><b>${s.pcs}</b><small>Total pcs</small></div><div><b>${rp(s.nilai)}</b><small>Nilai produk</small></div></div>
     ${adonanHtml(p)}
-    <div class="oc-actions"><button onclick="pilihPO('${p.id}');go('order')">📋 Orderan</button><button class="o" onclick="pilihPO('${p.id}');go('rekap')">🧮 Rekap</button>
-      <button class="${selesai ? 'o' : 'g'}" onclick="togglePO('${p.id}')">${selesai ? '↺ Buka lagi' : '✓ Selesaikan'}</button><button class="o" onclick="editPO('${p.id}')">✏️ Edit / Adonan</button></div>
-    <div class="oc-tools one"><button class="r" onclick="hapusPO('${p.id}')"><span>🗑</span>Hapus PO</button></div>
-  </div>`;
+    <div class="po-card-actions"><button onclick="pilihPO('${p.id}');go('order')">📋 Orderan</button><button class="o" onclick="pilihPO('${p.id}');go('rekap')">🧮 Rekap</button><button class="${p.status === 'Selesai' ? 'o' : 'g'}" onclick="togglePO('${p.id}')">${p.status === 'Selesai' ? '↺ Buka lagi' : '✓ Selesaikan'}</button><button class="o" onclick="editPO('${p.id}')">✏️ Edit</button></div>
+    <div class="po-card-delete"><button class="r" onclick="hapusPO('${p.id}')">🗑 Hapus PO</button></div>
+  </article>`;
 }
 function vPO() {
-  const e = window._poe, ps = (D.pos || []).slice().reverse();
+  const e = window._poe, all = (D.pos || []).slice();
   const legacyN = new Set(D.orders.filter(o => !o.po).map(o => o.id)).size;
-  const form = e ? `<div class="card col" style="margin-bottom:14px"><b>${e.id ? 'Edit PO' : 'PO baru'}</b>
+  const now = Date.now();
+  const classified = all.map(p => ({p, phase:poPhase(p, now)}));
+  const sortByTime = (a,b) => (a.phase.time || (a.p.mulai ? new Date(a.p.mulai).getTime() : Infinity)) - (b.phase.time || (b.p.mulai ? new Date(b.p.mulai).getTime() : Infinity));
+  const active = classified.filter(x => x.phase.group === 'active').sort(sortByTime);
+  const upcoming = classified.filter(x => x.phase.group === 'upcoming').sort(sortByTime);
+  const unscheduled = classified.filter(x => x.phase.group === 'unscheduled').sort((a,b) => String(b.p.kirim||'').localeCompare(String(a.p.kirim||'')));
+  const archive = classified.filter(x => x.phase.group === 'archive').sort((a,b) => String(b.p.kirim||'').localeCompare(String(a.p.kirim||'')));
+  const form = e ? `<div class="card col po-edit-form" style="margin-bottom:14px"><b>${e.id ? 'Edit PO' : 'PO baru'}</b>
       <label class="mut">Tanggal ambil / kirim</label><input type="date" value="${esc(e.kirim)}" oninput="window._poe.kirim=this.value">
       <label class="mut">Nama PO (opsional — otomatis dari tanggal)</label><input placeholder="mis. PO Sabtu" value="${esc(e.nama)}" oninput="window._poe.nama=this.value">
       <div class="grid w" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
@@ -2634,13 +2732,17 @@ function vPO() {
       <div class="adn-form"><b>🥣 Kapasitas adonan / stok awal</b><div class="mut">Isi kapasitas awal untuk setiap komponen. Semua varian bolen memakai satu pool <b>Adonan Bolen</b>; produk lain seperti <b>Banana Milk Cheese</b> memiliki pool terpisah. Menu dan paket akan berbagi kapasitas komponen yang sama secara otomatis.</div>
         ${e.names.length ? `<div class="adn-grid">${e.names.map((n, i) => `<label class="adn-item"><span>${esc(n)}</span><div class="adn-input"><input type="number" min="0" inputmode="numeric" placeholder="0" value="${e.am[key(n)] ? esc(e.am[key(n)]) : ''}" oninput="setAdonan(${i},this.value)"><em>pcs</em></div></label>`).join('')}</div>` : '<div class="note">Menu belum ada. Tambahkan produk di Menu Produk.</div>'}</div>
       <div class="row"><button class="o" onclick="window._poe=null;render()">Batal</button><button onclick="simpanPOForm()">Simpan</button></div></div>` : '';
-  return `<div class="row" style="flex-wrap:wrap"><h2 style="margin:6px 2px">Periode Pre-Order (PO)</h2><button onclick="bukaFormPO()">+ PO baru</button></div>
-    <div class="card mut" style="margin-bottom:12px">Satu PO = satu periode pre-order. Pesanan, rekap, dan struk dikelompokkan per PO. Setelah semua pesanan diantar, ketuk <b>Selesaikan</b>; untuk periode berikutnya buat PO baru.</div>
+  const section = (title, items, tone, emptyText) => `<section class="po-section"><div class="po-section-head"><div><b>${title}</b><small>${items.length} periode</small></div></div>${items.length ? `<div class="grid w po-grid">${items.map(x => poCard(x.p, false)).join('')}</div>` : `<div class="po-empty">${emptyText}</div>`}</section>`;
+  return `<div class="page-head po-page-head"><div><div class="eyebrow">PENGELOLAAN</div><h2>Periode Pre-Order</h2><div class="page-subtitle">Fokus pada periode yang sedang berjalan dan jadwal berikutnya.</div></div><div class="page-head-action"><button onclick="bukaFormPO()">＋ PO baru</button></div></div>
+    <div class="po-overview"><div class="po-overview-item is-active"><span class="po-overview-icon">🟢</span><div><b>${active.length}</b><small>Sedang berlangsung</small></div></div><div class="po-overview-item is-upcoming"><span class="po-overview-icon">🗓️</span><div><b>${upcoming.length}</b><small>Akan dibuka</small></div></div><div class="po-overview-item is-archive"><span class="po-overview-icon">📦</span><div><b>${archive.length}</b><small>Selesai / berakhir</small></div></div></div>
     ${form}
-    ${legacyN ? `<div class="note warn" style="margin-bottom:12px">Ada ${legacyN} pesanan lama yang belum punya PO. Pilih PO tujuan (tombol Orderan/Rekap pada PO), lalu: <div style="margin-top:8px"><button class="o" onclick="pindahLama()">Masukkan ke PO terpilih</button></div></div>` : ''}
-    ${ps.length ? `<div class="grid w">${ps.map(poCard).join('')}</div>` : '<div class="empty">Belum ada PO. Ketuk “+ PO baru”.</div>'}`;
+    ${legacyN ? `<div class="note warn" style="margin-bottom:12px">Ada ${legacyN} pesanan lama yang belum punya PO. Pilih PO tujuan, lalu: <div style="margin-top:8px"><button class="o" onclick="pindahLama()">Masukkan ke PO terpilih</button></div></div>` : ''}
+    ${section('Sedang berlangsung', active, 'active', 'Belum ada PO yang sedang berlangsung saat ini.')}
+    ${section('Akan dibuka', upcoming, 'upcoming', 'Belum ada jadwal PO berikutnya. Buat PO baru atau atur jadwal periode yang sudah ada.')}
+    ${unscheduled.length ? section('Perlu pengaturan jadwal', unscheduled, 'warning', '') : ''}
+    ${archive.length ? `<details class="po-archive"><summary><span><b>PO selesai &amp; berakhir</b><small>${archive.length} periode · disembunyikan agar daftar utama tetap ringkas</small></span><span class="po-archive-chevron">⌄</span></summary><div class="po-archive-list">${archive.map(x => poCard(x.p, true)).join('')}</div></details>` : ''}
+    ${!all.length ? '<div class="empty">Belum ada PO. Ketuk “＋ PO baru” untuk membuat periode pertama.</div>' : ''}`;
 }
-
 /* ---- Pengaturan ongkir ---- */
 function ongkirForm() {
   D.tarifOngkir = D.tarifOngkir || [];
