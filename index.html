@@ -1003,13 +1003,19 @@ img,svg,canvas,video{max-width:100%}
 @media(max-width:390px){.po-overview-item{flex-direction:column;align-items:flex-start}.po-overview-item small{font-size:8px}.customer-overview{grid-template-columns:repeat(3,minmax(0,1fr))}.customer-metric{align-items:flex-start;flex-direction:column}.customer-metric>div{gap:2px}}
 </style>
 
+<style>
+.delivery-detail-field{display:grid;gap:7px;margin:12px 0 4px;padding:12px;border:1px solid var(--ln);border-radius:14px;background:var(--surface)}
+.delivery-detail-field textarea{width:100%;min-height:76px;resize:vertical;padding:11px 12px;border:1px solid var(--ln);border-radius:11px;background:var(--bg);color:var(--tx);font:inherit;line-height:1.45}
+.delivery-detail-field textarea:focus{outline:2px solid var(--pr-l);border-color:var(--pr)}
+.delivery-detail-field small{color:var(--mut);font-size:11px;line-height:1.45}
+</style>
 </head>
 <body>
 <div class="app">
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.10.8)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.11.0)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -1032,10 +1038,10 @@ window.__len = 302189;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v11.10.8)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v11.11.0)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v11.10.8)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v11.11.0)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -1059,7 +1065,7 @@ window.__len = 302189;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.10.8 · PO & Customer UI Polish';
+var APP_VER = 'v11.11.0 · Seasonal PO & Menu Campaign';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -1453,26 +1459,27 @@ function currentShipping() {
     const useSaved = !!(selectedTarif && selectedTarif.aktif !== false);
     const feeText = useSaved ? String(selectedTarif.ongkir == null ? '' : selectedTarif.ongkir) : String(window._ongkir == null ? '' : window._ongkir).trim();
     const fee = Number(feeText);
+    if (!alamat) return {valid: false, error: 'Isi detail alamat tujuan, misalnya nama perumahan atau ruko.'};
     if (!feeText || !Number.isFinite(fee) || fee < 0) return {valid: false, error: 'Pilih tarif ongkir tersimpan atau isi nominal ongkir secara manual'};
     const finalArea = useSaved ? String(selectedTarif.area || '').trim() : area;
     const finalKm = useSaved ? Math.max(0, Number(selectedTarif.jarakKm) || 0) : 0;
-    return {valid: true, metode: 'Kurir', jenisKurir: editing && editing.jenisKurir === 'Pihak Ketiga' ? 'Pihak Ketiga' : 'Kurir', namaKurir: String(window._courierName || '').trim(), kontakKurir, catatanPengiriman, area: finalArea, alamat, jarakKm: finalKm, ongkir: Math.round(fee), placeId: useSaved ? String(selectedTarif.placeId || '') : '', lat: useSaved && selectedTarif.lat != null ? Number(selectedTarif.lat) : null, lng: useSaved && selectedTarif.lng != null ? Number(selectedTarif.lng) : null, saved: useSaved, manual: !useSaved};
+    return {valid: true, metode: 'Kurir', jenisKurir: editing && editing.jenisKurir === 'Pihak Ketiga' ? 'Pihak Ketiga' : 'Kurir', namaKurir: String(window._courierName || '').trim(), kontakKurir, catatanPengiriman, area: finalArea, alamat, detailAlamat: alamat, jarakKm: finalKm, ongkir: Math.round(fee), placeId: useSaved ? String(selectedTarif.placeId || '') : '', lat: useSaved && selectedTarif.lat != null ? Number(selectedTarif.lat) : null, lng: useSaved && selectedTarif.lng != null ? Number(selectedTarif.lng) : null, saved: useSaved, manual: !useSaved};
   }
 
-  // Kurir Maps (opsional, diaktifkan di Pengaturan): daerah & alamat wajib.
-  if (!area) return {valid: false, error: 'Isi daerah / nama alamat tujuan untuk menentukan ongkir'};
-  if (!alamat) return {valid: false, error: 'Isi alamat lengkap pelanggan untuk pengiriman Kurir Maps'};
-
+  // Kurir Maps: area adalah alamat umum/tarif, detailAlamat adalah lokasi spesifik penerima.
+  if (!alamat) return {valid: false, error: 'Isi detail alamat tujuan, misalnya nama perumahan atau ruko.'};
   const selected = window._selectedDestination || (customer && customer.placeId ? {placeId: customer.placeId, lat: customer.lat, lng: customer.lng, address: customer.alamat} : null);
   const saved = findTarifPlace(selected && selected.placeId) || findTarifArea(area);
-  if (saved) return {valid: true, metode: 'Kurir', jenisKurir: 'Maps', namaKurir: '', kontakKurir, catatanPengiriman, area: saved.area, alamat, jarakKm: Number(saved.jarakKm) || 0, ongkir: Number(saved.ongkir) || 0, placeId: (selected && selected.placeId) || saved.placeId || '', lat: selected && selected.lat != null ? Number(selected.lat) : (saved.lat == null ? null : Number(saved.lat)), lng: selected && selected.lng != null ? Number(selected.lng) : (saved.lng == null ? null : Number(saved.lng)), saved: true};
+  const finalArea = saved ? String(saved.area || '').trim() : area;
+  if (!finalArea) return {valid: false, error: 'Pilih atau isi daerah tujuan umum untuk menentukan tarif ongkir.'};
+  if (saved) return {valid: true, metode: 'Kurir', jenisKurir: 'Maps', namaKurir: '', kontakKurir, catatanPengiriman, area: finalArea, alamat, detailAlamat: alamat, jarakKm: Number(saved.jarakKm) || 0, ongkir: Number(saved.ongkir) || 0, placeId: (selected && selected.placeId) || saved.placeId || '', lat: selected && selected.lat != null ? Number(selected.lat) : (saved.lat == null ? null : Number(saved.lat)), lng: selected && selected.lng != null ? Number(selected.lng) : (saved.lng == null ? null : Number(saved.lng)), saved: true};
   const kmText = String(window._km == null ? '' : window._km).trim();
   const km = Number(kmText);
   if (!kmText || !Number.isFinite(km) || km < 0) return {valid: false, error: 'Pilih alamat di Maps agar jarak rute dapat dihitung, atau isi jarak manual'};
   let ongkirText = String(window._ongkir == null ? '' : window._ongkir).trim();
   let ongkir = ongkirText === '' ? feeFromDistance(km) : Number(ongkirText);
   if (ongkir == null || !Number.isFinite(ongkir) || ongkir < 0) return {valid: false, error: 'Isi nominal ongkos kirim atau atur tarif per km di Pengaturan Ongkos Kirim'};
-  return {valid: true, metode: 'Kurir', jenisKurir: 'Maps', namaKurir: '', kontakKurir, catatanPengiriman, area, alamat, jarakKm: km, ongkir: Math.round(ongkir), placeId: selected && selected.placeId || '', lat: selected && selected.lat != null ? Number(selected.lat) : null, lng: selected && selected.lng != null ? Number(selected.lng) : null, saved: false};
+  return {valid: true, metode: 'Kurir', jenisKurir: 'Maps', namaKurir: '', kontakKurir, catatanPengiriman, area: finalArea, alamat, detailAlamat: alamat, jarakKm: km, ongkir: Math.round(ongkir), placeId: selected && selected.placeId || '', lat: selected && selected.lat != null ? Number(selected.lat) : null, lng: selected && selected.lng != null ? Number(selected.lng) : null, saved: false};
 }
 function tarifInfo() {
   const area = String(window._area || '').trim();
@@ -1485,6 +1492,16 @@ function tarifInfo() {
     <label class="mut">Jarak dari toko (km) — otomatis dari Maps</label><input id="kmOngkir" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Pilih alamat di Maps" value="${esc(window._km == null ? '' : window._km)}" oninput="window._km=this.value;updateTarifInfo(false)">
     <label class="mut">Ongkos kirim (Rp) ${fee != null ? '— otomatis dari tarif per km' : ''}</label><input id="feeOngkir" type="number" min="0" step="500" inputmode="numeric" placeholder="Contoh: 10000" value="${esc(window._ongkir == null || window._ongkir === '' ? (fee == null ? '' : fee) : window._ongkir)}" oninput="window._ongkir=this.value;updateTarifInfo(false)">`;
 }
+function detailAlamatField() {
+  const customer = findPel(window._n || '');
+  const value = String(window._al == null ? (customer && customer.alamat || '') : window._al);
+  return `<div class="delivery-detail-field">
+    <label class="field-label" for="alamatPesanan">Detail alamat tujuan <span class="req">wajib</span></label>
+    <textarea id="alamatPesanan" rows="2" maxlength="500" placeholder="Contoh: Perumahan Garuda, Blok C No. 12 / Ruko Bintan Center lantai 2, patokan…" oninput="window._al=this.value">${esc(value)}</textarea>
+    <small>Daerah di atas adalah area umum untuk tarif ongkir. Isi lokasi spesifik penerima di sini, misalnya nama perumahan, ruko, blok, nomor unit, RT/RW, atau patokan.</small>
+  </div>`;
+}
+
 function kirimBox() {
   if (shippingMode === 'Pickup') return '<div class="note ok">📦 Pickup dipilih — tidak ada ongkos kirim.</div>';
   if (shippingMode === 'Kurir3') {
@@ -1506,12 +1523,13 @@ function kirimBox() {
         <label class="mut" for="shippingArea">Daerah tujuan (opsional)</label>
         <input id="shippingArea" placeholder="Contoh: Tanjungpinang Barat" value="${esc(window._area || '')}" oninput="window._area=this.value" autocomplete="off">
       `}
+      ${detailAlamatField()}
       <label class="mut" for="namaKurirManual">Nama kurir (opsional)</label>
       <input id="namaKurirManual" list="kurirList" placeholder="Contoh: Pak Budi, GoSend, J&T" value="${esc(window._courierName || '')}" oninput="window._courierName=this.value">
       <label class="mut" for="kontakKurirManual">Nomor kontak kurir (opsional)</label><input id="kontakKurirManual" inputmode="tel" placeholder="08xxxxxxxxxx" value="${esc(window._courierContact || '')}" oninput="window._courierContact=this.value">
       <label class="mut" for="catatanPengirimanManual">Catatan pengiriman (opsional)</label><input id="catatanPengirimanManual" placeholder="Contoh: hubungi sebelum tiba" value="${esc(window._deliveryNote || '')}" oninput="window._deliveryNote=this.value">
       <datalist id="kurirList"><option value="GoSend"><option value="GrabExpress"><option value="J&T Express"><option value="JNE"><option value="SiCepat"><option value="Lalamove"></datalist>
-      <div class="note">💡 Alamat lengkap diisi pada kolom alamat di atas. Pilih tarif tersimpan atau isi ongkir manual untuk pesanan ini.</div>
+      <div class="note">💡 Pilih area/tarif umum untuk ongkir, lalu isi detail lokasi penerima pada kolom terpisah.</div>
     </div>`;
   }
   const areas = (D.tarifOngkir || []).filter(t => t.aktif !== false).map(t => `<option value="${esc(t.area)}">`).join('');
@@ -1525,6 +1543,7 @@ function kirimBox() {
     <input id="shippingArea" list="tarifAreaList" placeholder="Otomatis dari alamat Maps atau isi nama daerah" value="${esc(window._area || '')}" oninput="window._area=this.value;updateTarifInfo(true)" autocomplete="off">
     <datalist id="tarifAreaList">${areas}</datalist>
     <div id="tarifInfo">${tarifInfo()}</div>
+    ${detailAlamatField()}
     <label class="mut" for="kontakKurirMaps">Nomor kontak kurir (opsional)</label><input id="kontakKurirMaps" inputmode="tel" placeholder="08xxxxxxxxxx" value="${esc(window._courierContact || '')}" oninput="window._courierContact=this.value">
     <label class="mut" for="catatanPengirimanMaps">Catatan pengiriman (opsional)</label><input id="catatanPengirimanMaps" placeholder="Contoh: hubungi sebelum tiba" value="${esc(window._deliveryNote || '')}" oninput="window._deliveryNote=this.value">
   </div>`;
@@ -2088,12 +2107,11 @@ function topPel() {
 }
 function pinfo() {
   const n = (window._n || '').trim();
-  if (!n || (editing && shippingMode !== 'Kurir' && shippingMode !== 'Kurir3')) return '';
-  const p = findPel(n), hp = window._hp == null ? (p ? p.hp : '') : window._hp, alamat = window._al == null ? (p ? p.alamat : '') : window._al;
+  if (!n) return '';
+  const p = findPel(n), hp = window._hp == null ? (p ? p.hp : '') : window._hp;
   return `${p ? `<div class="note ok">✔ Pelanggan lama${p.jumlah ? ` · ${p.jumlah}× order` : ''}</div>` : '<div class="note">Pelanggan baru — akan tersimpan otomatis.</div>'}
     <div class="col" style="margin-top:8px">
       ${editing ? '' : `<label class="mut">No. HP (opsional)</label><input placeholder="08xxxxxxxxxx" inputmode="tel" value="${esc(hp || '')}" oninput="window._hp=this.value">`}
-      <label class="mut">Alamat lengkap ${shippingMode === 'Kurir3' ? '(opsional)' : '(untuk pengiriman kurir)'}</label><input id="alamatPesanan" placeholder="Pilih dari Maps atau isi alamat lengkap" value="${esc(alamat || '')}" oninput="window._al=this.value;if(window._selectedDestination&&this.value!==window._selectedDestination.address){window._selectedDestination=null;window._km='';window._ongkir='';_routePlaceId='';_routePath=[];_routeDestination=null;updateTarifInfo(true)}">
       ${p && p.catatan ? `<div class="mut">📝 ${esc(p.catatan)}</div>` : ''}
     </div>`;
 }
@@ -2101,7 +2119,7 @@ function setDataPelangganPesanan(p) {
   window._hp = p ? (p.hp || '') : '';
   window._al = p ? (p.alamat || '') : '';
   window._selectedDestination = p && p.placeId ? {displayName:p.alamat,address:p.alamat,placeId:p.placeId,lat:p.lat,lng:p.lng} : null;
-  window._area = p ? (p.alamat || '') : '';
+  window._area = '';
   window._km = ''; window._ongkir = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null;
 }
 function closeCustomerSuggestions() {
@@ -2269,7 +2287,7 @@ function simpanEdit() {
   const at = Math.max(0, D.orders.findIndex(o => o.id === e.id));
   D.orders = D.orders.filter(o => o.id !== e.id);
   D.orders.splice(at, 0, ...items.map(i => ({id: e.id, waktu: e.waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: e.status, bayar: e.bayar, metodeBayar: e.metodeBayar, isi: i.isi || '', po: e.po,
-    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, ongkirStatus: shipping.metode === 'Kurir' ? 'Dikonfirmasi' : '', ongkirPending: false, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || ''})));
+    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.detailAlamat || shipping.alamat || '', detailAlamat: shipping.detailAlamat || shipping.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, ongkirStatus: shipping.metode === 'Kurir' ? 'Dikonfirmasi' : '', ongkirPending: false, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || ''})));
   upsertPelLocal(nama, pel);
   enqueue('editOrder', e.id, nama, items, shipping);
   editing = null; cart = {}; window._kurirTarifIndex = ''; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
@@ -2294,7 +2312,7 @@ async function simpan() {
     enqueue('saveTarif', t);
   }
   items.forEach(i => D.orders.push({id, waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: 'Baru', bayar: 'Belum Bayar', metodeBayar: '', isi: i.isi || '', po: tgt.id,
-    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.alamat || pel.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || ''}));
+    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.detailAlamat || shipping.alamat || pel.alamat || '', detailAlamat: shipping.detailAlamat || shipping.alamat || pel.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || ''}));
   upsertPelLocal(nama, pel);
   enqueue('addOrder', nama, items, pel, id, Date.now(), tgt.id, shipping);
   cart = {}; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
@@ -2305,7 +2323,7 @@ async function simpan() {
 function orderCard(g) {
   const p = findPel(g.nama), lunas = g.bayar === 'Lunas', pendingPay = g.bayar === 'Menunggu Verifikasi', rejectedPay = g.bayar === 'Pembayaran Ditolak', selesai = g.status === 'Selesai';
   const shipLine = g.metodeKirim === 'Kurir'
-    ? `<div class="oc-ship"><b>${isKurirMaps(g) ? '📍 Kurir Maps' : '🚚 Kurir' + (g.namaKurir ? ' · ' + esc(g.namaKurir) : '')}${g.daerahKirim ? ' · ' + esc(g.daerahKirim) : ''}</b>${g.alamatKirim ? `<div class="mut">📍 ${esc(g.alamatKirim)}</div>` : ''}${g.kontakKurir ? `<div class="mut">☎️ Kontak kurir: ${esc(g.kontakKurir)}</div>` : ''}${g.catatanPengiriman ? `<div class="mut">📝 ${esc(g.catatanPengiriman)}</div>` : ''}${g.jarakKm ? `<div class="mut">Jarak dari toko: ${g.jarakKm} km</div>` : ''}${g.ongkirPending ? '<div class="mut" style="color:#b35a20;font-weight:700">⏳ Ongkir menunggu konfirmasi melalui WhatsApp</div>' : ''}</div>`
+    ? `<div class="oc-ship"><b>${isKurirMaps(g) ? '📍 Kurir Maps' : '🚚 Kurir' + (g.namaKurir ? ' · ' + esc(g.namaKurir) : '')}${g.daerahKirim ? ' · ' + esc(g.daerahKirim) : ''}</b>${g.alamatKirim ? `<div class="mut">📍 Detail alamat: ${esc(g.alamatKirim)}</div>` : ''}${g.kontakKurir ? `<div class="mut">☎️ Kontak kurir: ${esc(g.kontakKurir)}</div>` : ''}${g.catatanPengiriman ? `<div class="mut">📝 ${esc(g.catatanPengiriman)}</div>` : ''}${g.jarakKm ? `<div class="mut">Jarak dari toko: ${g.jarakKm} km</div>` : ''}${g.ongkirPending ? '<div class="mut" style="color:#b35a20;font-weight:700">⏳ Ongkir menunggu konfirmasi melalui WhatsApp</div>' : ''}</div>`
     : `<div class="oc-ship"><b>📦 Pickup</b><div class="mut">Tanpa ongkos kirim</div></div>`;
   const main = lunas
     ? `<button class="main wa" onclick="shareStrukWhatsApp('${g.id}')">📲 Kirim Struk</button>`
@@ -2637,7 +2655,7 @@ function vRekap() {
 /* ---- PO: kelola periode pre-order ---- */
 var newPOId = () => 'P' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4);
 function poFormInit(po) {                     // siapkan state PO; data bolen lama digabung ke satu adonan
-  const e = Object.assign({id: '', nama: '', kirim: '', status: 'Buka', mulai: '', tutup: '', adonan: []}, po || {});
+  const e = Object.assign({id: '', nama: '', kirim: '', status: 'Buka', mulai: '', tutup: '', adonan: [], jenis: 'Reguler', tampilkanMenuUtama: true}, po || {});
   const legacyCombined = gabungDataAdonan(e.adonan);
   const names = komponenMenu().slice();
   legacyCombined.forEach(a => { if (!names.some(n => key(n) === key(a.nama))) names.push(a.nama); });
@@ -2654,7 +2672,7 @@ function simpanPOForm() {
   if (!e.mulai || !e.tutup) return toast('Atur tanggal dan jam mulai serta tutup PO agar pemesanan online bisa dibuka.', 'warning');
   if (e.mulai >= e.tutup) return toast('Waktu tutup PO harus setelah waktu mulai.', 'error');
   const adonan = e.names.map(n => ({nama: n, qty: Math.max(0, Math.floor(Number(e.am[key(n)]) || 0))})).filter(x => x.qty > 0);
-  const po = {id: e.id || newPOId(), nama: e.nama.trim() || ('PO ' + fmtTgl(e.kirim)), kirim: e.kirim || '', status: e.status || 'Buka', mulai: e.mulai, tutup: e.tutup, adonan};
+  const po = {id: e.id || newPOId(), nama: e.nama.trim() || ('PO ' + fmtTgl(e.kirim)), kirim: e.kirim || '', status: e.status || 'Buka', mulai: e.mulai, tutup: e.tutup, adonan, jenis: e.jenis === 'Khusus' ? 'Khusus' : 'Reguler', tampilkanMenuUtama: e.tampilkanMenuUtama !== false};
   D.pos = D.pos || [];
   const i = D.pos.findIndex(x => x.id === po.id);
   if (i >= 0) D.pos[i] = po; else { D.pos.push(po); curPO = po.id; LS.set('uf_po', po.id); }
@@ -2697,7 +2715,7 @@ function poPhase(p, nowMs) {
 }
 function poCard(p, compact) {
   const s = poStats(p.id), phase = poPhase(p), aktif = viewPO() === p.id;
-  const badge = `<span class="po-status po-status-${phase.tone}">${phase.label}</span>`;
+  const badge = `<span class="po-status po-status-${phase.tone}">${phase.label}</span>${p.jenis === 'Khusus' ? '<span class="tag pr">🎉 PO KHUSUS</span>' : ''}`;
   if (compact) return `<article class="po-archive-card">
     <div class="po-archive-info"><div class="po-archive-title">${esc(p.nama)}</div><div class="po-archive-meta">${p.kirim ? '📅 ' + fmtTgl(p.kirim) : 'Tanggal ambil/kirim belum diisi'} · ${s.n} pesanan · ${rp(s.nilai)}</div></div>
     ${badge}<div class="po-archive-actions"><button class="o" onclick="pilihPO('${p.id}');go('order')">Orderan</button><button class="o" onclick="pilihPO('${p.id}');go('rekap')">Rekap</button><button class="o" onclick="editPO('${p.id}')">Detail / Edit</button>${p.status === 'Selesai' ? `<button class="g" onclick="togglePO('${p.id}')">↺ Buka lagi</button>` : ''}<button class="r" onclick="hapusPO('${p.id}')">🗑 Hapus</button></div>
@@ -2723,7 +2741,9 @@ function vPO() {
   const archive = classified.filter(x => x.phase.group === 'archive').sort((a,b) => String(b.p.kirim||'').localeCompare(String(a.p.kirim||'')));
   const form = e ? `<div class="card col po-edit-form" style="margin-bottom:14px"><b>${e.id ? 'Edit PO' : 'PO baru'}</b>
       <label class="mut">Tanggal ambil / kirim</label><input type="date" value="${esc(e.kirim)}" oninput="window._poe.kirim=this.value">
-      <label class="mut">Nama PO (opsional — otomatis dari tanggal)</label><input placeholder="mis. PO Sabtu" value="${esc(e.nama)}" oninput="window._poe.nama=this.value">
+      <label class="mut">Nama PO (opsional — otomatis dari tanggal)</label><input placeholder="mis. PO Ramadan / Hampers Lebaran" value="${esc(e.nama)}" oninput="window._poe.nama=this.value">
+      <div class="menu-admin-field"><label>Jenis periode</label><div class="seg"><button type="button" class="${e.jenis !== 'Khusus' ? 'on' : ''}" onclick="window._poe.jenis='Reguler';render()">PO Reguler</button><button type="button" class="${e.jenis === 'Khusus' ? 'on' : ''}" onclick="window._poe.jenis='Khusus';render()">🎉 PO Khusus / Momen</button></div></div>
+      ${e.jenis === 'Khusus' ? `<div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span><b>Tampilkan menu utama</b><small style="display:block">ON: menu reguler tetap tampil bersama paket khusus. OFF: pelanggan hanya melihat paket khusus yang ditautkan ke PO ini.</small></span><button type="button" class="${e.tampilkanMenuUtama !== false ? 'g' : 'o'}" onclick="window._poe.tampilkanMenuUtama=!(window._poe.tampilkanMenuUtama !== false);render()">${e.tampilkanMenuUtama !== false ? '● ON' : '○ OFF'}</button></div>` : `<div class="mut">PO reguler menampilkan menu reguler. Paket khusus hanya tampil pada PO khusus yang ditautkan.</div>`}
       <div class="grid w" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
         <div><label class="mut">Mulai pemesanan (hari &amp; jam)</label><input type="datetime-local" value="${esc(e.mulai || '')}" oninput="window._poe.mulai=this.value"></div>
         <div><label class="mut">Tutup pemesanan (hari &amp; jam)</label><input type="datetime-local" value="${esc(e.tutup || '')}" oninput="window._poe.tutup=this.value"></div>
@@ -3074,6 +3094,8 @@ function vMenu() {
       <div class="menu-admin-fields">
         <div class="menu-admin-field"><label>Nama produk</label><input placeholder="Nama produk" value="${esc(m.nama)}" onchange="D.menu[${i}].nama=this.value.trim();render()"></div>
         <div class="menu-admin-field"><label>Harga jual</label><div class="menu-admin-price-wrap"><b>Rp</b><input type="number" min="0" step="500" inputmode="numeric" placeholder="Contoh: 65000" value="${Number(m.harga) || 0}" onchange="D.menu[${i}].harga=Math.max(0,+this.value||0)"></div></div>
+        <div class="menu-admin-field"><label>Kategori tampilan</label><select onchange="D.menu[${i}].jenisMenu=this.value; if(this.value!=='Khusus')D.menu[${i}].poKhususId='';render()"><option value="Reguler" ${(m.jenisMenu||'Reguler')!=='Khusus'?'selected':''}>Menu utama / Reguler</option><option value="Khusus" ${m.jenisMenu==='Khusus'?'selected':''}>Paket khusus / Seasonal</option></select></div>
+        ${m.jenisMenu === 'Khusus' ? `<div class="menu-admin-field"><label>Tampilkan pada PO khusus</label><select onchange="D.menu[${i}].poKhususId=this.value"><option value="">Pilih PO khusus…</option>${(D.pos||[]).filter(p=>p.jenis==='Khusus').map(p=>`<option value="${esc(p.id)}" ${String(m.poKhususId||'')===String(p.id)?'selected':''}>${esc(p.nama)}</option>`).join('')}</select></div>` : ''}
         ${variantEditor}
       </div>
       <div class="menu-admin-card-foot"><span class="tag ${m.isi && !isSelfVariant ? 'pr' : ''}" id="menu-kind-${i}">${isSelfVariant ? '🥐 Produk varian' : (m.isi ? '📦 Produk paket' : '🥐 Produk satuan')}</span><button class="r" type="button" onclick="hapusMenuProduk(${i})">🗑 Hapus produk</button></div>
@@ -3186,7 +3208,9 @@ function simpanMenu() {
       if (m._variantDirty) m.isi = menuBuildIsi(D.menu.indexOf(m));
     }
   }
-  D.menu = named.map(m => ({nama:String(m.nama).trim(), harga:Math.max(0, Number(m.harga)||0), isi:m.isi||'', gambar:m.gambar||''}));
+  D.menu = named.map(m => ({nama:String(m.nama).trim(), harga:Math.max(0, Number(m.harga)||0), isi:m.isi||'', gambar:m.gambar||'', jenisMenu:m.jenisMenu==='Khusus'?'Khusus':'Reguler', poKhususId:m.jenisMenu==='Khusus'?String(m.poKhususId||''):''}));
+  const invalidSpecial = D.menu.find(m=>m.jenisMenu==='Khusus'&&!m.poKhususId);
+  if (invalidSpecial) { toast('Pilih PO khusus untuk menu +invalidSpecial.nama+.', 'error'); return; }
   cart = {};
   enqueue('saveMenu', JSON.parse(JSON.stringify(D.menu)));
   toast(ONLINE ? 'Menu dan komposisi varian tersimpan ✔' : 'Menu tersimpan di perangkat — akan dikirim saat online'); render();
@@ -3198,7 +3222,7 @@ var num = n => Number(n || 0).toLocaleString('id-ID');
 var WA_MESSAGE_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan},\nTerima kasih sudah memesan di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total pembayaran: {total}*\nPengiriman: {metode_pengiriman}\nKurir: {nama_kurir}\nAlamat tujuan: {alamat}\nStatus pembayaran: {status_pembayaran}\n\n{footer}';
 var TAGIHAN_TEMPLATE_DEFAULT = 'Halo {nama_pelanggan},\nBerikut tagihan pesanan Anda di *{nama_toko}*.\n\n*Detail Pesanan*\nNo. Pesanan: {nomor_pesanan}\nTanggal: {tanggal}\n{daftar_produk}\n\nSubtotal produk: {subtotal}\nOngkos kirim: {ongkir}\n*Total tagihan: {total}*\n\n*Pembayaran via transfer:*\n{info_rekening}\n{info_qris}\n\nMohon kirimkan bukti transfer setelah melakukan pembayaran. Terima kasih.\n{footer}';
 var CUSTOMER_WA_CONFIRM_DEFAULT = "Assalamu’alaikum Uwais Food, saya sudah membuat pesanan melalui Customer PWA.\n\n*Konfirmasi Pesanan*\nNomor: {nomor_pesanan}\nNama: {nama_pelanggan}\nWhatsApp: {whatsapp_pelanggan}\nTanggal: {tanggal}\n\n*Pesanan*\n{daftar_produk}\nSubtotal: {subtotal}\nOngkir: {ongkir}\nTotal: {total}\n\nPengiriman: {metode_pengiriman}\nPembayaran: {metode_pembayaran} — {status_pembayaran}\nStatus pesanan: {status_pesanan}\n\nMohon konfirmasi pesanan saya. Terima kasih.";
-var CUSTOMER_WA_COURIER_DEFAULT = "*Detail Pengiriman*\nNama penerima: {nama_penerima}\nNo. telepon: {no_telepon_penerima}\nAlamat tujuan: {alamat_tujuan}";
+var CUSTOMER_WA_COURIER_DEFAULT = "*Detail Pengiriman*\nNama penerima: {nama_penerima}\nNo. telepon: {no_telepon_penerima}\nDaerah tujuan: {daerah_tujuan}\nDetail alamat: {detail_alamat}";
 var RECEIPT_BOOL_DEFAULTS = {
   receiptShowStoreName: true, receiptShowTitle: false, receiptShowAddress: true, receiptShowPhone: true, receiptShowCashier: true,
   receiptShowOrderNo: true, receiptShowDate: true, receiptShowPO: true, receiptShowPickupDate: true, receiptShowCustomer: true,
@@ -3210,7 +3234,7 @@ var RECEIPT_BOOL_DEFAULTS = {
 var RECEIPT_TEXT_DEFAULTS = {
   receiptTitle: 'STRUK PEMBELIAN', receiptLabelOrderNo: 'No.', receiptLabelDate: 'Tanggal', receiptLabelPO: 'PO',
   receiptLabelPickupDate: 'Ambil/Kirim', receiptLabelCustomer: 'Pelanggan', receiptLabelShipping: 'Pengiriman',
-  receiptLabelCourier: 'Jasa kurir', receiptLabelArea: 'Daerah', receiptLabelAddress: 'Alamat', receiptLabelDistance: 'Jarak Maps',
+  receiptLabelCourier: 'Jasa kurir', receiptLabelArea: 'Daerah tujuan', receiptLabelAddress: 'Detail alamat', receiptLabelDistance: 'Jarak Maps',
   receiptLabelCashier: 'Kasir', receiptLabelItemCount: 'Jumlah item', receiptLabelSubtotal: 'Subtotal produk',
   receiptLabelOngkir: 'Ongkos kirim', receiptLabelGrandTotal: 'TOTAL TAGIHAN', receiptLabelPayment: 'Pembayaran',
   receiptLabelCash: 'Tunai', receiptLabelChange: 'Kembali', receiptLabelShort: 'Kurang',
@@ -3221,6 +3245,8 @@ function cfg() {
   let c;
   try { c = Object.assign({}, CFG_DEF, JSON.parse(LS.get('uf_cfg') || '{}')); } catch (e) { c = Object.assign({}, CFG_DEF); }
   c.rekening = (Array.isArray(c.rekening) ? c.rekening : []).map(r => Object.assign({}, r));   // salinan, jangan memutasi CFG_DEF
+  if (String(c.receiptLabelAddress || '').trim().toLowerCase() === 'alamat') c.receiptLabelAddress = 'Detail alamat';
+  if (String(c.receiptLabelArea || '').trim().toLowerCase() === 'daerah') c.receiptLabelArea = 'Daerah tujuan';
   return c;
 }
 function simpanCfg(silent) {
@@ -3399,7 +3425,8 @@ function whatsappTemplateValues(g, state) {
     const detail = parts.map(part => '  - ' + ((Number(part.n) || 0) * (Number(item.qty) || 0)) + ' ' + part.nama).join('\n');
     return detail ? line + '\n' + detail : line;
   }).join('\n');
-  const address = [g.daerahKirim || '', g.alamatKirim || customer.alamat || ''].filter(Boolean).join(' — ');
+  const detailAddress = g.detailAlamat || g.alamatKirim || customer.alamat || '';
+  const address = [g.daerahKirim || '', detailAddress].filter(Boolean).join(' — ');
   const courier = g.namaKurir || (isCourier && g.jenisKurir === 'Maps' ? 'Kurir Maps' : '-');
   const values = {
     nama_toko: c.toko || 'UWAIS FOOD',
@@ -3414,6 +3441,8 @@ function whatsappTemplateValues(g, state) {
     metode_pengiriman: shippingLabel,
     nama_kurir: courier,
     daerah_tujuan: g.daerahKirim || '-',
+    detail_alamat: detailAddress || '-',
+    alamat_tujuan: address || '-',
     alamat: address || '-',
     status_pembayaran: isPaid ? 'LUNAS' : 'BELUM LUNAS',
     metode_pembayaran: method,
@@ -3577,7 +3606,7 @@ function receiptSettingsPreviewHtml() {
     id: 'O261105120544am', nama: 'Dinda', waktu: '05/11/2026 12:05', po: samplePO ? samplePO.id : '',
     items: [{item: 'All In', qty: 1, harga: 85000, isi: '3 Bolen Pisang Cokelat Keju + 3 Bolen Cheesy Beef + 4 Banana Milk Cheese'}],
     total: 85000, grandTotal: 97000, metodeKirim: 'Kurir', jenisKurir: 'Pihak Ketiga', namaKurir: 'Kurir Contoh',
-    daerahKirim: 'Sei Jang', alamatKirim: 'Jl. Lingga No. 33, Perumnas Sei Jang', jarakKm: 4.2, ongkir: 12000
+    daerahKirim: 'Batu 9–10', alamatKirim: 'Perumahan Garuda, Blok C No. 12', jarakKm: 4.2, ongkir: 12000
   };
   const receipt = buildStruk(g, {metode: 'Transfer', bayar: 97000}, c);
   return `<div class="paper-wrap"><div class="paper" style="width:${Number(c.lebar) === 80 ? 48 : 32}ch">${toHtml(receipt)}</div></div>`;
@@ -3609,8 +3638,8 @@ function buildStruk(g, st, configOverride) {
     if (g.metodeKirim === 'Kurir') {
       r.l(label('receiptLabelShipping', 'Pengiriman') + ': ' + (isKurirMaps(g) ? 'Kurir Maps' : 'Kurir'));
       if (show('receiptShowCourier') && g.namaKurir) r.l(label('receiptLabelCourier', 'Jasa kurir') + ': ' + g.namaKurir);
-      if (show('receiptShowArea') && g.daerahKirim) r.l(label('receiptLabelArea', 'Daerah') + ': ' + g.daerahKirim);
-      if (show('receiptShowDestinationAddress') && g.alamatKirim) r.l(label('receiptLabelAddress', 'Alamat') + ': ' + g.alamatKirim);
+      if (show('receiptShowArea') && g.daerahKirim) r.l(label('receiptLabelArea', 'Daerah tujuan') + ': ' + g.daerahKirim);
+      if (show('receiptShowDestinationAddress') && g.alamatKirim) r.l(label('receiptLabelAddress', 'Detail alamat') + ': ' + g.alamatKirim);
       if (show('receiptShowDistance') && g.jarakKm) r.lr(label('receiptLabelDistance', 'Jarak Maps'), String(g.jarakKm) + ' km');
     } else r.l(label('receiptLabelShipping', 'Pengiriman') + ': Pickup');
   }
@@ -3945,7 +3974,8 @@ function customerWhatsAppSettingsForm() {
   if (!window._cfg) window._cfg = cfg();
   const c = window._cfg;
   if (c.customerWaConfirmTemplate == null) c.customerWaConfirmTemplate = CUSTOMER_WA_CONFIRM_DEFAULT;
-  if (!c.customerWaCourierTemplate || /\{(?:jenis_kurir|nama_kurir|kontak_kurir|daerah|alamat|catatan_pengiriman|status_ongkir|ongkir)\}/i.test(String(c.customerWaCourierTemplate))) c.customerWaCourierTemplate = CUSTOMER_WA_COURIER_DEFAULT;
+  const oldDefaultCourierTemplate = '*Detail Pengiriman*\nNama penerima: {nama_penerima}\nNo. telepon: {no_telepon_penerima}\nAlamat tujuan: {alamat_tujuan}';
+  if (!c.customerWaCourierTemplate || c.customerWaCourierTemplate === oldDefaultCourierTemplate || /\{(?:jenis_kurir|nama_kurir|kontak_kurir|daerah|alamat|catatan_pengiriman|status_ongkir|ongkir)\}/i.test(String(c.customerWaCourierTemplate))) c.customerWaCourierTemplate = CUSTOMER_WA_COURIER_DEFAULT;
   return `<div class="card col settings-detail-card wa-customer-settings">
     <div class="note">Pesan ini digunakan oleh tombol <b>Beritahu kami di WhatsApp</b> pada Customer PWA. Template konfirmasi selalu digunakan. Template kurir hanya ditambahkan jika customer memilih <b>Via Kurir</b>.</div>
     <div class="col" style="gap:8px">
@@ -3960,13 +3990,13 @@ function customerWhatsAppSettingsForm() {
       <textarea id="customerWaCourierTemplate" rows="10" maxlength="2000" oninput="setCustomerWaTemplate('customerWaCourierTemplate',this.value)">${esc(String(c.customerWaCourierTemplate).replace(/\\n/g,'\n'))}</textarea>
       <div class="note"><b>Pratinjau pesan kurir</b><pre id="customerWaCourierPreview" class="wa-template-preview">${esc(applyWhatsAppTemplate(c.customerWaCourierTemplate || CUSTOMER_WA_COURIER_DEFAULT, customerWaSampleValues()))}</pre></div>
     </div>
-    <div class="note"><b>Variabel yang tersedia</b><br><code>{nama_toko}</code> <code>{nama_pelanggan}</code> <code>{whatsapp_pelanggan}</code> <code>{nomor_pesanan}</code> <code>{tanggal}</code> <code>{daftar_produk}</code> <code>{subtotal}</code> <code>{ongkir}</code> <code>{total}</code> <code>{metode_pengiriman}</code> <code>{metode_pembayaran}</code> <code>{status_pembayaran}</code> <code>{status_pesanan}</code> <code>{nama_penerima}</code> <code>{no_telepon_penerima}</code> <code>{alamat_tujuan}</code> <code>{footer}</code></div>
+    <div class="note"><b>Variabel yang tersedia</b><br><code>{nama_toko}</code> <code>{nama_pelanggan}</code> <code>{whatsapp_pelanggan}</code> <code>{nomor_pesanan}</code> <code>{tanggal}</code> <code>{daftar_produk}</code> <code>{subtotal}</code> <code>{ongkir}</code> <code>{total}</code> <code>{metode_pengiriman}</code> <code>{metode_pembayaran}</code> <code>{status_pembayaran}</code> <code>{status_pesanan}</code> <code>{nama_penerima}</code> <code>{no_telepon_penerima}</code> <code>{daerah_tujuan}</code> <code>{detail_alamat}</code> <code>{alamat_tujuan}</code> <code>{footer}</code></div>
     <div class="acts"><button onclick="simpanCfg()">Simpan pengaturan WhatsApp</button></div>
     <div class="mut">Template disimpan di server Apps Script, sehingga berlaku untuk semua perangkat Customer PWA setelah katalog diperbarui.</div>
   </div>`;
 }
 function customerWaSampleValues() {
-  return {nama_toko:cfg().toko||'UWAIS FOOD',nama_pelanggan:'Ibu Sari',whatsapp_pelanggan:'081234567890',nomor_pesanan:'O-UF-00125',tanggal:'08/11/2026 10:30',daftar_produk:'• 2 × Bolen Pisang Premium — Rp130.000\n• 1 × Banana Milk Cheese — Rp50.000',subtotal:'Rp180.000',ongkir:'Menunggu konfirmasi',total:'Belum termasuk ongkir',metode_pengiriman:'Via Kurir',metode_pembayaran:'QRIS / Transfer',status_pembayaran:'Belum Bayar',status_pesanan:'Baru',nama_penerima:'Ibu Sari',no_telepon_penerima:'081234567890',alamat_tujuan:'Jl. Contoh No. 10, Tanjungpinang',footer:cfg().footer||'Terima kasih'};
+  return {nama_toko:cfg().toko||'UWAIS FOOD',nama_pelanggan:'Ibu Sari',whatsapp_pelanggan:'081234567890',nomor_pesanan:'O-UF-00125',tanggal:'08/11/2026 10:30',daftar_produk:'• 2 × Bolen Pisang Premium — Rp130.000\n• 1 × Banana Milk Cheese — Rp50.000',subtotal:'Rp180.000',ongkir:'Menunggu konfirmasi',total:'Belum termasuk ongkir',metode_pengiriman:'Via Kurir',metode_pembayaran:'QRIS / Transfer',status_pembayaran:'Belum Bayar',status_pesanan:'Baru',nama_penerima:'Ibu Sari',no_telepon_penerima:'081234567890',daerah_tujuan:'Batu 9–10',detail_alamat:'Perumahan Garuda, Blok C No. 12',alamat_tujuan:'Batu 9–10 — Perumahan Garuda, Blok C No. 12',footer:cfg().footer||'Terima kasih'};
 }
 function setCustomerWaTemplate(key,value) {
   if (!window._cfg) window._cfg=cfg();
@@ -4070,8 +4100,8 @@ function strukForm() {
     ['Label nomor pesanan','receiptLabelOrderNo','No.'], ['Label tanggal','receiptLabelDate','Tanggal'],
     ['Label PO','receiptLabelPO','PO'], ['Label tanggal ambil/kirim','receiptLabelPickupDate','Ambil/Kirim'],
     ['Label pelanggan','receiptLabelCustomer','Pelanggan'], ['Label pengiriman','receiptLabelShipping','Pengiriman'],
-    ['Label jasa kurir','receiptLabelCourier','Jasa kurir'], ['Label daerah','receiptLabelArea','Daerah'],
-    ['Label alamat','receiptLabelAddress','Alamat'], ['Label jarak','receiptLabelDistance','Jarak Maps'],
+    ['Label jasa kurir','receiptLabelCourier','Jasa kurir'], ['Label daerah tujuan','receiptLabelArea','Daerah tujuan'],
+    ['Label detail alamat','receiptLabelAddress','Detail alamat'], ['Label jarak','receiptLabelDistance','Jarak Maps'],
     ['Label jumlah item','receiptLabelItemCount','Jumlah item'], ['Label subtotal','receiptLabelSubtotal','Subtotal produk'],
     ['Label ongkir','receiptLabelOngkir','Ongkos kirim'], ['Label total','receiptLabelGrandTotal','TOTAL TAGIHAN'],
     ['Label pembayaran','receiptLabelPayment','Pembayaran'], ['Label tanggal cetak','receiptPrintPrefix','Dicetak']
@@ -4114,7 +4144,7 @@ function strukForm() {
           ${toggle('Metode pengiriman','receiptShowShipping')}
           ${toggle('Nama jasa kurir','receiptShowCourier')}
           ${toggle('Daerah tujuan','receiptShowArea')}
-          ${toggle('Alamat pelanggan','receiptShowDestinationAddress')}
+          ${toggle('Detail alamat tujuan','receiptShowDestinationAddress')}
           ${toggle('Jarak Google Maps','receiptShowDistance')}
         </div>
         <div class="receipt-subhead">Ubah nama label yang tercetak</div>
