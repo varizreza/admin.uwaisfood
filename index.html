@@ -377,6 +377,19 @@ button.o,a.btn.o{border:1px solid color-mix(in srgb,var(--pr) 12%,transparent)}
 
 /* ===== MENU PRODUK — katalog dan editor gambar v10.6 ===== */
 .menu-admin-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:14px 0 16px}
+.menu-category-panel{display:grid;gap:11px;margin:0 0 15px;padding:14px;border:1px solid var(--ln);border-radius:16px;background:var(--surface)}
+.menu-category-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.menu-category-panel-head>div{display:grid;gap:3px}.menu-category-panel-head small{font-size:10px;color:var(--mut)}
+.menu-category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.menu-category-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:6px;padding:8px;border:1px solid var(--ln);border-radius:12px;background:var(--soft);min-width:0}
+.menu-category-row input[type=text]{width:100%;min-width:0;padding:9px 10px;border:1px solid var(--ln);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit;font-size:12px}
+.menu-category-active{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:10px;color:var(--mut);font-weight:750}
+.menu-category-active input{accent-color:var(--pr)}
+.menu-category-row button{width:29px;height:29px;min-height:29px;padding:0;border:1px solid var(--ln);border-radius:8px;background:var(--surface);color:var(--mut);font-size:13px}
+.menu-category-add{justify-self:start;padding:8px 11px;border:1px dashed var(--pr);border-radius:10px;background:transparent;color:var(--pr);font-size:11px;font-weight:800}
+.menu-category-select{width:100%;height:39px;padding:8px 10px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit;font-size:12px}
+@media(max-width:640px){.menu-category-grid{grid-template-columns:1fr}.menu-category-row{grid-template-columns:minmax(0,1fr) auto auto}}
+
 .menu-admin-search{display:flex;align-items:center;gap:9px;min-width:240px;max-width:420px;flex:1;padding:0 12px;border:1px solid var(--ln);border-radius:13px;background:var(--surface)}
 .menu-admin-search span{font-size:18px;color:var(--mut)}
 .menu-admin-search input{border:0!important;box-shadow:none!important;background:transparent;padding:11px 0;min-width:0}
@@ -1015,7 +1028,7 @@ img,svg,canvas,video{max-width:100%}
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.11.0)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.11.1)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -1038,10 +1051,10 @@ window.__len = 302189;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v11.11.0)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v11.11.1)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v11.11.0)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v11.11.1)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -1065,7 +1078,7 @@ window.__len = 302189;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.11.0 · Seasonal PO & Menu Campaign';
+var APP_VER = 'v11.11.1 · Kategori Menu Dinamis';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -1127,7 +1140,7 @@ function ufRememberDeviceLabel() {
 }
 function ufForgetLocalDevice() { LS.del('uf_device_token'); LS.del('uf_device_exp'); LS.del('uf_device_id'); }
 
-var D = {menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0, autoByArea: false}}, cart = {}, tab = 'pesan', filt = 'Semua', rfilt = 'Semua', curPO = LS.get('uf_po'), editing = null, dev = null, chr = null, installEv = null;
+var D = {menu: [], menuCategories: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0, autoByArea: false}}, cart = {}, tab = 'pesan', filt = 'Semua', rfilt = 'Semua', curPO = LS.get('uf_po'), editing = null, dev = null, chr = null, installEv = null;
 var shippingMode = 'Pickup';
 var ofilt = 'Semua', bfilt = 'Semua';   // filter pembayaran: ofilt = Orderan, bfilt = Rekap
 var mapsLoading = null, mapsPlaces = null, mapsRoutes = null, destMapObj = null, destMapEl = null, destPolylines = [], originMapObj = null, originPolylines = [];
@@ -1272,7 +1285,7 @@ async function kirimPengaturanKeServer(c) {
 async function load() {
   if (needSetup() || !getTok()) return render();
   const c = J.get('uf_data', null);
-  if (c) D = Object.assign({menu: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0, autoByArea: false}}, c);
+  if (c) D = Object.assign({menu: [], menuCategories: [], orders: [], pelanggan: [], pos: [], tarifOngkir: [], ongkirConfig: {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0, autoByArea: false}}, c);
   window._loading = !c;
   render(); updSync();
   await syncNow();
@@ -1937,7 +1950,7 @@ var J = {
 };
 var Q = J.get('uf_q', []), ONLINE = navigator.onLine !== false, flushing = false, refreshing = false;
 var saveQ = () => J.set('uf_q', Q);
-var saveCache = () => J.set('uf_data', {menu: D.menu, orders: D.orders.slice(-4000), pelanggan: D.pelanggan, pos: D.pos, tarifOngkir: D.tarifOngkir || [], ongkirConfig: D.ongkirConfig || {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0}, sheetUrl: D.sheetUrl});
+var saveCache = () => J.set('uf_data', {menu: D.menu, menuCategories: D.menuCategories || [], orders: D.orders.slice(-4000), pelanggan: D.pelanggan, pos: D.pos, tarifOngkir: D.tarifOngkir || [], ongkirConfig: D.ongkirConfig || {origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0}, sheetUrl: D.sheetUrl});
 function setOnline(v) { ONLINE = v; updSync(); }
 function updSync() {
   const el = $('#sync'); if (!el) return;
@@ -1991,13 +2004,13 @@ async function refresh() {
   const wasLoading = window._loading;
   try {
     const d = await run('getData');
-    d.pelanggan = d.pelanggan || []; d.pos = d.pos || [];
+    d.pelanggan = d.pelanggan || []; d.pos = d.pos || []; d.menuCategories = d.menuCategories || D.menuCategories || [];
     d.tarifOngkir = d.tarifOngkir || []; d.ongkirConfig = Object.assign({origin: '', placeId: '', lat: null, lng: null, ratePerKm: 0, minFee: 0}, d.ongkirConfig || {});
     if (Q.length) return;                         // ada perubahan baru selagi menunggu: jangan timpa
-    if (tab === 'menu') d.menu = D.menu;          // jangan hilangkan editan menu yang belum disimpan
-    const before = JSON.stringify([D.menu, D.orders, D.pelanggan, D.pos, D.tarifOngkir || [], D.ongkirConfig || {}]);
+    if (tab === 'menu') { const serverMenu=d.menu||[]; d.menu=(D.menu||[]).map(m=>{const fresh=serverMenu.find(x=>key(x.nama)===key(m.nama));return Object.assign({},fresh||{},m,{kategoriId:String(m.kategoriId||(fresh&&fresh.kategoriId)||'')});}); if ((D.menuCategories || []).length) d.menuCategories = D.menuCategories; } // pertahankan editan lokal sambil mengambil kategori lama dari server
+    const before = JSON.stringify([D.menu, D.menuCategories || [], D.orders, D.pelanggan, D.pos, D.tarifOngkir || [], D.ongkirConfig || {}]);
     D = d; window._lastRef = Date.now(); window._err = ''; if (D.ongkirConfig && D.ongkirConfig.placeId && !window._selectedOrigin) window._selectedOrigin = {address:D.ongkirConfig.origin,placeId:D.ongkirConfig.placeId,lat:D.ongkirConfig.lat,lng:D.ongkirConfig.lng}; saveCache(); setOnline(true);
-    if (JSON.stringify([D.menu, D.orders, D.pelanggan, D.pos, D.tarifOngkir || [], D.ongkirConfig || {}]) !== before) softRender();
+    if (JSON.stringify([D.menu, D.menuCategories || [], D.orders, D.pelanggan, D.pos, D.tarifOngkir || [], D.ongkirConfig || {}]) !== before) softRender();
   } catch (e) {
     if (e.retry) { window._err = msgOf(e); setOnline(false); }
     else if (!/Sesi berakhir/.test(msgOf(e))) toast('Gagal memuat: ' + msgOf(e));
@@ -2849,8 +2862,33 @@ function filterMenuAdmin(value) {
   const empty = $('#menuAdminEmpty');
   if (empty) empty.style.display = [...document.querySelectorAll('.menu-admin-card')].some(el => !el.hidden) ? 'none' : 'block';
 }
+function menuNewCategoryId() { return 'CAT_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8).toUpperCase(); }
+function menuCategoryAdd() {
+  D.menuCategories = D.menuCategories || [];
+  D.menuCategories.push({id:menuNewCategoryId(), nama:'Kategori baru', urutan:D.menuCategories.length+1, aktif:true});
+  render();
+  setTimeout(() => { const inputs=[...document.querySelectorAll('.menu-category-name')]; if(inputs.length) { inputs[inputs.length-1].focus(); inputs[inputs.length-1].select(); } }, 0);
+}
+function menuCategoryChange(id, field, value) {
+  const c=(D.menuCategories||[]).find(x=>String(x.id)===String(id)); if(!c) return;
+  if(field==='nama') c.nama=String(value||'').trimStart().slice(0,40);
+  if(field==='aktif') c.aktif=!!value;
+  saveCache();
+}
+function menuCategoryMove(id, delta) {
+  const a=D.menuCategories||[], i=a.findIndex(x=>String(x.id)===String(id)), j=i+delta;
+  if(i<0||j<0||j>=a.length) return;
+  [a[i],a[j]]=[a[j],a[i]]; a.forEach((x,n)=>x.urutan=n+1); render();
+}
+async function menuCategoryRemove(id) {
+  const c=(D.menuCategories||[]).find(x=>String(x.id)===String(id)); if(!c) return;
+  if((D.menu||[]).some(m=>String(m.kategoriId||'')===String(id))) { toast('Kategori masih digunakan produk. Pindahkan produk ke kategori lain terlebih dahulu.','warning'); return; }
+  if((D.menuCategories||[]).filter(x=>x.aktif).length<=1 && c.aktif) { toast('Minimal satu kategori harus aktif.','warning'); return; }
+  if(!(await popupConfirm('Hapus kategori "'+c.nama+'"? Produk lama tidak akan dihapus.',{title:'Hapus kategori?',confirmText:'Hapus'}))) return;
+  D.menuCategories=D.menuCategories.filter(x=>String(x.id)!==String(id)); D.menuCategories.forEach((x,i)=>x.urutan=i+1); render();
+}
 function tambahMenuProduk() {
-  D.menu.push({nama:'', harga:0, isi:'', gambar:'', _variantMode:'structured', _variantRows:[], _variantDirty:false});
+  D.menu.push({nama:'', harga:0, isi:'', gambar:'', jenisMenu:'Reguler', poKhususId:'', kategoriId:((D.menuCategories||[]).find(c=>c.aktif)||D.menuCategories||[])[0]?.id||'', _variantMode:'structured', _variantRows:[], _variantDirty:false});
   render();
   const el = document.querySelectorAll('.menu-admin-card input[placeholder="Nama produk"]');
   if (el.length) el[el.length - 1].focus();
@@ -3094,19 +3132,22 @@ function vMenu() {
       <div class="menu-admin-fields">
         <div class="menu-admin-field"><label>Nama produk</label><input placeholder="Nama produk" value="${esc(m.nama)}" onchange="D.menu[${i}].nama=this.value.trim();render()"></div>
         <div class="menu-admin-field"><label>Harga jual</label><div class="menu-admin-price-wrap"><b>Rp</b><input type="number" min="0" step="500" inputmode="numeric" placeholder="Contoh: 65000" value="${Number(m.harga) || 0}" onchange="D.menu[${i}].harga=Math.max(0,+this.value||0)"></div></div>
-        <div class="menu-admin-field"><label>Kategori tampilan</label><select onchange="D.menu[${i}].jenisMenu=this.value; if(this.value!=='Khusus')D.menu[${i}].poKhususId='';render()"><option value="Reguler" ${(m.jenisMenu||'Reguler')!=='Khusus'?'selected':''}>Menu utama / Reguler</option><option value="Khusus" ${m.jenisMenu==='Khusus'?'selected':''}>Paket khusus / Seasonal</option></select></div>
+        <div class="menu-admin-field"><label>Kategori katalog Customer PWA</label><select class="menu-category-select" onchange="D.menu[${i}].kategoriId=this.value"><option value="">Pilih kategori katalog…</option>${(D.menuCategories||[]).map(c=>`<option value="${esc(c.id)}" ${String(m.kategoriId||'')===String(c.id)?'selected':''}>${esc(c.nama)}${c.aktif?'':' (Nonaktif)'}</option>`).join('')}</select></div>
+        <div class="menu-admin-field"><label>Jenis penawaran / PO</label><select onchange="D.menu[${i}].jenisMenu=this.value; if(this.value!=='Khusus')D.menu[${i}].poKhususId='';render()"><option value="Reguler" ${(m.jenisMenu||'Reguler')!=='Khusus'?'selected':''}>Menu utama / Reguler</option><option value="Khusus" ${m.jenisMenu==='Khusus'?'selected':''}>Paket khusus / Seasonal</option></select></div>
         ${m.jenisMenu === 'Khusus' ? `<div class="menu-admin-field"><label>Tampilkan pada PO khusus</label><select onchange="D.menu[${i}].poKhususId=this.value"><option value="">Pilih PO khusus…</option>${(D.pos||[]).filter(p=>p.jenis==='Khusus').map(p=>`<option value="${esc(p.id)}" ${String(m.poKhususId||'')===String(p.id)?'selected':''}>${esc(p.nama)}</option>`).join('')}</select></div>` : ''}
         ${variantEditor}
       </div>
       <div class="menu-admin-card-foot"><span class="tag ${m.isi && !isSelfVariant ? 'pr' : ''}" id="menu-kind-${i}">${isSelfVariant ? '🥐 Produk varian' : (m.isi ? '📦 Produk paket' : '🥐 Produk satuan')}</span><button class="r" type="button" onclick="hapusMenuProduk(${i})">🗑 Hapus produk</button></div>
     </article>`;
   }).join('');
-  return `<div class="page-head"><div><div class="eyebrow">KATALOG PRODUK</div><h2>Menu Produk</h2><div class="page-subtitle">Atur foto, nama, harga, dan isi menu custom dari varian produk yang sudah tersedia.</div></div><button onclick="tambahMenuProduk()">＋ Tambah produk</button></div>
-    <div class="note" style="margin-bottom:12px">📸 Unggah foto produk agar tampil pada katalog pemesanan. Untuk membuat paket custom, tambahkan baris varian lalu pilih nama produk dan jumlah pcs. Kosongkan komposisi untuk produk satuan.</div>
+  const categoryManager = `<section class="menu-category-panel"><div class="menu-category-panel-head"><div><b>🏷️ Kategori katalog Customer PWA</b><small>Kelola kategori seperti Bolen, Cake, Hampers, dan Seasonal. Kategori nonaktif tidak ditampilkan kepada pelanggan.</small></div><button class="menu-category-add" type="button" onclick="menuCategoryAdd()">＋ Tambah kategori</button></div><div class="menu-category-grid">${(D.menuCategories||[]).map((c,i)=>`<div class="menu-category-row"><input class="menu-category-name" type="text" maxlength="40" value="${esc(c.nama)}" aria-label="Nama kategori" onchange="menuCategoryChange('${esc(c.id)}','nama',this.value)"><label class="menu-category-active"><input type="checkbox" ${c.aktif?'checked':''} onchange="menuCategoryChange('${esc(c.id)}','aktif',this.checked)"> Aktif</label><div style="display:flex;gap:3px"><button type="button" title="Naik" onclick="menuCategoryMove('${esc(c.id)}',-1)">↑</button><button type="button" title="Turun" onclick="menuCategoryMove('${esc(c.id)}',1)">↓</button><button type="button" title="Hapus" onclick="menuCategoryRemove('${esc(c.id)}')">×</button></div></div>`).join('')}</div></section>`;
+  return `<div class="page-head"><div><div class="eyebrow">KATALOG PRODUK</div><h2>Menu Produk</h2><div class="page-subtitle">Atur kategori katalog, foto, nama, harga, dan komposisi produk. Kategori katalog terpisah dari jenis PO.</div></div><button onclick="tambahMenuProduk()">＋ Tambah produk</button></div>
+    ${categoryManager}
+    <div class="note" style="margin-bottom:12px">📸 Unggah foto produk agar tampil pada katalog pemesanan. Pilih kategori katalog untuk mengelompokkan produk di Customer PWA. Jenis penawaran tetap mengatur apakah produk reguler atau terikat ke PO khusus.</div>
     <div class="menu-admin-toolbar"><label class="menu-admin-search"><span>⌕</span><input id="menuAdminSearch" placeholder="Cari nama produk…" value="${esc(window._menuAdminQuery || '')}" oninput="filterMenuAdmin(this.value)"></label><span class="menu-admin-count">${D.menu.length} produk terdaftar</span></div>
     <div class="menu-admin-grid">${cards || '<div class="empty">Belum ada produk. Tambahkan produk pertama Anda.</div>'}</div>
     <div id="menuAdminEmpty" class="empty" style="display:none;padding:20px">Produk tidak ditemukan.</div>
-    <div class="menu-admin-footer"><span class="mut">Komposisi paket disimpan dalam format yang dibaca stok, HPP, dan rencana produksi.</span><button class="o" onclick="tambahMenuProduk()">＋ Tambah produk</button><button onclick="simpanMenu()">💾 Simpan semua menu</button></div>`;
+    <div class="menu-admin-footer"><span class="mut">Komposisi paket disimpan dalam format yang dibaca stok, HPP, dan rencana produksi.</span><button class="o" onclick="tambahMenuProduk()">＋ Tambah produk</button><button onclick="simpanMenu()">💾 Simpan kategori & menu</button></div>`;
 }
 
 /* ---- Pengaturan Terpusat ---- */
@@ -3208,12 +3249,19 @@ function simpanMenu() {
       if (m._variantDirty) m.isi = menuBuildIsi(D.menu.indexOf(m));
     }
   }
-  D.menu = named.map(m => ({nama:String(m.nama).trim(), harga:Math.max(0, Number(m.harga)||0), isi:m.isi||'', gambar:m.gambar||'', jenisMenu:m.jenisMenu==='Khusus'?'Khusus':'Reguler', poKhususId:m.jenisMenu==='Khusus'?String(m.poKhususId||''):''}));
+  D.menu = named.map(m => ({nama:String(m.nama).trim(), harga:Math.max(0, Number(m.harga)||0), isi:m.isi||'', gambar:m.gambar||'', jenisMenu:m.jenisMenu==='Khusus'?'Khusus':'Reguler', poKhususId:m.jenisMenu==='Khusus'?String(m.poKhususId||''):'', kategoriId:String(m.kategoriId||'')}));
   const invalidSpecial = D.menu.find(m=>m.jenisMenu==='Khusus'&&!m.poKhususId);
-  if (invalidSpecial) { toast('Pilih PO khusus untuk menu +invalidSpecial.nama+.', 'error'); return; }
+  if (invalidSpecial) { toast('Pilih PO khusus untuk menu "' + invalidSpecial.nama + '".', 'error'); return; }
+  const categoryNames = new Set();
+  for (const c of (D.menuCategories||[])) { const name=key(c.nama); if(!name){toast('Nama kategori tidak boleh kosong.','error');return;} if(categoryNames.has(name)){toast('Nama kategori tidak boleh duplikat: '+c.nama,'error');return;} categoryNames.add(name); }
+  if (!(D.menuCategories||[]).some(c=>c.aktif)) { toast('Aktifkan minimal satu kategori katalog.','error'); return; }
+  const categoryIds = new Set((D.menuCategories||[]).map(c=>String(c.id)));
+  const missingCategory = D.menu.find(m=>!m.kategoriId || !categoryIds.has(m.kategoriId));
+  if (missingCategory) { toast('Pilih kategori katalog untuk produk "'+missingCategory.nama+'".','error'); return; }
   cart = {};
-  enqueue('saveMenu', JSON.parse(JSON.stringify(D.menu)));
-  toast(ONLINE ? 'Menu dan komposisi varian tersimpan ✔' : 'Menu tersimpan di perangkat — akan dikirim saat online'); render();
+  const categoriesPayload=(D.menuCategories||[]).map((c,i)=>({id:c.id,nama:String(c.nama||'').trim(),urutan:i+1,aktif:!!c.aktif}));
+  enqueue('saveMenuBundle', categoriesPayload, JSON.parse(JSON.stringify(D.menu)));
+  toast(ONLINE ? 'Kategori dan menu berhasil disimpan ✔' : 'Kategori dan menu disimpan di perangkat — akan dikirim saat online'); render();
 }
 
 /* ================= STRUK & PRINTER THERMAL (ESC/POS) ================= */

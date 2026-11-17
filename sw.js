@@ -1,9 +1,9 @@
-/* UWAIS FOOD ADMIN PWA — v11.11.0 Seasonal PO
+/* UWAIS FOOD ADMIN PWA — v11.11.1 Seasonal PO + Menu Categories
  * Network-first navigation, versioned app shell, user-approved update activation.
  * API requests use POST and are never cached.
  */
 const CACHE_PREFIX = 'uwais-food-admin-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v11-11-0-seasonal-po-20261116';
+const CACHE_NAME = CACHE_PREFIX + 'v11-11-1-menu-categories-20261117';
 const SHELL_FILES = [
   './',
   './index.html',
