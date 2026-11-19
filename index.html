@@ -1028,7 +1028,7 @@ img,svg,canvas,video{max-width:100%}
   <aside class="side" id="side"></aside>
   <div>
     <div class="top"><span class="brand">🥐 Uwais Food</span><span style="display:flex;gap:6px;align-items:center"><button type="button" class="chip-pr" id="orderAlertBtn" onclick="enableOrderNotifications()" title="Aktifkan notifikasi pesanan baru">🔔 <span id="orderAlertBadge">0</span></button><span class="chip-pr" id="sync" onclick="toast(window._err||'Semua data tersinkron')"></span><span class="chip-pr" id="pr" onclick="openSetting('printer')"></span></span></div>
-    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.11.1)</small></div></main>
+    <main class="wrap" id="app"><div class="empty">Memuat… <small>(v11.11.5)</small></div></main>
   </div>
 </div>
 <nav class="bottom" id="bottom"></nav>
@@ -1051,10 +1051,10 @@ window.__len = 302189;
     var a = document.getElementById('app'); if (!a) return;
     var msg;
     if (window.__errs.length) {
-      msg = '<b>Aplikasi gagal dijalankan (v11.11.1)</b><br>' + window.__errs.map(esc).join('<br>') +
+      msg = '<b>Aplikasi gagal dijalankan (v11.11.5)</b><br>' + window.__errs.map(esc).join('<br>') +
         '<br><small>Salin pesan ini dan kirim ke pembuat aplikasi.</small>';
     } else {
-      msg = '<b>Aplikasi belum berjalan (v11.11.1)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
+      msg = '<b>Aplikasi belum berjalan (v11.11.5)</b><br>Kemungkinan file <code>Index.html</code> di Apps Script tidak lengkap (terpotong saat ditempel) atau diblokir ekstensi browser.' +
         '<br><small>Hapus seluruh isi Index.html, tempel ulang dari awal sampai akhir (harus berakhir dengan &lt;/html&gt;), simpan, lalu Terapkan &rarr; Kelola deployment &rarr; Edit &rarr; Versi baru.</small>';
     }
       var m = document.getElementById('main'), t = m ? (m.text || '') : '';
@@ -1078,7 +1078,7 @@ window.__len = 302189;
 </script>
 <script id="main">
 /* ================= MODE: di dalam Apps Script atau versi hosting (PWA) ================= */
-var APP_VER = 'v11.11.1 · Kategori Menu Dinamis';
+var APP_VER = 'v11.11.5 · Produksi Varian, Hide Menu & Catatan';
 var IN_GAS = typeof google !== 'undefined' && !!google.script && !!google.script.run;
 var LS = {
   get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
@@ -1326,6 +1326,34 @@ function komponen(items) {
   });
   return Object.values(r).sort((a, b) => b.qty - a.qty);
 }
+function rincianVarianBolen(items) {
+  const result = {};
+  const canonical = name => {
+    const k = key(name);
+    if (['bolen manis','bolen pisang','bolen pisang manis'].includes(k)) return 'Bolen Pisang Cokelat Keju';
+    if (['bolen daging','bolen asin'].includes(k)) return 'Bolen Cheesy Beef';
+    return String(name || '').trim();
+  };
+  const add = (name, qty) => {
+    const label = canonical(name);
+    if (!label || !/bolen/i.test(label) || !(Number(qty) > 0)) return;
+    const k = key(label);
+    result[k] = result[k] || {nama:label, qty:0};
+    result[k].qty += Math.floor(Number(qty) || 0);
+  };
+  (items || []).forEach(it => {
+    const orderQty = Math.max(0, Math.floor(Number(it.qty) || 0));
+    if (!orderQty) return;
+    const parts = parseIsi(it.isi);
+    if (parts.length) parts.forEach(part => add(part.nama, Number(part.n) * orderQty));
+    else {
+      const rule = aturanStokMenuAdmin[key(it.item)];
+      if (rule && key(rule.nama) === 'adonan bolen') add(it.item, Number(rule.n) * orderQty);
+      else if (/bolen/i.test(String(it.item || ''))) add(it.item, orderQty);
+    }
+  });
+  return Object.values(result).sort((a,b) => b.qty-a.qty);
+}
 function perPaket(items) {
   const r = {};
   items.forEach(it => { r[it.item] = (r[it.item] || 0) + it.qty; });
@@ -1334,7 +1362,7 @@ function perPaket(items) {
 function groups() {
   const g = {};
   D.orders.forEach(o => {
-    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, po: o.po || '', items: [], total: 0, metodeKirim: o.metodeKirim || 'Pickup', jenisKurir: o.jenisKurir || (o.metodeKirim === 'Kurir' ? 'Maps' : ''), bayar: String(o.bayar || 'Belum Bayar'), metodeBayar: o.metodeBayar || '', buktiFileId: o.buktiFileId || '', namaKurir: o.namaKurir || '', kontakKurir: o.kontakKurir || '', catatanPengiriman: o.catatanPengiriman || '', daerahKirim: o.daerahKirim || '', alamatKirim: o.alamatKirim || '', jarakKm: Number(o.jarakKm) || 0, ongkir: Number(o.ongkir) || 0, ongkirStatus: o.ongkirStatus || '', ongkirPending: !!o.ongkirPending, placeId: o.placeId || '', lat: o.lat == null ? null : Number(o.lat), lng: o.lng == null ? null : Number(o.lng)};
+    g[o.id] = g[o.id] || {id: o.id, nama: o.nama, waktu: o.waktu, status: o.status, po: o.po || '', items: [], total: 0, metodeKirim: o.metodeKirim || 'Pickup', jenisKurir: o.jenisKurir || (o.metodeKirim === 'Kurir' ? 'Maps' : ''), bayar: String(o.bayar || 'Belum Bayar'), metodeBayar: o.metodeBayar || '', buktiFileId: o.buktiFileId || '', namaKurir: o.namaKurir || '', kontakKurir: o.kontakKurir || '', catatanPengiriman: o.catatanPengiriman || '', catatanPesanan: o.catatanPesanan || '', daerahKirim: o.daerahKirim || '', alamatKirim: o.alamatKirim || '', jarakKm: Number(o.jarakKm) || 0, ongkir: Number(o.ongkir) || 0, ongkirStatus: o.ongkirStatus || '', ongkirPending: !!o.ongkirPending, placeId: o.placeId || '', lat: o.lat == null ? null : Number(o.lat), lng: o.lng == null ? null : Number(o.lng)};
     g[o.id].items.push(o); g[o.id].total += o.qty * o.harga;
   });
   return Object.values(g).map(x => { x.grandTotal = x.total + (x.metodeKirim === 'Kurir' ? Number(x.ongkir) || 0 : 0); return x; }).reverse();
@@ -2237,6 +2265,7 @@ function vPesan() {
           </div>
           <div id="pinfo">${pinfo()}</div>
         </div>
+        <div class="order-customer-field"><label class="field-label" for="orderNote">Catatan pesanan (opsional)</label><textarea id="orderNote" rows="2" maxlength="500" placeholder="Contoh: Pisahkan bolen cokelat dan keju, tanpa kartu ucapan" oninput="window._orderNote=this.value">${esc(window._orderNote || '')}</textarea><small class="mut">Catatan ini tersimpan bersama pesanan dan ditampilkan pada struk.</small></div>
         <div class="shipping-selector"><label class="field-label">Metode penyerahan</label><div class="seg shipping-seg">
           <button class="${shippingMode === 'Pickup' ? 'on' : ''}" onclick="setMetodeKirim('Pickup')">📦 Pickup</button>
           <button class="${shippingMode === 'Kurir3' ? 'on' : ''}" onclick="setMetodeKirim('Kurir3')">🚚 Kurir</button>
@@ -2272,18 +2301,18 @@ function editOrder(id) {
     if (i >= 0) cart[i] = (cart[i] || 0) + it.qty;
     else extra.push({nama: it.item, harga: it.harga, isi: it.isi || '', qty: it.qty});   // menu sudah dihapus/diganti nama
   });
-  editing = {id, nama0: g.nama, po: g.po, waktu: g.waktu, status: g.status, bayar: g.bayar, metodeBayar: g.metodeBayar, orig, extra, metodeKirim: g.metodeKirim || 'Pickup', jenisKurir: g.jenisKurir || (g.metodeKirim === 'Kurir' ? 'Maps' : ''), namaKurir: g.namaKurir || '', kontakKurir: g.kontakKurir || '', catatanPengiriman: g.catatanPengiriman || '', daerahKirim: g.daerahKirim || '', alamatKirim: g.alamatKirim || '', jarakKm: g.jarakKm || 0, ongkir: g.ongkir || 0, placeId: g.placeId || '', lat: g.lat, lng: g.lng};
+  editing = {id, nama0: g.nama, po: g.po, waktu: g.waktu, status: g.status, bayar: g.bayar, metodeBayar: g.metodeBayar, orig, extra, metodeKirim: g.metodeKirim || 'Pickup', jenisKurir: g.jenisKurir || (g.metodeKirim === 'Kurir' ? 'Maps' : ''), namaKurir: g.namaKurir || '', kontakKurir: g.kontakKurir || '', catatanPengiriman: g.catatanPengiriman || '', catatanPesanan: g.catatanPesanan || '', daerahKirim: g.daerahKirim || '', alamatKirim: g.alamatKirim || '', jarakKm: g.jarakKm || 0, ongkir: g.ongkir || 0, placeId: g.placeId || '', lat: g.lat, lng: g.lng};
   shippingMode = editing.metodeKirim === 'Kurir' ? (editing.jenisKurir === 'Maps' ? 'Kurir' : 'Kurir3') : 'Pickup'; window._area = editing.daerahKirim; window._km = String(editing.jarakKm || ''); window._ongkir = String(editing.ongkir || ''); window._kurirTarifIndex = '';
   if (shippingMode === 'Kurir3') {
     const matchRate = (D.tarifOngkir || []).findIndex(t => t && t.aktif !== false && normArea(t.area) === normArea(editing.daerahKirim) && Number(t.ongkir) === Number(editing.ongkir));
     if (matchRate >= 0) window._kurirTarifIndex = String(matchRate);
   }
   window._courierName = editing.namaKurir || ''; window._courierContact = editing.kontakKurir || ''; window._deliveryNote = editing.catatanPengiriman || '';
-  window._n = g.nama; window._hp = ''; window._al = g.alamatKirim || ''; window._selectedDestination = g.placeId ? {address:g.alamatKirim,placeId:g.placeId,lat:g.lat,lng:g.lng} : null;
+  window._n = g.nama; window._hp = ''; window._orderNote = g.catatanPesanan || ''; window._al = g.alamatKirim || ''; window._selectedDestination = g.placeId ? {address:g.alamatKirim,placeId:g.placeId,lat:g.lat,lng:g.lng} : null;
   _routePlaceId = ''; _routePath = []; _routeDestination = g.lat != null && g.lng != null ? {lat:Number(g.lat),lng:Number(g.lng)} : null; destMapObj = null; destMapEl = null; destPolylines = [];
   go('pesan');
 }
-function batalEdit() { editing = null; cart = {}; shippingMode = 'Pickup'; window._kurirTarifIndex = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; window._ongkir = ''; window._n = ''; go('order'); }
+function batalEdit() { editing = null; cart = {}; window._orderNote = ''; shippingMode = 'Pickup'; window._kurirTarifIndex = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; window._ongkir = ''; window._n = ''; go('order'); }
 function simpanEdit() {
   const e = editing, nama = (window._n || '').trim();
   if (!nama) { toast('Isi nama pemesan dulu'); const el = $('#nama'); if (el) el.focus(); return; }
@@ -2291,6 +2320,8 @@ function simpanEdit() {
     .concat(e.extra.filter(x => x.qty > 0).map(x => ({nama: x.nama, harga: x.harga, isi: x.isi, qty: x.qty})));
   if (!items.length) return toast('Pilih minimal satu menu (atau hapus pesanan dengan tombol 🗑)');
   const shipping = currentShipping(); if (!shipping.valid) return toast(shipping.error);
+  const orderNote = String($('#orderNote')?.value ?? window._orderNote ?? '').trim().slice(0,500);
+  shipping.catatanPesanan = orderNote;
   const oldPel = findPel(nama);
   const pel = {hp: String(window._hp == null ? (oldPel && oldPel.hp || '') : window._hp).trim(), alamat: shipping.metode === 'Kurir' && shipping.alamat ? shipping.alamat : (oldPel && oldPel.alamat || ''), placeId: shipping.metode === 'Kurir' ? shipping.placeId : '', lat: shipping.metode === 'Kurir' ? shipping.lat : null, lng: shipping.metode === 'Kurir' ? shipping.lng : null};
   if (shipping.metode === 'Kurir' && shipping.jenisKurir === 'Maps' && !shipping.saved) {
@@ -2300,10 +2331,10 @@ function simpanEdit() {
   const at = Math.max(0, D.orders.findIndex(o => o.id === e.id));
   D.orders = D.orders.filter(o => o.id !== e.id);
   D.orders.splice(at, 0, ...items.map(i => ({id: e.id, waktu: e.waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: e.status, bayar: e.bayar, metodeBayar: e.metodeBayar, isi: i.isi || '', po: e.po,
-    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.detailAlamat || shipping.alamat || '', detailAlamat: shipping.detailAlamat || shipping.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, ongkirStatus: shipping.metode === 'Kurir' ? 'Dikonfirmasi' : '', ongkirPending: false, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || ''})));
+    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.detailAlamat || shipping.alamat || '', detailAlamat: shipping.detailAlamat || shipping.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, ongkirStatus: shipping.metode === 'Kurir' ? 'Dikonfirmasi' : '', ongkirPending: false, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || '', catatanPesanan: orderNote})));
   upsertPelLocal(nama, pel);
   enqueue('editOrder', e.id, nama, items, shipping);
-  editing = null; cart = {}; window._kurirTarifIndex = ''; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
+  editing = null; cart = {}; window._orderNote = ''; window._kurirTarifIndex = ''; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
   go('order'); toast(ONLINE ? 'Pesanan diperbarui ✔' : 'Perubahan tersimpan di perangkat — akan dikirim saat online');
 }
 function chg(i, d) { cart[i] = Math.max(0, (cart[i] || 0) + d); const y = window.scrollY; render(); window.scrollTo(0, y); }
@@ -2315,6 +2346,8 @@ async function simpan() {
   const tgt = poTarget(); if (!tgt) return toast('Buat PO dulu di tab PO');
   const shipping = currentShipping();
   if (!shipping.valid) return toast(shipping.error);
+  const orderNote = String($('#orderNote')?.value ?? window._orderNote ?? '').trim().slice(0,500);
+  shipping.catatanPesanan = orderNote;
   const oldPel = findPel(nama);
   const pel = {hp: String(window._hp == null ? (oldPel && oldPel.hp || '') : window._hp).trim(), alamat: String(window._al == null ? (oldPel && oldPel.alamat || '') : window._al).trim(), placeId: shipping.placeId || (oldPel && oldPel.placeId) || '', lat: shipping.lat != null ? shipping.lat : oldPel && oldPel.lat, lng: shipping.lng != null ? shipping.lng : oldPel && oldPel.lng};
   const id = newId(), waktu = nowStr();
@@ -2325,10 +2358,10 @@ async function simpan() {
     enqueue('saveTarif', t);
   }
   items.forEach(i => D.orders.push({id, waktu, nama, item: i.nama, qty: i.qty, harga: i.harga, status: 'Baru', bayar: 'Belum Bayar', metodeBayar: '', isi: i.isi || '', po: tgt.id,
-    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.detailAlamat || shipping.alamat || pel.alamat || '', detailAlamat: shipping.detailAlamat || shipping.alamat || pel.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || ''}));
+    metodeKirim: shipping.metode, daerahKirim: shipping.area || '', alamatKirim: shipping.detailAlamat || shipping.alamat || pel.alamat || '', detailAlamat: shipping.detailAlamat || shipping.alamat || pel.alamat || '', jarakKm: shipping.jarakKm || 0, ongkir: shipping.ongkir || 0, placeId: shipping.placeId || '', lat: shipping.lat, lng: shipping.lng, jenisKurir: shipping.jenisKurir || '', namaKurir: shipping.namaKurir || '', kontakKurir: shipping.kontakKurir || '', catatanPengiriman: shipping.catatanPengiriman || '', catatanPesanan: orderNote}));
   upsertPelLocal(nama, pel);
   enqueue('addOrder', nama, items, pel, id, Date.now(), tgt.id, shipping);
-  cart = {}; window._n = ''; window._hp = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
+  cart = {}; window._n = ''; window._hp = ''; window._orderNote = ''; window._al = null; window._selectedDestination = null; window._area = ''; window._km = ''; window._ongkir = ''; window._courierName = ''; window._courierContact = ''; window._deliveryNote = ''; _routePlaceId = ''; _routePath = []; _routeDestination = null; destMapObj = null; destMapEl = null; destPolylines = []; shippingMode = 'Pickup';
   go('order'); toast(ONLINE ? 'Tersimpan ✔' : 'Tersimpan di perangkat — akan dikirim saat online'); cetakOrder(id);
 }
 
@@ -2354,6 +2387,7 @@ function orderCard(g) {
     <div class="oc-head"><div><div class="nm">${esc(g.nama)}</div><div class="mut">${g.waktu}${viewPO() === '*' ? ' · ' + esc(poNama(g.po)) : ''}${p && p.hp ? ' · ' + esc(p.hp) : ''}</div></div>
       <div class="oc-badges"><button class="paytag ${lunas ? 'lunas' : ((pendingPay || rejectedPay) ? 'pending' : 'belum')}" onclick="bayarDlg('${g.id}')" title="Ubah status pembayaran">${lunas ? '✅ Lunas' + (g.metodeBayar ? ' · ' + esc(g.metodeBayar) : '') : (pendingPay ? '🧾 Menunggu verifikasi' : (rejectedPay ? '⚠️ Pembayaran ditolak' : '⏳ Belum bayar'))}</button><span class="tag ${selesai ? 'ok' : 'pr'}">${esc(g.status || 'Baru')}</span></div></div>
     ${shipLine}
+    ${g.catatanPesanan ? `<div class="mut" style="margin:8px 0;padding:9px 11px;border-radius:10px;background:var(--surface-2,#f5f5f5)">📝 <b>Catatan pesanan:</b> ${esc(g.catatanPesanan)}</div>` : ''}
     <div class="oc-items">${g.items.map(o => `<div class="line"><span>${o.qty}× ${esc(o.item)}${o.isi ? `<div class="mut">${parseIsi(o.isi).map(x => (x.n * o.qty) + ' ' + esc(x.nama)).join(' · ')}</div>` : ''}</span><span>${rp(o.qty * o.harga)}</span></div>`).join('')}</div>
     <div class="oc-sum"><div class="line"><span class="mut">Subtotal produk</span><b>${rp(g.total)}</b></div>${g.metodeKirim === 'Kurir' ? `<div class="line"><span class="mut">Ongkos kirim</span><b>${g.ongkirPending ? 'Akan diinformasikan via WhatsApp' : rp(g.ongkir)}</b></div>` : ''}</div>
     <div class="oc-total"><span>${g.ongkirPending ? 'Total sementara (belum termasuk ongkir)' : 'Total'}</span><strong>${rp(g.grandTotal)}</strong></div>
@@ -2617,7 +2651,7 @@ async function hapusPel(i) {
 
 /* ---- Rekap ---- */
 function vRekap() {
-  const o = filtered(), comp = komponen(o), pk = perPaket(o), ppm = perPemesan(o), po = findPO(viewPO());
+  const o = filtered(), comp = komponen(o), bolenVariants = rincianVarianBolen(o), pk = perPaket(o), ppm = perPemesan(o), po = findPO(viewPO());
   const pcs = comp.reduce((s, x) => s + x.qty, 0), omzet = o.reduce((s, x) => s + x.qty * x.harga, 0);
   const idsRekap = new Set(o.map(x => x.id));
   // Semua jenis pengiriman berbayar (Maps maupun pihak ketiga) dihitung sebagai ongkir.
@@ -2659,6 +2693,7 @@ function vRekap() {
     ${po ? (adnHtml ? `<h3>Adonan &amp; kapasitas box</h3><div class="card">${adnHtml}<div class="mut" style="margin-top:8px">Dihitung dari semua pesanan di PO ini (tidak terpengaruh filter).</div></div>` : `<div class="note" style="margin-top:14px">🥣 Belum ada data adonan untuk PO ini. Isi jumlah adonan awal agar sisa adonan dan jumlah box dapat dihitung. <div style="margin-top:8px"><button class="o" onclick="go('po');editPO('${po.id}')">Isi adonan PO</button></div></div>`) : ''}
     <h3>Yang harus dibuat (pcs per jenis)</h3>
     ${comp.length ? `<div class="grid">${comp.map(c => `<div class="card stat"><span>${esc(c.nama)}</span><span class="big">${c.qty}<span class="mut" style="font-size:14px;font-weight:500"> pcs</span></span></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}
+    ${bolenVariants.length ? `<div class="card col" style="margin-top:10px"><b>Rincian Adonan Bolen per Varian</b>${bolenVariants.map(v => `<div class="line"><span>${esc(v.nama)}</span><b>${v.qty} pcs</b></div>`).join('')}<small class="mut">Total rincian varian tetap menggunakan satu kapasitas bersama: Adonan Bolen.</small></div>` : ''}
     <h3>Jumlah per menu / paket</h3>
     ${pk.length ? `<div class="card">${pk.map(p => `<div class="line"><span>${esc(p.nama)}</span><b>${p.qty}</b></div>`).join('')}</div>` : '<div class="empty">Belum ada data.</div>'}
     <h3>Daftar pemesan (${ppm.length})</h3>
@@ -2888,7 +2923,7 @@ async function menuCategoryRemove(id) {
   D.menuCategories=D.menuCategories.filter(x=>String(x.id)!==String(id)); D.menuCategories.forEach((x,i)=>x.urutan=i+1); render();
 }
 function tambahMenuProduk() {
-  D.menu.push({nama:'', harga:0, isi:'', gambar:'', jenisMenu:'Reguler', poKhususId:'', kategoriId:((D.menuCategories||[]).find(c=>c.aktif)||D.menuCategories||[])[0]?.id||'', _variantMode:'structured', _variantRows:[], _variantDirty:false});
+  D.menu.push({nama:'', harga:0, isi:'', gambar:'', jenisMenu:'Reguler', poKhususId:'', kategoriId:((D.menuCategories||[]).find(c=>c.aktif)||D.menuCategories||[])[0]?.id||'', hideCustomer:false, _variantMode:'structured', _variantRows:[], _variantDirty:false});
   render();
   const el = document.querySelectorAll('.menu-admin-card input[placeholder="Nama produk"]');
   if (el.length) el[el.length - 1].focus();
@@ -3084,6 +3119,16 @@ function hapusGambarMenu(index) {
   render();
   toast('Gambar dihapus dari pratinjau. Tekan Simpan Menu untuk menerapkan.');
 }
+function toggleCustomerMenuHide(index, hidden) {
+  if (!D.menu || !D.menu[index]) return;
+  D.menu[index].hideCustomer = !!hidden;
+  saveCache();
+  const status = $('#menu-hide-status-' + index);
+  if (status) {
+    status.className = 'tag ' + (hidden ? 'neg' : 'ok');
+    status.textContent = hidden ? '🙈 Hide Customer' : '🌐 Tampil Customer';
+  }
+}
 function vMenu() {
   const query = key(window._menuAdminQuery || '');
   const cards = D.menu.map((m, i) => {
@@ -3133,11 +3178,12 @@ function vMenu() {
         <div class="menu-admin-field"><label>Nama produk</label><input placeholder="Nama produk" value="${esc(m.nama)}" onchange="D.menu[${i}].nama=this.value.trim();render()"></div>
         <div class="menu-admin-field"><label>Harga jual</label><div class="menu-admin-price-wrap"><b>Rp</b><input type="number" min="0" step="500" inputmode="numeric" placeholder="Contoh: 65000" value="${Number(m.harga) || 0}" onchange="D.menu[${i}].harga=Math.max(0,+this.value||0)"></div></div>
         <div class="menu-admin-field"><label>Kategori katalog Customer PWA</label><select class="menu-category-select" onchange="D.menu[${i}].kategoriId=this.value"><option value="">Pilih kategori katalog…</option>${(D.menuCategories||[]).map(c=>`<option value="${esc(c.id)}" ${String(m.kategoriId||'')===String(c.id)?'selected':''}>${esc(c.nama)}${c.aktif?'':' (Nonaktif)'}</option>`).join('')}</select></div>
+        <div class="menu-admin-field"><label style="display:flex;align-items:center;gap:9px;cursor:pointer"><input type="checkbox" style="width:18px;height:18px;margin:0" ${m.hideCustomer ? 'checked' : ''} onchange="toggleCustomerMenuHide(${i},this.checked)"> Sembunyikan dari Customer PWA</label><small class="mut">Produk tetap terlihat dan dapat dipesan melalui Admin.</small></div>
         <div class="menu-admin-field"><label>Jenis penawaran / PO</label><select onchange="D.menu[${i}].jenisMenu=this.value; if(this.value!=='Khusus')D.menu[${i}].poKhususId='';render()"><option value="Reguler" ${(m.jenisMenu||'Reguler')!=='Khusus'?'selected':''}>Menu utama / Reguler</option><option value="Khusus" ${m.jenisMenu==='Khusus'?'selected':''}>Paket khusus / Seasonal</option></select></div>
         ${m.jenisMenu === 'Khusus' ? `<div class="menu-admin-field"><label>Tampilkan pada PO khusus</label><select onchange="D.menu[${i}].poKhususId=this.value"><option value="">Pilih PO khusus…</option>${(D.pos||[]).filter(p=>p.jenis==='Khusus').map(p=>`<option value="${esc(p.id)}" ${String(m.poKhususId||'')===String(p.id)?'selected':''}>${esc(p.nama)}</option>`).join('')}</select></div>` : ''}
         ${variantEditor}
       </div>
-      <div class="menu-admin-card-foot"><span class="tag ${m.isi && !isSelfVariant ? 'pr' : ''}" id="menu-kind-${i}">${isSelfVariant ? '🥐 Produk varian' : (m.isi ? '📦 Produk paket' : '🥐 Produk satuan')}</span><button class="r" type="button" onclick="hapusMenuProduk(${i})">🗑 Hapus produk</button></div>
+      <div class="menu-admin-card-foot"><span class="tag ${m.isi && !isSelfVariant ? 'pr' : ''}" id="menu-kind-${i}">${isSelfVariant ? '🥐 Produk varian' : (m.isi ? '📦 Produk paket' : '🥐 Produk satuan')}</span><span id="menu-hide-status-${i}" class="tag ${m.hideCustomer ? 'neg' : 'ok'}">${m.hideCustomer ? '🙈 Hide Customer' : '🌐 Tampil Customer'}</span><button class="r" type="button" onclick="hapusMenuProduk(${i})">🗑 Hapus produk</button></div>
     </article>`;
   }).join('');
   const categoryManager = `<section class="menu-category-panel"><div class="menu-category-panel-head"><div><b>🏷️ Kategori katalog Customer PWA</b><small>Kelola kategori seperti Bolen, Cake, Hampers, dan Seasonal. Kategori nonaktif tidak ditampilkan kepada pelanggan.</small></div><button class="menu-category-add" type="button" onclick="menuCategoryAdd()">＋ Tambah kategori</button></div><div class="menu-category-grid">${(D.menuCategories||[]).map((c,i)=>`<div class="menu-category-row"><input class="menu-category-name" type="text" maxlength="40" value="${esc(c.nama)}" aria-label="Nama kategori" onchange="menuCategoryChange('${esc(c.id)}','nama',this.value)"><label class="menu-category-active"><input type="checkbox" ${c.aktif?'checked':''} onchange="menuCategoryChange('${esc(c.id)}','aktif',this.checked)"> Aktif</label><div style="display:flex;gap:3px"><button type="button" title="Naik" onclick="menuCategoryMove('${esc(c.id)}',-1)">↑</button><button type="button" title="Turun" onclick="menuCategoryMove('${esc(c.id)}',1)">↓</button><button type="button" title="Hapus" onclick="menuCategoryRemove('${esc(c.id)}')">×</button></div></div>`).join('')}</div></section>`;
@@ -3249,7 +3295,7 @@ function simpanMenu() {
       if (m._variantDirty) m.isi = menuBuildIsi(D.menu.indexOf(m));
     }
   }
-  D.menu = named.map(m => ({nama:String(m.nama).trim(), harga:Math.max(0, Number(m.harga)||0), isi:m.isi||'', gambar:m.gambar||'', jenisMenu:m.jenisMenu==='Khusus'?'Khusus':'Reguler', poKhususId:m.jenisMenu==='Khusus'?String(m.poKhususId||''):'', kategoriId:String(m.kategoriId||'')}));
+  D.menu = named.map(m => ({nama:String(m.nama).trim(), harga:Math.max(0, Number(m.harga)||0), isi:m.isi||'', gambar:m.gambar||'', jenisMenu:m.jenisMenu==='Khusus'?'Khusus':'Reguler', poKhususId:m.jenisMenu==='Khusus'?String(m.poKhususId||''):'', kategoriId:String(m.kategoriId||''), hideCustomer:!!m.hideCustomer}));
   const invalidSpecial = D.menu.find(m=>m.jenisMenu==='Khusus'&&!m.poKhususId);
   if (invalidSpecial) { toast('Pilih PO khusus untuk menu "' + invalidSpecial.nama + '".', 'error'); return; }
   const categoryNames = new Set();
@@ -3371,7 +3417,8 @@ function toBytes(r) {
     if (L.big) out.push(29, 33, 0);
     if (L.bold) out.push(27, 69, 0);
   });
-  out.push(10, 10, 10, 29, 86, 66, 0);
+  // Satu feed pendek sebelum cut cukup untuk memberi ruang tepi tanpa membuang kertas.
+  out.push(10, 29, 86, 66, 0);
   return new Uint8Array(out);
 }
 function toHtml(r) {
@@ -3691,6 +3738,7 @@ function buildStruk(g, st, configOverride) {
       if (show('receiptShowDistance') && g.jarakKm) r.lr(label('receiptLabelDistance', 'Jarak Maps'), String(g.jarakKm) + ' km');
     } else r.l(label('receiptLabelShipping', 'Pengiriman') + ': Pickup');
   }
+  if (g.catatanPesanan) r.l('Catatan pesanan: ' + g.catatanPesanan);
   if (show('receiptShowCashier') && c.kasir) r.l(label('receiptLabelCashier', 'Kasir') + ': ' + c.kasir);
   r.hr(sectionSep);
 
@@ -3722,7 +3770,6 @@ function buildStruk(g, st, configOverride) {
   r.hr(headerSep);
   if (show('receiptShowFooter') && c.footer) r.c(c.footer);
   if (show('receiptShowPrintDate')) r.c(label('receiptPrintPrefix', 'Dicetak') + ' ' + nowStr());
-  r.feed(1);
   return r;
 }
 function poHeader(r) {
@@ -3976,17 +4023,23 @@ function browserPrintOptions(receiptWidth) {
 }
 function printBrowserReceipt(r) {
   const o = browserPrintOptions(r.w);
+  // Buang feed kosong di akhir, lalu tetapkan tinggi halaman mengikuti isi struk.
+  const printOps = (r.o || []).slice();
+  while (printOps.length && printOps[printOps.length - 1].k === 'feed') printOps.pop();
+  const printRows = printOps.reduce((sum, op) => sum + (op.big ? 2.24 : o.lineHeight), 0);
+  const pageHeight = Math.max(25, 4 + printRows * o.fontSize + 1.5);
+  const printable = Object.assign({}, r, {o: printOps});
   let st = $('#pgstyle'); if (!st) { st = document.createElement('style'); st.id = 'pgstyle'; document.head.appendChild(st); }
-  st.textContent = `@page{size:${o.mm}mm auto;margin:0!important}
+  st.textContent = `@page{size:${o.mm}mm ${pageHeight.toFixed(1)}mm;margin:0!important}
     @media print{
-      html,body{width:${o.mm}mm!important;min-width:${o.mm}mm!important;max-width:${o.mm}mm!important;margin:0!important;padding:0!important;background:#fff!important;overflow:visible!important}
-      #printArea{display:block!important;position:static!important;box-sizing:border-box!important;width:${o.mm}mm!important;min-width:${o.mm}mm!important;max-width:${o.mm}mm!important;margin:0!important;padding:2mm ${o.rightMargin.toFixed(2)}mm 2mm ${o.leftMargin.toFixed(2)}mm!important;background:#fff!important;color:#000!important;overflow:visible!important}
-      #printArea .paper{display:block!important;box-sizing:border-box!important;width:${o.contentMm}mm!important;min-width:${o.contentMm}mm!important;max-width:${o.contentMm}mm!important;margin:0!important;padding:0!important;box-shadow:none!important;border:0!important;border-radius:0!important;background:#fff!important;color:#000!important;font-family:Consolas,'Lucida Console','Courier New',monospace!important;font-size:${o.fontSize.toFixed(3)}mm!important;font-weight:${o.density}!important;line-height:${o.lineHeight}!important;letter-spacing:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;overflow:visible!important}
-      #printArea .paper .pl{display:block!important;max-width:100%!important;box-sizing:border-box!important;font-size:1em!important;font-weight:${o.density}!important;line-height:${o.lineHeight}!important;color:#000!important;white-space:pre!important;text-shadow:none!important}
+      html,body{width:${o.mm}mm!important;min-width:${o.mm}mm!important;max-width:${o.mm}mm!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;background:#fff!important;overflow:visible!important}
+      #printArea{display:block!important;position:static!important;box-sizing:border-box!important;width:${o.mm}mm!important;min-width:${o.mm}mm!important;max-width:${o.mm}mm!important;height:auto!important;min-height:0!important;margin:0!important;padding:1.5mm ${o.rightMargin.toFixed(2)}mm 1.5mm ${o.leftMargin.toFixed(2)}mm!important;background:#fff!important;color:#000!important;overflow:visible!important}
+      #printArea .paper{display:block!important;box-sizing:border-box!important;width:${o.contentMm}mm!important;min-width:${o.contentMm}mm!important;max-width:${o.contentMm}mm!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;box-shadow:none!important;border:0!important;border-radius:0!important;background:#fff!important;color:#000!important;font-family:Consolas,'Lucida Console','Courier New',monospace!important;font-size:${o.fontSize.toFixed(3)}mm!important;font-weight:${o.density}!important;line-height:${o.lineHeight}!important;letter-spacing:0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;overflow:visible!important}
+      #printArea .paper .pl{display:block!important;max-width:100%!important;box-sizing:border-box!important;font-size:1em!important;font-weight:${o.density}!important;line-height:${o.lineHeight}!important;color:#000!important;white-space:pre!important;text-shadow:none!important;margin:0!important;padding:0!important}
       #printArea .paper .pl.b,#printArea .paper .pl.bg{font-weight:900!important}
       #printArea .paper .pl.bg{font-size:2em!important;line-height:1.12!important}
     }`;
-  $('#printArea').innerHTML = `<div class="paper" style="width:${o.contentMm}mm">${toHtml(r)}</div>`;
+  $('#printArea').innerHTML = `<div class="paper" style="width:${o.contentMm}mm">${toHtml(printable)}</div>`;
   setTimeout(() => window.print(), 100);
 }
 function cetakTesBrowser() {
