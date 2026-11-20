@@ -3,7 +3,7 @@
  * API requests use POST and are never cached.
  */
 const CACHE_PREFIX = 'uwais-food-admin-shell-';
-const CACHE_NAME = CACHE_PREFIX + 'v11-11-5-20261120-admin-hide-note-receipt-v2';
+const CACHE_NAME = CACHE_PREFIX + 'v11-11-5-20261120-admin-floating-order-panel-v2';
 const SHELL_FILES = [
   './',
   './index.html',

@@ -1022,6 +1022,55 @@ img,svg,canvas,video{max-width:100%}
 .delivery-detail-field textarea:focus{outline:2px solid var(--pr-l);border-color:var(--pr)}
 .delivery-detail-field small{color:var(--mut);font-size:11px;line-height:1.45}
 </style>
+
+<style id="uf-admin-floating-order-panel-v2">
+/*
+ * PATCH 2 — Floating diterapkan pada seluruh kartu pemesanan (panel kanan),
+ * bukan pada kolom Catatan secara terpisah. Catatan tetap menjadi field normal
+ * dengan lebar yang sama seperti kolom form pemesanan lainnya.
+ */
+#panel .order-panel-body .order-note-field{
+  position:static!important;top:auto;z-index:auto;align-self:stretch;
+  display:flex;flex-direction:column;align-items:stretch;gap:7px;
+  width:100%;min-width:0;max-width:100%;margin:0;padding:0;
+  border:0;border-radius:0;background:transparent;box-shadow:none;isolation:auto;
+}
+#panel .order-note-field .field-label,
+#panel .order-note-field small{display:block;width:100%;min-width:0}
+#panel .order-note-field textarea{
+  display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;
+  resize:vertical;
+}
+
+/* Desktop: seluruh panel pemesanan menempel saat halaman digulir.
+   Bagian judul, data pelanggan, catatan, pengiriman, keranjang, total,
+   dan tombol tetap berada dalam satu kartu yang sama. */
+@media (min-width:1200px){
+  #panel{align-self:start;min-width:0}
+  #panel .panel.order-panel-shell{
+    position:sticky;top:78px;align-self:start;
+    max-height:calc(100vh - 94px);overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+}
+
+/* Tablet/laptop sempit tetap memakai susunan satu kolom yang sudah ada. */
+@media (min-width:900px) and (max-width:1199px){
+  #panel .panel.order-panel-shell{
+    position:static;top:auto;max-height:none;overflow:visible;
+  }
+}
+
+/* Mobile: ukuran kartu, urutan elemen, jarak dan posisi form tetap mengikuti
+   aturan responsif bawaan; hanya textarea Catatan yang dibuat selebar kolom. */
+@media (max-width:899px){
+  #panel .panel.order-panel-shell{
+    position:relative!important;top:auto!important;max-height:none!important;
+    overflow:visible!important;width:100%;
+  }
+  #panel .order-note-field textarea{max-width:100%;}
+}
+</style>
 </head>
 <body>
 <div class="app">
@@ -2265,7 +2314,7 @@ function vPesan() {
           </div>
           <div id="pinfo">${pinfo()}</div>
         </div>
-        <div class="order-customer-field"><label class="field-label" for="orderNote">Catatan pesanan (opsional)</label><textarea id="orderNote" rows="2" maxlength="500" placeholder="Contoh: Pisahkan bolen cokelat dan keju, tanpa kartu ucapan" oninput="window._orderNote=this.value">${esc(window._orderNote || '')}</textarea><small class="mut">Catatan ini tersimpan bersama pesanan dan ditampilkan pada struk.</small></div>
+        <div class="order-customer-field order-note-field"><label class="field-label" for="orderNote">Catatan pesanan (opsional)</label><textarea id="orderNote" rows="2" maxlength="500" placeholder="Contoh: Pisahkan bolen cokelat dan keju, tanpa kartu ucapan" oninput="window._orderNote=this.value">${esc(window._orderNote || '')}</textarea><small class="mut">Catatan ini tersimpan bersama pesanan dan ditampilkan pada struk.</small></div>
         <div class="shipping-selector"><label class="field-label">Metode penyerahan</label><div class="seg shipping-seg">
           <button class="${shippingMode === 'Pickup' ? 'on' : ''}" onclick="setMetodeKirim('Pickup')">📦 Pickup</button>
           <button class="${shippingMode === 'Kurir3' ? 'on' : ''}" onclick="setMetodeKirim('Kurir3')">🚚 Kurir</button>
